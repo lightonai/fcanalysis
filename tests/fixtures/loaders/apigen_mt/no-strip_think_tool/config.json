@@ -1,0 +1,17 @@
+{
+  "dataset_config": {
+    "drop_consecutive_assistant": true,
+    "drop_error_recovery_loops": false,
+    "drop_repeated_tool_call_streaks": true,
+    "drop_undefined_function_calls": true,
+    "strip_think_tool": false
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

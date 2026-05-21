@@ -1,0 +1,39 @@
+{
+  "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+  "dataset_config_count": 221851,
+  "dataset_config_drop_reasons": {
+    "conflicting_duplicate_tool_names": 906,
+    "consecutive_text_text_assistant": 1145
+  },
+  "dataset_config_transform_counts": {
+    "merge_text_fc_assistant_pairs": 1121,
+    "merge_text_fc_assistant_samples": 972
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": false,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "invalid_arguments": 6291,
+    "unbalanced_cardinality": 13535,
+    "undefined_function_calls": 248
+  },
+  "filtered_count": 202336,
+  "raw_count": 227579,
+  "stage1_count": 223896,
+  "stage1_drop_reasons": {
+    "function_calls_on_environment": 5,
+    "function_calls_on_user": 170,
+    "malformed_function_calls": 3505,
+    "no_user_message": 3
+  },
+  "stage1_issue_counts": {
+    "conflicting_duplicate_tool_names": 906,
+    "empty_tool_content": 6,
+    "hollow_assistant_messages": 1333
+  },
+  "strip_thinking_applied": false
+}

@@ -1,0 +1,18 @@
+{
+  "dataset_config": {
+    "drop_conflicting_duplicate_tools": true,
+    "drop_empty_system": false,
+    "drop_orphan_samples": true,
+    "splits": [
+      "tool_calling"
+    ]
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

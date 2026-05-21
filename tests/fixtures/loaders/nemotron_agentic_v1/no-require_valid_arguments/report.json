@@ -1,0 +1,50 @@
+{
+  "dataset": "nvidia/Nemotron-Agentic-v1",
+  "dataset_config_count": 294236,
+  "dataset_config_drop_reasons": {
+    "conflicting_duplicate_tools": 15104,
+    "orphan_samples": 6814
+  },
+  "dataset_config_transform_counts": {
+    "removed_empty_system": 294236
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": false,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {},
+  "filtered_count": 294236,
+  "raw_count": 316094,
+  "stage1_count": 316094,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "assistant_messages_missing_reasoning_content": 4,
+    "samples_with_conflicting_duplicate_tool_names": 15104,
+    "samples_with_consecutive_same_role": 48550,
+    "samples_with_duplicate_tool_names": 15104,
+    "samples_with_empty_system": 316094,
+    "samples_with_no_tools": 3637,
+    "samples_with_orphan_calls": 6814,
+    "tool_call_arguments_dict_serialized": 668144,
+    "tool_call_arguments_list_serialized": 7,
+    "tool_call_arguments_string_passthrough": 0,
+    "tool_calls_with_id_field_stripped": 668151,
+    "tool_calls_with_index_field_stripped": 12293,
+    "tool_defs_function_level_required_empty_dropped": 72,
+    "tool_defs_function_level_required_lifted": 11,
+    "tool_defs_leaf_type_root_integer": 2,
+    "tool_defs_leaf_type_root_string": 435,
+    "tool_defs_with_empty_properties": 76498,
+    "tool_defs_with_missing_properties": 18121,
+    "tool_message_content_bool_serialized": 20,
+    "tool_message_content_dict_serialized": 648104,
+    "tool_message_content_list_serialized": 7041,
+    "tool_message_content_other_serialized": 0,
+    "tool_message_content_string_passthrough": 2197,
+    "tool_messages_with_tool_call_id_stripped": 0
+  },
+  "strip_thinking_applied": false
+}

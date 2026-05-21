@@ -1,0 +1,32 @@
+{
+  "dataset": "nvidia/Nemotron-Terminal-Corpus",
+  "dataset_config_count": 257312,
+  "dataset_config_drop_reasons": {
+    "incomplete_episodes": 108842
+  },
+  "dataset_config_transform_counts": {
+    "strip_malformed_pairs": 235867,
+    "strip_malformed_samples": 141134
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "unbalanced_cardinality": 21427
+  },
+  "filtered_count": 235885,
+  "raw_count": 366154,
+  "stage1_count": 366154,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "orphan_tool_response_messages": 190741,
+    "parse_error_feedback_messages": 328372,
+    "samples_with_orphan_tool_responses": 163035,
+    "samples_with_parse_error_feedback": 189683
+  },
+  "strip_thinking_applied": false
+}

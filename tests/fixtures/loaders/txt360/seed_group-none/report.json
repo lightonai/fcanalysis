@@ -1,0 +1,34 @@
+{
+  "dataset": "LLM360/TxT360-3efforts/high",
+  "dataset_config_count": 1401340,
+  "dataset_config_drop_reasons": {
+    "no_qualifying_user_message": 29,
+    "user_tool_call_samples": 102
+  },
+  "dataset_config_transform_counts": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "invalid_arguments": 123389,
+    "unbalanced_cardinality": 766822,
+    "undefined_function_calls": 130,
+    "unparseable_arguments": 24
+  },
+  "filtered_count": 597395,
+  "raw_count": 1401471,
+  "stage1_count": 1401471,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "samples_with_no_qualifying_user_messages": 29,
+    "samples_with_unmatched_tool_calls": 766935,
+    "samples_with_user_tool_call_messages": 102,
+    "unmatched_tool_calls": 973591,
+    "user_tool_call_messages": 102
+  },
+  "strip_thinking_applied": false
+}

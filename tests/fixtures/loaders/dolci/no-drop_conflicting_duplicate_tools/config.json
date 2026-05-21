@@ -1,0 +1,15 @@
+{
+  "dataset_config": {
+    "drop_conflicting_duplicate_tools": false,
+    "drop_consecutive_text_text_assistant": true,
+    "merge_text_fc_assistant": true
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

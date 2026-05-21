@@ -1,0 +1,16 @@
+{
+  "dataset_config": {
+    "interactive_agent_domain_cap": null,
+    "splits": [
+      "interactive_agent"
+    ]
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

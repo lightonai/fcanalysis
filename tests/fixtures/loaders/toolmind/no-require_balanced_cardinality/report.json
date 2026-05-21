@@ -1,0 +1,33 @@
+{
+  "dataset": "Nanbeige/ToolMind",
+  "dataset_config_count": 40158,
+  "dataset_config_drop_reasons": {
+    "non_object_arguments": 3,
+    "seed_group_intermediate_discarded": 123019
+  },
+  "dataset_config_transform_counts": {
+    "seed_group_clean_selections": 26488,
+    "seed_group_fallback_selections": 13673,
+    "seed_groups_kept": 40161,
+    "seed_groups_total": 40161
+  },
+  "filter_config": {
+    "require_balanced_cardinality": false,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "invalid_arguments": 4254,
+    "unparseable_arguments": 2
+  },
+  "filtered_count": 35904,
+  "raw_count": 163180,
+  "stage1_count": 163180,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "samples_with_non_object_arguments": 12
+  },
+  "strip_thinking_applied": false
+}

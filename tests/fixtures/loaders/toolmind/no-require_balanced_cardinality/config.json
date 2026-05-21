@@ -1,0 +1,20 @@
+{
+  "dataset_config": {
+    "drop_consecutive_text_assistant": true,
+    "drop_non_object_arguments": true,
+    "merge_split_assistant": true,
+    "seed_group_filter": "longest_clean",
+    "sources": [
+      "graph_syn_datasets/graphsyn.jsonl"
+    ],
+    "strip_think_tool": true
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": false,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "dataset_config": {
+    "configs": null,
+    "drop_incomplete": true,
+    "drop_orphans": true,
+    "strip_malformed": true
+  },
+  "extra_kwargs": {},
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false
+  }
+}

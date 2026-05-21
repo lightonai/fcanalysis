@@ -1,0 +1,34 @@
+{
+  "dataset": "Salesforce/APIGen-MT-5k",
+  "dataset_config_count": 4800,
+  "dataset_config_drop_reasons": {
+    "repeated_tool_call_streaks": 11,
+    "undefined_function_calls": 199
+  },
+  "dataset_config_transform_counts": {
+    "samples_with_think_tool": 3600,
+    "think_tool_calls_removed": 849,
+    "think_tool_definitions_removed": 3600,
+    "think_tool_observations_removed": 849
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "invalid_arguments": 89
+  },
+  "filtered_count": 4711,
+  "raw_count": 5000,
+  "stage1_count": 5000,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "samples_with_consecutive_assistant_text": 39,
+    "samples_with_repeated_tool_call_streak_ge_2": 30,
+    "samples_with_repeated_tool_call_streak_ge_3": 11
+  },
+  "strip_thinking_applied": false
+}

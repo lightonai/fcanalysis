@@ -1,0 +1,63 @@
+[project]
+name = "fcanalysis"
+version = "0.1.0"
+description = "Systematic analysis of function-calling datasets: format-aware loaders, structural and statistical metrics, and LLM-driven semantic classification of no-FC turns."
+readme = "README.md"
+authors = [
+    { name = "Yakine Tahtah (ReinforcedKnowledge)", email = "reinforced.knowledge@gmail.com" },
+]
+requires-python = ">=3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = [
+    "function-calling",
+    "tool-use",
+    "tool-calling",
+    "llm",
+    "agentic",
+    "dataset-analysis",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "datasets>=4.8.5",
+    "httpx>=0.28.1",
+    "huggingface-hub>=1.15.0",
+    "numpy>=2.4.6",
+    "openai>=2.37.0",
+    "orjson>=3.11.9",
+    "pyarrow>=24.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/lightonai/fcanalysis"
+Repository = "https://github.com/lightonai/fcanalysis"
+Issues = "https://github.com/lightonai/fcanalysis/issues"
+
+[build-system]
+requires = ["uv_build>=0.11.3,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not e2e'"
+markers = [
+    "e2e: full-dataset loader regression test; loads pinned HuggingFace revisions and compares against committed fixtures (slow, requires HF network access or warm cache)",
+]
+
+[dependency-groups]
+dev = [
+    "prek==0.4.1",
+    "pytest==9.0.3",
+    "ruff==0.15.13",
+    "ty==0.0.38",
+]

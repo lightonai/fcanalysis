@@ -1,0 +1,38 @@
+{
+  "dataset": "LLM360/TxT360-3efforts/high",
+  "dataset_config_count": 338457,
+  "dataset_config_drop_reasons": {
+    "no_qualifying_user_message": 9,
+    "seed_group_intermediate_discarded": 1062943,
+    "user_tool_call_samples": 62
+  },
+  "dataset_config_transform_counts": {
+    "seed_groups_kept": 338528,
+    "seed_groups_total": 338528
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  },
+  "filter_drop_reasons": {
+    "invalid_arguments": 42289,
+    "unbalanced_cardinality": 54485,
+    "undefined_function_calls": 48,
+    "unparseable_arguments": 12
+  },
+  "filtered_count": 260127,
+  "raw_count": 1401471,
+  "stage1_count": 1401471,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {
+    "samples_with_no_qualifying_user_messages": 29,
+    "samples_with_unmatched_tool_calls": 766935,
+    "samples_with_user_tool_call_messages": 102,
+    "unmatched_tool_calls": 973591,
+    "user_tool_call_messages": 102
+  },
+  "strip_thinking_applied": false
+}

@@ -1,0 +1,17 @@
+{
+  "dataset_config": {
+    "drop_user_tool_call_samples": true,
+    "require_non_empty_user": false,
+    "seed_group_filter": "latest_clean_prefix"
+  },
+  "extra_kwargs": {
+    "split": "high"
+  },
+  "filter_config": {
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true
+  }
+}

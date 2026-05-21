@@ -1,0 +1,32 @@
+# Python build & packaging
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environment & local env files
+.venv
+.env
+.env.*
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ty_cache/
+
+# Generated artifacts
+semantic_results/
+
+# Regression fixture local-only artifacts (hashes + reports + configs are committed)
+tests/fixtures/loaders/*/*/output.jsonl.gz
+tests/fixtures/loaders/*/*/sample.jsonl
+
+# Log files (test runs, tool outputs)
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
