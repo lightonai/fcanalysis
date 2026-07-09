@@ -5,5 +5,6 @@ LOADER_MODULES: dict[str, str] = {
     "nemotron_agentic_v2": "fcanalysis.loaders.nemotron_agentic_v2",
     "nemotron_terminal": "fcanalysis.loaders.nemotron_terminal",
     "toolmind": "fcanalysis.loaders.toolmind",
+    "toucan": "fcanalysis.loaders.toucan",
     "txt360": "fcanalysis.loaders.txt360",
 }
