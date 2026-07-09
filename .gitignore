@@ -16,9 +16,12 @@ wheels/
 .ruff_cache/
 .mypy_cache/
 .ty_cache/
+.claude/
 
 # Generated artifacts
 semantic_results/
+semantic_results_mixture/
+working_notes/
 
 # Regression fixture local-only artifacts (hashes + reports + configs are committed)
 tests/fixtures/loaders/*/*/output.jsonl.gz

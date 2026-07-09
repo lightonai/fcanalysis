@@ -74,15 +74,15 @@ class TestBuildPrompt:
         out = build_prompt(
             _input(no_fc_turn_indices=[2, 5], no_fc_user_message_indices=[3, 7])
         )
-        # Turn map is rendered as a JSON list of dicts.
-        assert '"turn_index": 2' in out[1]["content"]
-        assert '"user_message_index": 7' in out[1]["content"]
+        # Turn map is rendered as a compact JSON list of dicts.
+        assert '"turn_index":2' in out[1]["content"]
+        assert '"user_message_index":7' in out[1]["content"]
 
     def test_includes_indexed_messages(self) -> None:
         out = build_prompt(_input())
         # Each message in the payload should carry a positional "index" field.
-        assert '"index": 0' in out[1]["content"]
-        assert '"index": 1' in out[1]["content"]
+        assert '"index":0' in out[1]["content"]
+        assert '"index":1' in out[1]["content"]
 
 
 class TestValidateResponse:
