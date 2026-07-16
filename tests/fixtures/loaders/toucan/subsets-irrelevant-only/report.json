@@ -8,7 +8,7 @@
     "subset_not_selected": 1367983
   },
   "dataset_config_transform_counts": {
-    "stripped_reasoning_tools": 7848
+    "stripped_reasoning_tools": 4558
   },
   "filter_config": {
     "require_balanced_cardinality": true,

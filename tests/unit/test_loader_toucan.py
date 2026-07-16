@@ -5,26 +5,78 @@ contract is covered by the e2e fixtures; these tests pin the per-function
 semantics that the conversion and Stage 2 config depend on.
 """
 
+import copy
+
 import orjson
 import pytest
 
 from fcanalysis.format import ConversationSample
 from fcanalysis.loaders.toucan import (
+    REASONING_TOOL_FAMILIES_ANNOTATION,
+    SEQUENTIAL_THINKING_TOOL_FAMILY,
+    THINK_TOOL_FAMILY,
     ToucanConfig,
     _apply_dataset_config,
     _convert_messages,
     _convert_sample,
     _ends_incomplete,
     _has_conflicting_duplicate_tools,
+    _is_embedded_tool_system_message,
     _is_reasoning_tool,
     _is_scaffold_tool,
+    _PRESERVED_REASONING_TOOL_NAMES,
+    _SEQUENTIAL_THINKING_TOOL_NAMES,
+    _strip_embedded_tool_system_content,
     _passes_quality,
+    _THINK_TOOL_NAMES,
     _stage1_issues,
     _strip_tools,
     load,
 )
 
 from tests.helpers import assistant, call, func, system, tool_response, user
+
+
+EXPECTED_THINK_TOOL_NAMES = (
+    "think",
+    "get_thoughts",
+    "get_thought_stats",
+    "clear_thoughts",
+    "think-tool-think",
+    "think-tool-get_thoughts",
+    "think-tool-get_thought_stats",
+    "think-tool-clear_thoughts",
+    "think-tool-server-think",
+    "think-tool-server-get_thoughts",
+    "think-tool-server-get_thought_stats",
+    "think-tool-server-clear_thoughts",
+)
+
+EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES = (
+    "clear-thought-sequentialthinking",
+    "clear-thought-server-sequentialthinking",
+    "model-context-protocol-server-sequentialthinking",
+    "reference-servers-sequentialthinking",
+    "sequential-thinking-sequentialthinking",
+    "sequential-thinking-tools-sequentialthinking_tools",
+    "sequentialthinking",
+    "sequentialthinking_tools",
+)
+
+EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
+    EXPECTED_THINK_TOOL_NAMES + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+)
+
+AUDITED_REASONING_TOOL_CASES = (
+    *(
+        pytest.param(name, THINK_TOOL_FAMILY, id=name)
+        for name in EXPECTED_THINK_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, SEQUENTIAL_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+    ),
+)
 
 
 # --------------------------------------------------------------------------
@@ -61,6 +113,28 @@ def conv(messages=None, tools=None, raw=None):
     )
 
 
+def kimi_tool_system(tools=None):
+    serialized = orjson.dumps(tools or [{"type": "function"}]).decode()
+    return f"<|im_system|>tool_declare<|im_middle|>{serialized}<|im_end|>"
+
+
+def xml_tool_system(tools=None):
+    serialized = "\n".join(
+        orjson.dumps(tool).decode() for tool in (tools or [{"type": "function"}])
+    )
+    return (
+        "# Tools\n\n"
+        "You may call one or more functions to assist with the user query.\n\n"
+        "You are provided with function signatures within <tools></tools> XML tags:\n"
+        f"<tools>\n{serialized}\n</tools>\n\n"
+        "For each function call, return a json object with function name and arguments "
+        "within <tool_call></tool_call> XML tags:\n"
+        "<tool_call>\n"
+        '{"name": <function-name>, "arguments": <args-json-object>}\n'
+        "</tool_call>"
+    )
+
+
 def qa(question_quality=5, scenario_realism=5):
     return orjson.dumps(
         {
@@ -89,16 +163,94 @@ def qrow(subset="single-turn-original", question=(5, 5), response=(4, 4, 1.0)):
     return row
 
 
+def conversion_row(called_names=(), defined_names=None):
+    """Minimal raw Toucan row for Stage-1 marker/conversion tests."""
+
+    definitions = list(defined_names if defined_names is not None else called_names)
+    raw_messages = [{"role": "user", "content": "u"}]
+    for name in called_names:
+        raw_messages.extend(
+            [
+                raw_asst(function_call=fcall(name, "{}")),
+                raw_fn("ok"),
+            ]
+        )
+    raw_messages.append(raw_asst(content="done"))
+    row = qrow()
+    row.update(
+        {
+            "uuid": "marker-row",
+            "messages": orjson.dumps(raw_messages).decode(),
+            "available_tools": orjson.dumps(
+                [func(name) for name in definitions]
+            ).decode(),
+        }
+    )
+    return row
+
+
 # --------------------------------------------------------------------------
 # _is_reasoning_tool / _is_scaffold_tool
 # --------------------------------------------------------------------------
 
 
 class TestIsReasoningTool:
-    def test_bare_and_suffixed_think(self) -> None:
-        assert _is_reasoning_tool("think") is True
+    def test_exact_preservation_vocabularies_are_complete_and_disjoint(self) -> None:
+        """Pin the curation contract independently of loader construction."""
+
+        assert (
+            len(EXPECTED_THINK_TOOL_NAMES) == len(set(EXPECTED_THINK_TOOL_NAMES)) == 12
+        )
+        assert (
+            len(EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES)
+            == len(set(EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES))
+            == 8
+        )
+        assert set(EXPECTED_THINK_TOOL_NAMES).isdisjoint(
+            EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+        )
+        assert _THINK_TOOL_NAMES == frozenset(EXPECTED_THINK_TOOL_NAMES)
+        assert _SEQUENTIAL_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+        )
+        assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
+            EXPECTED_PRESERVED_REASONING_TOOL_NAMES
+        )
+
+    @pytest.mark.parametrize(
+        ("name", "family"),
+        AUDITED_REASONING_TOOL_CASES,
+    )
+    def test_every_exact_audited_name_is_preserved(
+        self, name: str, family: str
+    ) -> None:
+        del family
+        assert _is_reasoning_tool(name) is False
+
+    def test_audited_think_names_are_preserved_but_lookalikes_are_not(self) -> None:
+        assert _is_reasoning_tool("think") is False
+        assert _is_reasoning_tool("think-tool-think") is False
+        assert _is_reasoning_tool("think-tool-server-think") is False
+        # Tool names are case-sensitive; an unaudited variant does not inherit
+        # an audited identity merely through case folding.
         assert _is_reasoning_tool("THINK") is True
         assert _is_reasoning_tool("server-think") is True
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-sequentialthinking",
+            "clear-thought-server-sequentialthinking",
+            "model-context-protocol-server-sequentialthinking",
+            "reference-servers-sequentialthinking",
+            "sequential-thinking-sequentialthinking",
+            "sequential-thinking-tools-sequentialthinking_tools",
+            "sequentialthinking",
+            "sequentialthinking_tools",
+        ],
+    )
+    def test_eight_exact_sequential_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
 
     def test_core_families(self) -> None:
         assert _is_reasoning_tool("mcp-sequentialthinking-tools") is True
@@ -111,8 +263,12 @@ class TestIsReasoningTool:
         assert _is_reasoning_tool("analogicalReasoning") is True
         assert _is_reasoning_tool("collaborativeReasoning") is True
         assert _is_reasoning_tool("visualReasoning") is True
-        assert _is_reasoning_tool("get_thoughts") is True
-        assert _is_reasoning_tool("get_thought_stats") is True
+
+    def test_thought_state_operations_are_not_reasoning(self) -> None:
+        for prefix in ("", "think-tool-", "think-tool-server-"):
+            assert _is_reasoning_tool(f"{prefix}get_thoughts") is False
+            assert _is_reasoning_tool(f"{prefix}get_thought_stats") is False
+            assert _is_reasoning_tool(f"{prefix}clear_thoughts") is False
 
     def test_full_clear_thought_op_set(self) -> None:
         # the whole reasoning-server op vocabulary, incl. standalone prefixes
@@ -184,8 +340,8 @@ class TestIsScaffoldTool:
 
 class TestConvertMessages:
     def test_returns_empty_issues(self) -> None:
-        # _convert_messages never drops; structural issues come from
-        # _stage1_issues. Its issue dict is always empty.
+        # Structural issues come from _stage1_issues. Conversion reports no
+        # issue merely because a known redundant system template was omitted.
         _, issues = _convert_messages([{"role": "user", "content": "hi"}])
         assert issues == {}
 
@@ -200,6 +356,56 @@ class TestConvertMessages:
             {"role": "system", "content": "sys"},
             {"role": "user", "content": "u"},
         ]
+
+    @pytest.mark.parametrize(
+        "content",
+        [kimi_tool_system(), xml_tool_system()],
+    )
+    def test_known_embedded_tool_system_is_omitted(self, content: str) -> None:
+        assert _is_embedded_tool_system_message(content) is True
+        out, _ = _convert_messages(
+            [
+                {"role": "system", "content": content},
+                {"role": "user", "content": "u"},
+            ]
+        )
+        assert out == [{"role": "user", "content": "u"}]
+
+    @pytest.mark.parametrize("template", [kimi_tool_system(), xml_tool_system()])
+    @pytest.mark.parametrize(
+        ("content_factory", "expected"),
+        [
+            (lambda template: f"{template}\n\nFollow policy P.", "Follow policy P."),
+            (lambda template: f"Follow policy P.\n\n{template}", "Follow policy P."),
+            (
+                lambda template: f"Instruction A.\n\n{template}\n\nInstruction B.",
+                "Instruction A.\n\nInstruction B.",
+            ),
+        ],
+    )
+    def test_preserves_custom_system_text_around_verified_template(
+        self, template: str, content_factory, expected: str
+    ) -> None:
+        content = content_factory(template)
+        remaining, removed = _strip_embedded_tool_system_content(content)
+        assert removed is True
+        assert remaining == expected
+        assert _is_embedded_tool_system_message(content) is False
+        out, _ = _convert_messages([{"role": "system", "content": content}])
+        assert out == [{"role": "system", "content": expected}]
+
+    def test_malformed_xml_template_is_preserved_whole(self) -> None:
+        content = xml_tool_system().replace('{"type":"function"}', "custom instruction")
+        remaining, removed = _strip_embedded_tool_system_content(content)
+        assert (remaining, removed) == (content, False)
+        out, _ = _convert_messages([{"role": "system", "content": content}])
+        assert out == [{"role": "system", "content": content}]
+
+    def test_unexpected_system_is_not_heuristically_edited(self) -> None:
+        content = "Follow the user's instructions. The word <tools> is incidental."
+        assert _is_embedded_tool_system_message(content) is False
+        out, _ = _convert_messages([{"role": "system", "content": content}])
+        assert out == [{"role": "system", "content": content}]
 
     def test_none_content_becomes_empty_string_for_system_user(self) -> None:
         out, _ = _convert_messages([{"role": "user", "content": None}])
@@ -308,14 +514,72 @@ class TestConvertMessages:
 # --------------------------------------------------------------------------
 
 
+class TestReasoningToolFamilyAnnotations:
+    @pytest.mark.parametrize(
+        ("name", "family"),
+        AUDITED_REASONING_TOOL_CASES,
+    )
+    def test_every_exact_name_is_marked_and_preserved_by_default(
+        self, name: str, family: str
+    ) -> None:
+        sample, _ = _convert_sample(conversion_row(called_names=(name,)), "OSS")
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.annotations == {REASONING_TOOL_FAMILIES_ANNOTATION: [family]}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert [
+            tool_call["function"]["name"]
+            for message in sample.messages
+            for tool_call in message.get("tool_calls") or []
+        ] == [name]
+        assert [tool["function"]["name"] for tool in sample.tools] == [name]
+
+    def test_marks_only_families_with_actual_exact_calls(self) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("think", "sequentialthinking"),
+                defined_names=("think", "sequentialthinking", "get_weather"),
+            ),
+            "OSS",
+        )
+
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [
+                THINK_TOOL_FAMILY,
+                SEQUENTIAL_THINKING_TOOL_FAMILY,
+            ]
+        }
+
+    def test_unused_definitions_do_not_mark_the_row(self) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=("get_weather", "think", "sequentialthinking"),
+            ),
+            "Kimi-K2",
+        )
+
+        assert sample.annotations == {}
+
+    def test_fuzzy_case_variant_does_not_receive_an_audited_marker(self) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=("SequentialThinking",)), "Qwen3"
+        )
+
+        assert sample.annotations == {}
+
+
 class TestStage1Issues:
     def test_clean_conversation_no_issues(self) -> None:
         msgs = [system("s"), user("u"), assistant(content="a")]
         assert _stage1_issues(msgs) == {}
-
-    def test_no_system_message(self) -> None:
-        msgs = [user("u"), assistant(content="a")]
-        assert _stage1_issues(msgs).get("no_system_message") == 1
 
     def test_ends_on_tool_response(self) -> None:
         msgs = [
@@ -588,6 +852,84 @@ class TestHasConflictingDuplicateTools:
         }
         assert _has_conflicting_duplicate_tools(raw) is True
 
+    def test_same_name_difference_outside_description_and_schema_conflicts(
+        self,
+    ) -> None:
+        first = func("a")
+        second = copy.deepcopy(first)
+        second["function"]["strict"] = True
+        raw = {"available_tools": orjson.dumps([first, second]).decode()}
+
+        assert _has_conflicting_duplicate_tools(raw) is True
+
+    def test_object_key_order_alone_is_not_a_conflict(self) -> None:
+        first = func("a")
+        function = first["function"]
+        second = {
+            "function": {
+                "parameters": function["parameters"],
+                "description": function["description"],
+                "name": function["name"],
+            },
+            "type": "function",
+        }
+        raw = {"available_tools": orjson.dumps([first, second]).decode()}
+
+        assert _has_conflicting_duplicate_tools(raw) is False
+
+    def test_nested_object_key_order_alone_is_not_a_conflict(self) -> None:
+        first = func(
+            "a",
+            parameters={
+                "type": "object",
+                "properties": {"location": {"type": "string", "description": "City"}},
+                "required": ["location"],
+            },
+        )
+        second = {
+            "function": {
+                "parameters": {
+                    "required": ["location"],
+                    "properties": {
+                        "location": {"description": "City", "type": "string"}
+                    },
+                    "type": "object",
+                },
+                "description": "",
+                "name": "a",
+            },
+            "type": "function",
+        }
+        raw = {"available_tools": orjson.dumps([first, second]).decode()}
+
+        assert _has_conflicting_duplicate_tools(raw) is False
+
+    def test_array_order_remains_part_of_the_complete_definition(self) -> None:
+        first = func(
+            "a",
+            parameters={
+                "type": "object",
+                "properties": {"x": {}, "y": {}},
+                "required": ["x", "y"],
+            },
+        )
+        second = copy.deepcopy(first)
+        second["function"]["parameters"]["required"] = ["y", "x"]
+        raw = {"available_tools": orjson.dumps([first, second]).decode()}
+
+        # The comparator is structural equality modulo object-key order, not
+        # full JSON-Schema semantic equivalence. Arrays are never reordered.
+        assert _has_conflicting_duplicate_tools(raw) is True
+
+    def test_case_distinct_visible_names_are_not_merged(self) -> None:
+        raw = {
+            "available_tools": orjson.dumps(
+                [func("sequentialthinking"), func("SequentialThinking")]
+            ).decode()
+        }
+
+        assert _has_conflicting_duplicate_tools(raw) is False
+
     def test_unparseable_tools_returns_false(self) -> None:
         assert _has_conflicting_duplicate_tools({"available_tools": "{bad"}) is False
 
@@ -614,6 +956,15 @@ class TestHasConflictingDuplicateTools:
         }
         assert _has_conflicting_duplicate_tools(raw) is False
 
+    def test_malformed_function_object_is_ignored_without_crashing(self) -> None:
+        raw = {
+            "available_tools": orjson.dumps(
+                [{"type": "function", "function": "bad"}, func("a")]
+            ).decode()
+        }
+
+        assert _has_conflicting_duplicate_tools(raw) is False
+
 
 # --------------------------------------------------------------------------
 # _strip_tools  (mutating transform; returns (changed, removed_reasoning, removed_scaffold))
@@ -631,13 +982,119 @@ class TestStripTools:
         )
         assert _strip_tools(s, True, False) == (False, False, False)
 
+    @pytest.mark.parametrize("name", EXPECTED_PRESERVED_REASONING_TOOL_NAMES)
+    def test_audited_reasoning_tool_calls_are_always_preserved(self, name: str) -> None:
+        s = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="observation"),
+                assistant(content="done"),
+            ],
+        )
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.messages == original_messages
+        assert s.tools == original_tools
+
+    @pytest.mark.parametrize("name", EXPECTED_PRESERVED_REASONING_TOOL_NAMES)
+    def test_audited_call_keeps_its_positional_result_and_definition_when_mixed(
+        self, name: str
+    ) -> None:
+        s = conv(
+            tools=[
+                func(name, description="protected"),
+                func("chain-of-draft", description="strippable"),
+                func("get_weather", description="ordinary"),
+            ],
+            messages=[
+                assistant(
+                    content="visible assistant content",
+                    tool_calls=[
+                        call(name=name, call_id="protected"),
+                        call(name="chain-of-draft", call_id="reasoning"),
+                        call(name="get_weather", call_id="ordinary"),
+                    ],
+                ),
+                tool_response(content="protected result", tool_call_id="protected"),
+                tool_response(content="reasoning result", tool_call_id="reasoning"),
+                tool_response(content="weather result", tool_call_id="ordinary"),
+                assistant(content="done"),
+            ],
+        )
+
+        assert _strip_tools(s, True, False) == (True, True, False)
+        assert s.messages[0]["content"] == "visible assistant content"
+        assert [
+            tool_call["function"]["name"] for tool_call in s.messages[0]["tool_calls"]
+        ] == [name, "get_weather"]
+        assert [
+            message["tool_call_id"]
+            for message in s.messages
+            if message["role"] == "tool"
+        ] == ["protected", "ordinary"]
+        assert [
+            message["content"] for message in s.messages if message["role"] == "tool"
+        ] == ["protected result", "weather result"]
+        assert [tool["function"]["name"] for tool in s.tools] == [
+            name,
+            "get_weather",
+        ]
+
+    def test_all_uncalled_audited_definitions_are_preserved(self) -> None:
+        s = conv(
+            tools=[func(name) for name in EXPECTED_PRESERVED_REASONING_TOOL_NAMES],
+            messages=[user("u"), assistant(content="done")],
+        )
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.tools == original_tools
+
+    def test_undefined_fuzzy_reasoning_call_is_left_for_validation(self) -> None:
+        s = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name="SequentialThinking")]),
+                tool_response(content="Tool does not exist"),
+            ],
+        )
+        original_messages = copy.deepcopy(s.messages)
+
+        # The broad legacy name predicate recognizes this spelling, but an
+        # undefined call must not be deleted before defined-function validation.
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.messages == original_messages
+
+    def test_conflicting_name_is_never_partially_stripped(self) -> None:
+        first = func("chain-of-draft", description="contract A")
+        second = func("chain-of-draft", description="contract B")
+        s = conv(
+            tools=[first, second],
+            messages=[
+                assistant(tool_calls=[call(name="chain-of-draft")]),
+                tool_response(content="ambiguous observation"),
+            ],
+        )
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.messages == original_messages
+        assert s.tools == original_tools
+
     def test_strips_reasoning_call_and_its_response(self) -> None:
         s = conv(
-            tools=[func("think"), func("get_weather")],
+            tools=[func("chain-of-draft"), func("get_weather")],
             messages=[
                 assistant(
                     content="reasoning",
-                    tool_calls=[call(name="think"), call(name="get_weather")],
+                    tool_calls=[
+                        call(name="chain-of-draft"),
+                        call(name="get_weather"),
+                    ],
                 ),
                 tool_response(content="", tool_call_id="t"),
                 tool_response(content="sunny", tool_call_id="w"),
@@ -655,9 +1112,9 @@ class TestStripTools:
 
     def test_reasoning_only_turn_with_content_keeps_text_drops_calls(self) -> None:
         s = conv(
-            tools=[func("think")],
+            tools=[func("chain-of-draft")],
             messages=[
-                assistant(content="visible", tool_calls=[call(name="think")]),
+                assistant(content="visible", tool_calls=[call(name="chain-of-draft")]),
                 tool_response(content=""),
             ],
         )
@@ -666,9 +1123,9 @@ class TestStripTools:
 
     def test_reasoning_only_turn_without_content_is_dropped(self) -> None:
         s = conv(
-            tools=[func("think")],
+            tools=[func("chain-of-draft")],
             messages=[
-                assistant(tool_calls=[call(name="think")]),
+                assistant(tool_calls=[call(name="chain-of-draft")]),
                 tool_response(content=""),
             ],
         )
@@ -678,23 +1135,31 @@ class TestStripTools:
     def test_unbalanced_turn_left_untouched(self) -> None:
         # 2 calls, 1 response -> not the loader's normal output; leave alone.
         s = conv(
-            tools=[func("think"), func("get_weather")],
+            tools=[func("chain-of-draft"), func("get_weather")],
             messages=[
-                assistant(tool_calls=[call(name="think"), call(name="get_weather")]),
+                assistant(
+                    tool_calls=[
+                        call(name="chain-of-draft"),
+                        call(name="get_weather"),
+                    ]
+                ),
                 tool_response(),
             ],
         )
         before = [dict(m) for m in s.messages]
         changed, rem_r, _ = _strip_tools(s, True, False)
-        # messages unchanged, but the reasoning tool is still pruned from the list
+        # The whole unbalanced name is protected, including its definition.
         assert [m for m in s.messages] == before
-        assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
-        assert changed is True and rem_r is True  # tools_changed
+        assert [t["function"]["name"] for t in s.tools] == [
+            "chain-of-draft",
+            "get_weather",
+        ]
+        assert changed is False and rem_r is False
 
     def test_prunes_uncalled_reasoning_tool_from_list(self) -> None:
         # A reasoning tool defined but never called is still pruned.
         s = conv(
-            tools=[func("think"), func("get_weather")],
+            tools=[func("chain-of-draft"), func("get_weather")],
             messages=[user("u"), assistant(content="hi")],
         )
         assert _strip_tools(s, True, False)[0] is True
@@ -729,11 +1194,15 @@ class TestStripTools:
 
     def test_both_families_reported_separately(self) -> None:
         s = conv(
-            tools=[func("think"), func("fs-read_resource"), func("get_weather")],
+            tools=[
+                func("chain-of-draft"),
+                func("fs-read_resource"),
+                func("get_weather"),
+            ],
             messages=[
                 assistant(
                     tool_calls=[
-                        call(name="think"),
+                        call(name="chain-of-draft"),
                         call(name="fs-read_resource"),
                         call(name="get_weather"),
                     ]
@@ -786,11 +1255,15 @@ class TestApplyDatasetConfig:
         # (strip_scaffold_tools default False). Pins the default-ON contract that a
         # weaker no-tools test would miss.
         s = conv(
-            tools=[func("think"), func("srv-read_resource"), func("get_weather")],
+            tools=[
+                func("chain-of-draft"),
+                func("srv-read_resource"),
+                func("get_weather"),
+            ],
             messages=[
                 assistant(
                     tool_calls=[
-                        call(name="think"),
+                        call(name="chain-of-draft"),
                         call(name="srv-read_resource"),
                         call(name="get_weather"),
                     ]
@@ -803,7 +1276,7 @@ class TestApplyDatasetConfig:
             raw=qrow(),
         )
         kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
-        # reasoning stripped (think), scaffold kept (read_resource survives)
+        # Legacy reasoning stripped; scaffold kept (read_resource survives).
         assert transforms == {"stripped_reasoning_tools": 1}
         kept_names = [t["function"]["name"] for t in kept[0].tools]
         assert kept_names == ["srv-read_resource", "get_weather"]
@@ -860,11 +1333,94 @@ class TestApplyDatasetConfig:
         assert len(kept) == 1
         assert drops["conflicting_duplicate_tools"] == 1
 
+    def test_same_name_definition_variation_across_rows_is_allowed(self) -> None:
+        first_raw = qrow()
+        first_raw["available_tools"] = orjson.dumps(
+            [func("sequentialthinking", description="reference contract")]
+        ).decode()
+        second_raw = qrow()
+        second_raw["available_tools"] = orjson.dumps(
+            [func("sequentialthinking", description="session contract")]
+        ).decode()
+        samples = [
+            conv(messages=[user("u")], raw=first_raw),
+            conv(messages=[user("v")], raw=second_raw),
+        ]
+
+        kept, drops, _ = _apply_dataset_config(
+            samples, ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == samples
+        assert drops == {}
+
+    def test_identical_same_row_duplicates_are_allowed_and_not_deduplicated(
+        self,
+    ) -> None:
+        duplicate = func("get_weather", description="same contract")
+        raw = qrow()
+        raw["available_tools"] = orjson.dumps([duplicate, duplicate]).decode()
+        sample = conv(
+            messages=[user("u"), assistant(content="done")],
+            tools=[copy.deepcopy(duplicate), copy.deepcopy(duplicate)],
+            raw=raw,
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample], ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.tools == original_tools
+        assert len(sample.tools) == 2
+
+    def test_real_oss_sequential_name_collision_is_dropped_before_transform(
+        self,
+    ) -> None:
+        # Production UUID 7e196aff-06a9-55d3-b316-b038a029ec5b contains the
+        # reference and Waldzell contracts under this one visible name. The
+        # reduced definitions pin the ambiguity and drop/transform ordering.
+        raw = qrow()
+        raw["available_tools"] = orjson.dumps(
+            [
+                func("sequentialthinking", description="reference contract"),
+                func("sequentialthinking", description="Waldzell session contract"),
+            ]
+        ).decode()
+        sample = conv(
+            tools=[
+                func("sequentialthinking", description="reference contract"),
+                func("sequentialthinking", description="Waldzell session contract"),
+            ],
+            messages=[
+                assistant(tool_calls=[call(name="sequentialthinking")]),
+                tool_response(content='{"thoughtHistoryLength":1}'),
+            ],
+            raw=raw,
+        )
+        sample.sample_id = "7e196aff-06a9-55d3-b316-b038a029ec5b"
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample], ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == []
+        assert drops == {"conflicting_duplicate_tools": 1}
+        assert transforms == {}
+
     def test_strip_reasoning_tools_is_a_transform_on_survivors(self) -> None:
         s = conv(
-            tools=[func("think"), func("get_weather")],
+            tools=[func("chain-of-draft"), func("get_weather")],
             messages=[
-                assistant(tool_calls=[call(name="think"), call(name="get_weather")]),
+                assistant(
+                    tool_calls=[
+                        call(name="chain-of-draft"),
+                        call(name="get_weather"),
+                    ]
+                ),
                 tool_response(content="", tool_call_id="t"),
                 tool_response(content="sunny", tool_call_id="w"),
                 assistant(content="done"),
@@ -877,6 +1433,168 @@ class TestApplyDatasetConfig:
         assert transforms["stripped_reasoning_tools"] == 1
         assert "stripped_scaffold_tools" not in transforms
         assert [t["function"]["name"] for t in kept[0].tools] == ["get_weather"]
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "events"),
+        [
+            (
+                "e5ba7254-e907-5f46-8918-270e6f2cb087",
+                "Kimi-K2",
+                [
+                    (
+                        "think-tool-get_thought_stats",
+                        "No thoughts have been recorded yet.",
+                    ),
+                    (
+                        "think-tool-get_thoughts",
+                        "No thoughts have been recorded yet.",
+                    ),
+                    ("think-tool-clear_thoughts", "Cleared 0 recorded thoughts."),
+                ],
+            ),
+            (
+                "400a283d-1ae2-5623-85d9-d39eecbfbe5a",
+                "Qwen3",
+                [
+                    ("think-tool-server-think", "OUTLINE AGILE AND WATERFALL"),
+                    ("think-tool-server-think", "COMPARE PROS AND CONS"),
+                    ("think-tool-server-think", "ANALYZE PROJECT CONTEXT"),
+                    ("think-tool-server-think", "CREATE A DECISION MATRIX"),
+                    (
+                        "think-tool-server-get_thoughts",
+                        "Thought #1: OUTLINE ... Thought #4: DECISION MATRIX",
+                    ),
+                ],
+            ),
+            (
+                "783ba926-364b-51af-bde8-34c655e88ebf",
+                "OSS",
+                [
+                    (
+                        "get_thought_stats",
+                        '{"type":"text","text":"No thoughts have been recorded yet."}',
+                    ),
+                    (
+                        "get_thoughts",
+                        '{"type":"text","text":"No thoughts have been recorded yet."}',
+                    ),
+                ],
+            ),
+            (
+                "1c8500a5-35bd-5cbc-853d-020b10e11706",
+                "OSS",
+                [
+                    (
+                        "think",
+                        '{"type":"text","text":"Thought recorded: solution requires A and B"}',
+                    ),
+                    (
+                        "get_thought_stats",
+                        '{"average_length":25,"total_thoughts":1}',
+                    ),
+                ],
+            ),
+            (
+                "78ace17d-45dc-5eab-97bc-42d6a953f49f",
+                "Qwen3",
+                [("think-tool-clear_thoughts", "Cleared 0 recorded thoughts.")],
+            ),
+        ],
+    )
+    def test_real_thought_state_episodes_are_preserved(
+        self, sample_id: str, teacher: str, events: list[tuple[str, str]]
+    ) -> None:
+        """Exact call order and representative observations from five raw rows."""
+
+        names = [name for name, _ in events]
+        messages = []
+        for i, (name, observation) in enumerate(events):
+            messages.extend(
+                [
+                    assistant(tool_calls=[call(name=name)]),
+                    tool_response(content=observation, tool_call_id=str(i)),
+                ]
+            )
+        messages.append(assistant(content="final answer grounded in the observations"))
+
+        s = conv(
+            tools=[func(name) for name in dict.fromkeys(names)],
+            messages=messages,
+            raw=qrow(),
+        )
+        s.sample_id = sample_id
+        s.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(s.messages)
+
+        kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
+
+        assert transforms == {}
+        assert kept[0].sample_id == sample_id
+        assert kept[0].messages == original_messages
+        assert [t["function"]["name"] for t in kept[0].tools] == list(
+            dict.fromkeys(names)
+        )
+
+    def test_all_audited_think_writes_are_preserved_without_state_reads(self) -> None:
+        s = conv(
+            tools=[
+                func("think-tool-server-think"),
+                func("think-tool-server-get_thoughts"),
+                func("think"),
+            ],
+            messages=[
+                assistant(tool_calls=[call(name="think-tool-server-think")]),
+                tool_response(content="recorded"),
+                assistant(tool_calls=[call(name="think")]),
+                tool_response(content="unrelated bare echo"),
+                assistant(tool_calls=[call(name="think-tool-server-get_thoughts")]),
+                tool_response(content="Thought #1: recorded"),
+            ],
+            raw=qrow(),
+        )
+
+        kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
+
+        assert transforms == {}
+        assert [
+            c["function"]["name"]
+            for m in kept[0].messages
+            for c in m.get("tool_calls") or []
+        ] == [
+            "think-tool-server-think",
+            "think",
+            "think-tool-server-get_thoughts",
+        ]
+
+    def test_arbitrary_matching_suffix_does_not_create_a_state_family(self) -> None:
+        # The raw snapshot contains an undefined mcpollinations-get_thoughts
+        # hallucination. A shared arbitrary prefix is not evidence that it and a
+        # hypothetical *-think call share the audited Clear Thought state.
+        s = conv(
+            tools=[
+                func("mcpollinations-think"),
+                func("mcpollinations-get_thoughts"),
+            ],
+            messages=[
+                assistant(tool_calls=[call(name="mcpollinations-think")]),
+                tool_response(content="echo"),
+                assistant(tool_calls=[call(name="mcpollinations-get_thoughts")]),
+                tool_response(content="Tool does not exist"),
+            ],
+            raw=qrow(),
+        )
+
+        kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
+
+        assert transforms == {"stripped_reasoning_tools": 1}
+        assert [t["function"]["name"] for t in kept[0].tools] == [
+            "mcpollinations-get_thoughts"
+        ]
+        assert [
+            c["function"]["name"]
+            for m in kept[0].messages
+            for c in m.get("tool_calls") or []
+        ] == ["mcpollinations-get_thoughts"]
 
     def test_scaffold_strip_reported_separately(self) -> None:
         # strip_scaffold_tools (off by default) is reported under its own key.
@@ -903,9 +1621,9 @@ class TestApplyDatasetConfig:
         # A row dropped by subset selection must not be counted as stripped,
         # even if it contains reasoning tools (transform runs on survivors only).
         dropped = conv(
-            tools=[func("think")],
+            tools=[func("chain-of-draft")],
             messages=[
-                assistant(tool_calls=[call(name="think")]),
+                assistant(tool_calls=[call(name="chain-of-draft")]),
                 tool_response(content=""),
             ],
             raw=qrow(subset="irrelevant"),
@@ -951,10 +1669,10 @@ class TestApplyDatasetConfig:
         # and dropped, so strip_reasoning_tools never runs to "rescue" it. Pins
         # the drop/transform ordering.
         s = conv(
-            tools=[func("think")],
+            tools=[func("chain-of-draft")],
             messages=[
                 user("u"),
-                assistant(tool_calls=[call(name="think")]),
+                assistant(tool_calls=[call(name="chain-of-draft")]),
                 tool_response(content=""),
             ],
             raw=qrow(),

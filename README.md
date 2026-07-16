@@ -88,7 +88,7 @@ secondary_kept, cross_report = dedup_cross(
 
 ## Architecture
 
-- `fcanalysis.format.ConversationSample`: the universal data type. Five fields (`messages`, `tools`, `dataset`, `sample_id`, `raw`); slotted dataclass with `raw` repr-hidden.
+- `fcanalysis.format.ConversationSample`: the universal data type. Six fields (`messages`, `tools`, `dataset`, `sample_id`, `annotations`, `raw`); slotted dataclass with `raw` repr-hidden. `annotations` carries normalized curation metadata that downstream selectors may serialize. It must remain outside model input: chat templates and training formatters must consume only `messages` and `tools`.
 - `fcanalysis.loaders.base`: `FilterConfig`, `LoadReport`, `apply_filters`. Universal Stage-3 filter logic.
 - `fcanalysis.loaders.{name}`: per-dataset Stage-1 conversion plus Stage-2 dataset-specific config.
 - `fcanalysis.core`: turn classification (`identify_real_turns`, `classify_turn_pattern`).

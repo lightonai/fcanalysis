@@ -3,6 +3,7 @@
 import dataclasses
 
 from fcanalysis.format import ConversationSample
+from tests.tools.hash_jsonl import sample_payload
 
 
 class TestConversationSample:
@@ -21,6 +22,25 @@ class TestConversationSample:
     def test_raw_defaults_to_empty_dict(self) -> None:
         s = ConversationSample(messages=[], tools=[], dataset="test", sample_id="x")
         assert s.raw == {}
+
+    def test_annotations_default_to_distinct_empty_dicts(self) -> None:
+        a = ConversationSample(messages=[], tools=[], dataset="t", sample_id=1)
+        b = ConversationSample(messages=[], tools=[], dataset="t", sample_id=2)
+        a.annotations["family"] = "sequential_thinking"
+        assert b.annotations == {}
+
+    def test_serialized_only_when_non_empty(self) -> None:
+        plain = ConversationSample(messages=[], tools=[], dataset="t", sample_id=1)
+        marked = ConversationSample(
+            messages=[],
+            tools=[],
+            dataset="t",
+            sample_id=2,
+            annotations={"reasoning_tool_families": ["sequential_thinking"]},
+        )
+
+        assert "annotations" not in sample_payload(plain)
+        assert sample_payload(marked)["annotations"] == marked.annotations
 
     def test_raw_is_distinct_per_instance(self) -> None:
         a = ConversationSample(messages=[], tools=[], dataset="t", sample_id=1)
@@ -47,6 +67,7 @@ class TestConversationSample:
             tools=[],
             dataset="d",
             sample_id="s",
+            annotations={"reasoning_tool_families": ["sequential_thinking"]},
             raw={"r": 1},
         )
         d = dataclasses.asdict(s)

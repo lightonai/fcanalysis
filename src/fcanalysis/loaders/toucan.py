@@ -37,11 +37,15 @@ Mapping to OpenAI format (collapses the split messages; validated by the
 round-trip census toucan/census/c10_roundtrip.py):
     - ``available_tools`` is parsed directly into ``sample.tools`` (already OpenAI
       ``{type: function, function: {name, description, parameters}}``).
-    - The ``system`` message (which embeds the framework preamble and a tool-list
-      dump) is preserved verbatim per the loader checklist. The embedded dump is
-      not authoritative: sampled rows contain both system-only scaffold tools and
-      available-only domain tools, so callable definitions come from
-      ``available_tools``, not from re-parsing the system text.
+    - The verified framework-generated tool-declaration span is removed from each
+      ``system`` message. A full-snapshot census found that every source system
+      message consists entirely of one of the two teacher-framework templates and
+      contains no independent instructions, so no system message remains in the
+      pinned snapshot. The recognizer nevertheless preserves any text before or
+      after a verified template span for forward compatibility and fails closed
+      on malformed/unknown shapes. ``available_tools`` is the single authoritative
+      tool source; the target chat template renders its canonical tool context.
+      The original system dump remains available in ``sample.raw`` for audits.
     - A maximal run of consecutive assistant messages becomes ONE OpenAI
       assistant message: ``content`` = the joined non-empty text contents;
       ``reasoning_content`` = the joined reasoning fields (OSS only, so
@@ -74,8 +78,11 @@ Dataset-specific config (Stage 2, before universal filters):
     - ``drop_incomplete_termination``: drop rows whose last message is a tool
       response or an empty assistant message (no final answer; <1% of rows).
     - ``drop_conflicting_duplicate_tools``: drop rows whose ``available_tools``
-      defines the same name with more than one distinct definition (317 rows;
-      name-based lookup would be order-dependent, loader checklist).
+      defines the same exact visible name with more than one distinct complete
+      tool definition (317 rows; name-based lookup would be order-dependent).
+      Object-key order is canonicalized, but no schema or description is
+      heuristically normalized. Same-name variation across different rows is
+      allowed; byte-equivalent duplicates within one row are not conflicts.
     - ``strip_reasoning_tools`` (DEFAULT ON) and ``strip_scaffold_tools``
       (default off): two transforms (run on survivors, after the drops) that
       remove tool calls and their positionally-linked tool responses, and drop
@@ -85,16 +92,15 @@ Dataset-specific config (Stage 2, before universal filters):
         * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
           only purpose is to structure/record the model's reasoning (the result
           echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content, so it is
-          stripped BY DEFAULT to keep trajectories free of thinking regardless of
-          source. The token set was audited against the full 4,868-tool catalog
-          to catch every reasoning scaffold (the whole Clear-Thought op set under
-          any prefix or bare name, sequential-thinking, think-tool, chain-of-draft,
-          lotus-wisdom, metacognitive-monitoring, scientific-method, structured-
-          argumentation, decision-framework, analogical/collaborative/visual
-          reasoning, plus domain ``*thinking`` tools) while matching no domain
-          tool (verified to exclude the think-tank server's real ops and
-          model-listing utilities like listReasoningModels).
+          calls, the structural analog of <think>/reasoning_content. Two audited
+          families are unconditional preservation exceptions: all twelve exact
+          audited ``think``/thought-state names and all eight exact sequential-
+          thinking names. Their calls, paired observations, and definitions
+          remain intact even when this transform is enabled. Undefined calls and
+          calls under a conflicting or unbalanced name are also retained so
+          downstream validators see the source defect. Other legacy name families
+          cover chain-of-draft, lotus-wisdom, metacognitive/scientific/decision
+          methods, and domain ``*thinking`` tools.
         * ``strip_scaffold_tools`` removes non-reasoning framework PLUMBING:
           server-unlock handshakes ``__unlock*`` / ``__get_instructions``, MCP
           resource primitives ``list_resources`` / ``read_resource`` /
@@ -109,11 +115,9 @@ Dataset-specific config (Stage 2, before universal filters):
           the final answer used; treat it as an explicit analysis variant, not the
           production cleaning path.
 
-      NOTE: this reasoning vs scaffold split, and the breadth of the reasoning
-      detector, are deliberate divergences from the upstream fcanalysis loader
-      (which had a single ``strip_meta_tools`` flag, off by default, that stripped
-      a narrower reasoning set plus the plumbing). Every other behavior is
-      identical to upstream.
+      NOTE: this reasoning vs scaffold split, the audited-family preservation
+      rules, and canonical tool-context normalization are deliberate divergences
+      from the upstream loader.
 
 Universal filters then apply (strip_thinking removes the OSS reasoning_content;
 the four drop filters compose orthogonally per the base class).
@@ -157,9 +161,10 @@ class ToucanConfig:
     drop_incomplete_termination: bool = False
     drop_conflicting_duplicate_tools: bool = False
     # Two independent strip transforms (see _is_reasoning_tool / _is_scaffold_tool).
-    # Reasoning scaffolds (think/sequentialthinking/clear_thought/mentalmodel/...)
-    # are reasoning-as-tool-calls and are stripped by DEFAULT so the trajectories
-    # are free of thinking regardless of source. Framework SCAFFOLD plumbing
+    # Legacy reasoning scaffolds are stripped by DEFAULT, except for the exact
+    # audited think/thought-state and sequential-thinking families, which are always
+    # preserved and marked for downstream row-level selection. Framework SCAFFOLD
+    # plumbing
     # (server-unlock handshakes, MCP resource primitives, the degenerate
     # deep_researcher async poller) is kept by default -- it is real (often
     # information-bearing) tool use, not reasoning. strip_scaffold_tools is an
@@ -174,23 +179,16 @@ class ToucanConfig:
 # external information). These are reasoning-as-tool-calls -- the structural
 # analog of <think>/reasoning_content -- and are stripped by default.
 #
-# The token set is intentionally broader than the upstream fcanalysis repo and
-# the toucan census c16: it was audited against the full 4,868-tool catalog to
-# catch EVERY reasoning scaffold (the whole Clear-Thought / "Waldzell" op set
-# under any server prefix or bare name, sequential-thinking, think-tool,
-# chain-of-draft, lotus-wisdom, metacognitive-monitoring, scientific-method,
-# structured-argumentation, decision-framework, pentest/analogical/collaborative/
-# visual reasoning, plus domain "*thinking" tools) while matching NO domain tool
-# -- verified to exclude the think-tank server's real ops (web search,
-# knowledge-graph CRUD, task management) and model-listing utilities like
-# listReasoningModels.
+# The token set is broader than the upstream loader and was audited against the
+# 4,868-tool catalog for name coverage. Name matching is not, by itself, proof
+# that a particular episode is safely removable. The exact audited preservation
+# vocabularies below take precedence over this legacy broad predicate.
 _REASONING_TOOL_SUBSTRINGS = (
     "thinking",  # systemsthinking, creativethinking, *thinking domain tools, sequentialthinking
     "clear_thought",
     "clear-thought",
     "think-tool",
     "mentalmodel",
-    "get_thought",  # get_thoughts, get_thought_stats
     "analogicalreasoning",
     "collaborativereasoning",
     "visualreasoning",
@@ -207,6 +205,85 @@ _REASONING_TOOL_SUBSTRINGS = (
 )
 
 
+# These Clear Thought operations are ordinary stateful tools, not reasoning
+# traces. Their observations expose session state that is unavailable in the
+# call arguments, and clear_thoughts mutates that state. The pinned snapshot
+# contains exactly three audited naming families. Do not infer family membership
+# from an arbitrary ``*-get_thoughts`` suffix: the snapshot contains an undefined
+# ``mcpollinations-get_thoughts`` hallucination that is not a Clear Thought tool.
+_THOUGHT_STATE_OPERATIONS = (
+    "get_thoughts",
+    "get_thought_stats",
+    "clear_thoughts",
+)
+
+_THOUGHT_STATE_NAMESPACES = (
+    "",  # bare: think / get_thoughts / get_thought_stats / clear_thoughts
+    "think-tool",
+    "think-tool-server",
+)
+
+_THOUGHT_STATE_NAMESPACE_BY_NAME = {
+    (operation if not namespace else f"{namespace}-{operation}"): namespace
+    for namespace in _THOUGHT_STATE_NAMESPACES
+    for operation in _THOUGHT_STATE_OPERATIONS
+}
+
+_THOUGHT_WRITE_NAMESPACE_BY_NAME = {
+    ("think" if not namespace else f"{namespace}-think"): namespace
+    for namespace in _THOUGHT_STATE_NAMESPACES
+}
+
+
+# Exact call-name vocabularies established by the full pinned-snapshot audits.
+# Preservation is deliberately name-exact: case variants, misspellings, and
+# names with serialized arguments appended do not inherit an audited identity.
+# Such undefined calls are nevertheless retained by _strip_tools so universal
+# defined-function validation can reject them rather than being bypassed.
+REASONING_TOOL_FAMILIES_ANNOTATION = "reasoning_tool_families"
+THINK_TOOL_FAMILY = "think_tool"
+SEQUENTIAL_THINKING_TOOL_FAMILY = "sequential_thinking"
+
+_THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
+    _THOUGHT_WRITE_NAMESPACE_BY_NAME
+)
+
+_SEQUENTIAL_THINKING_TOOL_NAMES = frozenset(
+    {
+        "clear-thought-sequentialthinking",
+        "clear-thought-server-sequentialthinking",
+        "model-context-protocol-server-sequentialthinking",
+        "reference-servers-sequentialthinking",
+        "sequential-thinking-sequentialthinking",
+        "sequential-thinking-tools-sequentialthinking_tools",
+        "sequentialthinking",
+        "sequentialthinking_tools",
+    }
+)
+
+_PRESERVED_REASONING_TOOL_NAMES = _THINK_TOOL_NAMES | _SEQUENTIAL_THINKING_TOOL_NAMES
+
+
+def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
+    """Return exact audited reasoning-tool families actually called in a row.
+
+    Definitions alone do not mark a sample: an unused tool does not teach an
+    action. The result is stable and ordered for deterministic serialization.
+    """
+
+    called_names = {
+        (call.get("function") or {}).get("name")
+        for message in messages
+        for call in message.get("tool_calls") or []
+    }
+    families = []
+    if called_names & _THINK_TOOL_NAMES:
+        families.append(THINK_TOOL_FAMILY)
+    if called_names & _SEQUENTIAL_THINKING_TOOL_NAMES:
+        families.append(SEQUENTIAL_THINKING_TOOL_FAMILY)
+    return families
+
+
 # Non-reasoning framework SCAFFOLD/plumbing: generic MCP protocol machinery and
 # the degenerate async poller. Real (often information-bearing) tool use, not
 # reasoning -- KEPT by default; strippable via strip_scaffold_tools.
@@ -221,6 +298,10 @@ _SCAFFOLD_TOOL_SUBSTRINGS = (
 
 
 def _is_reasoning_tool(name: str) -> bool:
+    # These exact, audited families are explicit tool actions. They are retained
+    # intact and can later be selected out at row granularity via annotations.
+    if name in _PRESERVED_REASONING_TOOL_NAMES:
+        return False
     low = name.lower()
     # bare or namespaced "think" tool, plus the reasoning substring families
     return (
@@ -235,6 +316,124 @@ def _is_scaffold_tool(name: str) -> bool:
     return any(s in low for s in _SCAFFOLD_TOOL_SUBSTRINGS)
 
 
+_KIMI_TOOL_TEMPLATE_PREFIX = "<|im_system|>tool_declare<|im_middle|>"
+_KIMI_TOOL_TEMPLATE_SUFFIX = "<|im_end|>"
+
+_XML_TOOL_TEMPLATE_PREFIX = (
+    "# Tools\n\n"
+    "You may call one or more functions to assist with the user query.\n\n"
+    "You are provided with function signatures within <tools></tools> XML tags:\n"
+    "<tools>\n"
+)
+_XML_TOOL_TEMPLATE_SUFFIX = (
+    "\n</tools>\n\n"
+    "For each function call, return a json object with function name and arguments "
+    "within <tool_call></tool_call> XML tags:\n"
+    "<tool_call>\n"
+    '{"name": <function-name>, "arguments": <args-json-object>}\n'
+    "</tool_call>"
+)
+
+
+def _valid_kimi_tool_body(body: str) -> bool:
+    try:
+        tools = orjson.loads(body)
+    except orjson.JSONDecodeError:
+        return False
+    return isinstance(tools, list) and all(isinstance(tool, dict) for tool in tools)
+
+
+def _valid_xml_tool_body(body: str) -> bool:
+    """Validate the observed one-JSON-object-per-line XML template body."""
+
+    lines = [line for line in body.splitlines() if line.strip()]
+    try:
+        tools = [orjson.loads(line) for line in lines]
+    except orjson.JSONDecodeError:
+        return False
+    return all(isinstance(tool, dict) for tool in tools)
+
+
+def _find_valid_template_end(
+    content: str,
+    start: int,
+    prefix: str,
+    suffix: str,
+    body_validator: Any,
+) -> int | None:
+    """Return the end of a verified template starting at ``start``."""
+
+    body_start = start + len(prefix)
+    suffix_start = content.find(suffix, body_start)
+    while suffix_start >= 0:
+        if body_validator(content[body_start:suffix_start]):
+            return suffix_start + len(suffix)
+        suffix_start = content.find(suffix, suffix_start + 1)
+    return None
+
+
+def _strip_embedded_tool_system_content(content: str) -> tuple[str, bool]:
+    """Remove only verified tool-template spans and preserve surrounding text.
+
+    Both framework templates may occur at the beginning, middle, or end of a
+    future system message. A candidate is removed only when its exact fixed
+    framing and its serialized tool body validate. Malformed and unfamiliar
+    candidates are retained byte-for-byte rather than heuristically truncated.
+    """
+
+    templates = (
+        (
+            _KIMI_TOOL_TEMPLATE_PREFIX,
+            _KIMI_TOOL_TEMPLATE_SUFFIX,
+            _valid_kimi_tool_body,
+        ),
+        (_XML_TOOL_TEMPLATE_PREFIX, _XML_TOOL_TEMPLATE_SUFFIX, _valid_xml_tool_body),
+    )
+    kept: list[str] = []
+    cursor = 0
+    removed = False
+
+    while cursor < len(content):
+        candidates = [
+            (position, prefix, suffix, validator)
+            for prefix, suffix, validator in templates
+            if (position := content.find(prefix, cursor)) >= 0
+        ]
+        if not candidates:
+            kept.append(content[cursor:])
+            break
+
+        start, prefix, suffix, validator = min(candidates, key=lambda item: item[0])
+        end = _find_valid_template_end(content, start, prefix, suffix, validator)
+        if end is None:
+            # Keep the unmatched prefix and continue looking after it. This
+            # preserves the content exactly while still allowing a later valid
+            # template in the same message to be normalized.
+            prefix_end = start + len(prefix)
+            kept.append(content[cursor:prefix_end])
+            cursor = prefix_end
+            continue
+
+        kept.append(content[cursor:start])
+        cursor = end
+        removed = True
+    else:
+        # The final valid template ended exactly at the end of the message.
+        pass
+
+    if not removed:
+        return content, False
+    custom_segments = [segment.strip() for segment in kept if segment.strip()]
+    return "\n\n".join(custom_segments), True
+
+
+def _is_embedded_tool_system_message(content: str) -> bool:
+    """Return whether ``content`` consists only of verified tool templates."""
+
+    remaining, removed = _strip_embedded_tool_system_content(content)
+    return removed and not remaining
+
+
 # ---------------------------------------------------------------------------
 # Stage 1 conversion
 # ---------------------------------------------------------------------------
@@ -243,7 +442,7 @@ def _is_scaffold_tool(name: str) -> bool:
 def _convert_messages(
     raw_msgs: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, int]]:
-    """Collapse Toucan's split messages into OpenAI format. Nothing dropped."""
+    """Collapse split messages and normalize embedded tool-system templates."""
     out: list[dict[str, Any]] = []
     issues: dict[str, int] = {}
     content_buf: list[str] = []
@@ -288,7 +487,18 @@ def _convert_messages(
         elif role == "function":
             flush()
             out.append({"role": "tool", "content": m.get("content") or ""})
-        else:  # system, user (and any unexpected role, preserved verbatim)
+        elif role == "system":
+            flush()
+            original_content = m.get("content") or ""
+            normalized_content, removed = _strip_embedded_tool_system_content(
+                original_content
+            )
+            # Tool definitions are represented authoritatively by sample.tools
+            # and will be rendered by the target chat template. Preserve any
+            # independent system instructions surrounding that verified span.
+            if normalized_content or not removed:
+                out.append({"role": role, "content": normalized_content})
+        else:  # user, unexpected system, or any unexpected role: preserve
             flush()
             out.append({"role": role, "content": m.get("content") or ""})
     flush()
@@ -298,8 +508,6 @@ def _convert_messages(
 def _stage1_issues(messages: list[dict[str, Any]]) -> dict[str, int]:
     """Structural Stage 1 issues on the converted messages (per-row flags)."""
     issues: dict[str, int] = {}
-    if not any(m["role"] == "system" for m in messages):
-        issues["no_system_message"] = 1
     if messages and messages[-1]["role"] == "tool":
         issues["ends_on_tool_response"] = 1
     if (
@@ -353,12 +561,20 @@ def _convert_sample(
     except orjson.JSONDecodeError:
         tools = []
     messages, issues = _convert_messages(raw_msgs)
+    # This remains a source-data census flag.  Normalized output intentionally
+    # omits the framework tool-system templates, so checking converted messages
+    # would incorrectly flag every row.
+    if not any(m.get("role") == "system" for m in raw_msgs):
+        issues["no_system_message"] = 1
     issues.update(_stage1_issues(messages))
+    families = _reasoning_tool_families(messages)
+    annotations = {REASONING_TOOL_FAMILIES_ANNOTATION: families} if families else {}
     sample = ConversationSample(
         messages=messages,
         tools=tools,
         dataset=f"{DATASET_ID}:{cfg_name}",
         sample_id=row.get("uuid") or "",
+        annotations=annotations,
         raw=row,
     )
     return sample, issues
@@ -419,25 +635,41 @@ def _ends_incomplete(sample: ConversationSample) -> bool:
     return False
 
 
+def _conflicting_duplicate_tool_names(tools: Any) -> set[str]:
+    """Exact visible names mapped to multiple complete definitions in one row.
+
+    Canonical JSON serialization removes only irrelevant object-key ordering.
+    Every actual field and every array order remains part of the definition; no
+    schema equivalence, description normalization, case folding, or cross-row
+    comparison is attempted.
+    """
+
+    if not isinstance(tools, list):
+        return set()
+    by_name: dict[str, set[bytes]] = {}
+    for tool in tools:
+        if not isinstance(tool, dict):
+            continue
+        function = tool.get("function")
+        if not isinstance(function, dict):
+            continue
+        name = function.get("name")
+        if not isinstance(name, str):
+            continue
+        by_name.setdefault(name, set()).add(
+            orjson.dumps(tool, option=orjson.OPT_SORT_KEYS)
+        )
+    return {name for name, definitions in by_name.items() if len(definitions) > 1}
+
+
 def _has_conflicting_duplicate_tools(raw: dict[str, Any]) -> bool:
-    """True if available_tools defines the same name with >1 distinct definition."""
+    """Whether one row gives an exact visible name multiple definitions."""
+
     try:
         tools = orjson.loads(raw.get("available_tools") or "[]")
     except orjson.JSONDecodeError:
         return False
-    by_name: dict[str, set[str]] = {}
-    for td in tools:
-        if not isinstance(td, dict):
-            continue
-        fn = td.get("function", {})
-        name = fn.get("name")
-        if not isinstance(name, str):
-            continue
-        defrepr = orjson.dumps(
-            [fn.get("description"), fn.get("parameters")], option=orjson.OPT_SORT_KEYS
-        )
-        by_name.setdefault(name, set()).add(defrepr.decode("utf-8", "replace"))
-    return any(len(v) > 1 for v in by_name.values())
+    return bool(_conflicting_duplicate_tool_names(tools))
 
 
 def _strip_tools(
@@ -449,14 +681,48 @@ def _strip_tools(
     whether a tool of that family was removed (as a call or pruned from the list).
 
     Only strips an assistant turn whose tool_calls are balanced with the
-    following run of tool messages (the loader's normal output); unbalanced turns
-    are left untouched. Reasoning and scaffold token sets are disjoint over the
-    tool catalog; reasoning is checked first, so any (off-catalog) overlap is
-    resolved deterministically and both verdicts mean "strip" anyway.
+    following run of tool messages (the loader's normal output). Exact audited
+    preservation names, undefined calls, and every call/definition under a
+    conflicting or unbalanced visible name remain untouched. This prevents a
+    transform from hiding the very defect that a downstream validator must see.
+    Reasoning is checked before scaffold for deterministic off-catalog overlap.
     """
 
-    def classify(name: str) -> tuple[bool, bool]:
+    defined_names = {
+        (tool.get("function") or {}).get("name")
+        for tool in sample.tools
+        if isinstance(tool, dict) and isinstance(tool.get("function"), dict)
+    }
+    conflicting_names = _conflicting_duplicate_tool_names(sample.tools)
+
+    # If any episode for a name is structurally unbalanced, preserve all events
+    # and definitions under that name. Partial deletion would make the remaining
+    # row even less faithful and could manufacture an undefined call.
+    unbalanced_names: set[str] = set()
+    i = 0
+    while i < len(sample.messages):
+        message = sample.messages[i]
+        calls = (
+            message.get("tool_calls") if message.get("role") == "assistant" else None
+        )
+        if not calls:
+            i += 1
+            continue
+        j = i + 1
+        while j < len(sample.messages) and sample.messages[j].get("role") == "tool":
+            j += 1
+        if len(calls) != j - i - 1:
+            unbalanced_names.update(
+                (call.get("function") or {}).get("name") or "" for call in calls
+            )
+        i = j
+
+    def classify(name: str, *, is_call: bool = False) -> tuple[bool, bool]:
         # returns (should_strip, is_reasoning)
+        if name in conflicting_names or name in unbalanced_names:
+            return False, False
+        if is_call and name not in defined_names:
+            return False, False
         if strip_reasoning and _is_reasoning_tool(name):
             return True, True
         if strip_scaffold and _is_scaffold_tool(name):
@@ -490,7 +756,9 @@ def _strip_tools(
         keep_calls = []
         keep_resp = []
         for call, r in zip(calls, resp, strict=True):
-            strip, is_reasoning = classify(call.get("function", {}).get("name") or "")
+            strip, is_reasoning = classify(
+                call.get("function", {}).get("name") or "", is_call=True
+            )
             if strip:
                 changed = True
                 if is_reasoning:
@@ -511,8 +779,8 @@ def _strip_tools(
             out.extend(keep_resp)  # empty
         # else: assistant turn was only stripped calls with no content -> drop it
         i = j
-    # prune stripped tools from the tool list regardless of whether they were
-    # called (a tool may be defined but never called)
+    # Prune definitions for tools classified as strippable in this episode.
+    # Ordinary state operations remain defined even when they were not called.
     pruned_tools = []
     for t in sample.tools:
         strip, is_reasoning = classify((t.get("function") or {}).get("name") or "")
