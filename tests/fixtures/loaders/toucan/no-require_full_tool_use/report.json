@@ -7,7 +7,7 @@
     "low_quality": 956674
   },
   "dataset_config_transform_counts": {
-    "stripped_reasoning_tools": 27934
+    "stripped_reasoning_tools": 9490
   },
   "filter_config": {
     "require_balanced_cardinality": true,
@@ -17,11 +17,11 @@
     "strip_thinking": true
   },
   "filter_drop_reasons": {
-    "invalid_arguments": 11572,
+    "invalid_arguments": 12480,
     "undefined_function_calls": 6252,
-    "unparseable_arguments": 1966
+    "unparseable_arguments": 2109
   },
-  "filtered_count": 551189,
+  "filtered_count": 550173,
   "raw_count": 1527259,
   "stage1_count": 1527259,
   "stage1_drop_reasons": {},

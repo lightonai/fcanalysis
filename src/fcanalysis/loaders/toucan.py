@@ -86,21 +86,34 @@ Dataset-specific config (Stage 2, before universal filters):
     - ``strip_reasoning_tools`` (DEFAULT ON) and ``strip_scaffold_tools``
       (default off): two transforms (run on survivors, after the drops) that
       remove tool calls and their positionally-linked tool responses, and drop
-      those tools from the tool list (whether or not they were called). Only
-      balanced assistant turns are stripped; an assistant turn left with no calls
-      and no content is dropped (any reasoning_content goes with it).
+      the exact-name definitions of calls actually removed. Definitions that
+      were available but never called are always retained. Only balanced
+      assistant turns are stripped; an assistant turn left with no calls and no
+      content is dropped (any reasoning_content goes with it).
         * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
           only purpose is to structure/record the model's reasoning (the result
           echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content. Two audited
+          calls, the structural analog of <think>/reasoning_content. Nine audited
           families are unconditional preservation exceptions: all twelve exact
-          audited ``think``/thought-state names and all eight exact sequential-
-          thinking names. Their calls, paired observations, and definitions
-          remain intact even when this transform is enabled. Undefined calls and
-          calls under a conflicting or unbalanced name are also retained so
-          downstream validators see the source defect. Other legacy name families
-          cover chain-of-draft, lotus-wisdom, metacognitive/scientific/decision
-          methods, and domain ``*thinking`` tools.
+          audited ``think``/thought-state names, all eight exact sequential-
+          thinking names, and the two exact names in each of the pentest, game-
+          design, and Skia-animation thinking families, plus the four exact Lotus
+          Wisdom names, five exact Structured Argumentation names, and two exact
+          Analogical Reasoning names, and three exact Clear Thought mental-model
+          names. Their calls, paired observations, and definitions remain intact
+          even when this transform is enabled. Lotus
+          writes maintain a turn-local journey read by the summary operation.
+          Structured Argumentation spans a stateful argument graph, a runtime-ID-
+          producing Clear Thought implementation, and a compact Clear Thought
+          implementation that exposes hidden session statistics. Analogical
+          Reasoning validates model-authored analogies, assigns missing element
+          IDs, and records server-local state. Clear Thought mental-model calls
+          validate model-authored analyses and return either deterministic status
+          metadata or hidden session context. Undefined calls and calls under a
+          conflicting or unbalanced name are also retained so downstream
+          validators see the source defect. Other legacy name families cover
+          chain-of-draft and
+          metacognitive/scientific/decision methods.
         * ``strip_scaffold_tools`` removes non-reasoning framework PLUMBING:
           server-unlock handshakes ``__unlock*`` / ``__get_instructions``, MCP
           resource primitives ``list_resources`` / ``read_resource`` /
@@ -162,9 +175,11 @@ class ToucanConfig:
     drop_conflicting_duplicate_tools: bool = False
     # Two independent strip transforms (see _is_reasoning_tool / _is_scaffold_tool).
     # Legacy reasoning scaffolds are stripped by DEFAULT, except for the exact
-    # audited think/thought-state and sequential-thinking families, which are always
-    # preserved and marked for downstream row-level selection. Framework SCAFFOLD
-    # plumbing
+    # audited think/thought-state, sequential-thinking, pentest-thinking, game-
+    # design-thinking, Skia-animation-thinking, Lotus Wisdom, Structured
+    # Argumentation, Analogical Reasoning, and Clear Thought mental-model families,
+    # which are always preserved and marked for downstream row-level selection.
+    # Framework SCAFFOLD plumbing
     # (server-unlock handshakes, MCP resource primitives, the degenerate
     # deep_researcher async poller) is kept by default -- it is real (often
     # information-bearing) tool use, not reasoning. strip_scaffold_tools is an
@@ -243,6 +258,13 @@ _THOUGHT_WRITE_NAMESPACE_BY_NAME = {
 REASONING_TOOL_FAMILIES_ANNOTATION = "reasoning_tool_families"
 THINK_TOOL_FAMILY = "think_tool"
 SEQUENTIAL_THINKING_TOOL_FAMILY = "sequential_thinking"
+PENTEST_THINKING_TOOL_FAMILY = "pentest_thinking"
+GAME_DESIGN_THINKING_TOOL_FAMILY = "game_design_thinking"
+SKIA_ANIMATION_THINKING_TOOL_FAMILY = "skia_animation_thinking"
+LOTUS_WISDOM_TOOL_FAMILY = "lotus_wisdom"
+STRUCTURED_ARGUMENTATION_TOOL_FAMILY = "structured_argumentation"
+ANALOGICAL_REASONING_TOOL_FAMILY = "analogical_reasoning"
+MENTAL_MODEL_TOOL_FAMILY = "mental_model"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -261,7 +283,128 @@ _SEQUENTIAL_THINKING_TOOL_NAMES = frozenset(
     }
 )
 
-_PRESERVED_REASONING_TOOL_NAMES = _THINK_TOOL_NAMES | _SEQUENTIAL_THINKING_TOOL_NAMES
+# PentestThinking validates and scores model-authored attack steps, selects a
+# search strategy, and returns server-created scores/node IDs. The pinned MCTS
+# results include runtime-derived identifiers, so this is not an echo contract.
+_PENTEST_THINKING_TOOL_NAMES = frozenset(
+    {
+        "pentestthinkingMCP",
+        "pentestthinking-pentestthinkingMCP",
+    }
+)
+
+# Game-design calls return cumulative title/component/library/branch/history
+# state. The advertised summary/export companions are broken in the pinned
+# deployment, but that does not make the write observations episode-independent.
+_GAME_DESIGN_THINKING_TOOL_NAMES = frozenset(
+    {
+        "gamedesignthinking",
+        "game-engine-server-gamedesignthinking",
+    }
+)
+
+# Skia-animation calls return turn/session-local history and branch state plus
+# sequence metadata. Domain claims remain model-authored, but the explicit tool
+# episode is stateful and is retained for later row-level selection.
+_SKIA_ANIMATION_THINKING_TOOL_NAMES = frozenset(
+    {
+        "skiaanimationthinking",
+        "react-native-skia-animation-thinking-tool-skiaanimationthinking",
+    }
+)
+
+# Lotus Wisdom is a stateful contemplative protocol, not a call-local echo. The
+# write operation appends validated steps and returns cumulative tag/domain
+# journeys. The summary operation exposes the accumulated steps, including
+# truncated content that is absent from the summary call arguments. The pinned
+# snapshot uses one bare OSS spelling and one Qwen-Agent-qualified spelling for
+# each operation; their definitions are otherwise identical. State is observed
+# to reset at each user turn in Toucan's generated trajectories. Preserve only
+# these four exact, definition-backed names: malformed and fuzzy variants do not
+# inherit the audited identity.
+_LOTUS_WISDOM_TOOL_NAMES = frozenset(
+    {
+        "lotuswisdom",
+        "lotuswisdom_summary",
+        "lotus-wisdom-lotuswisdom",
+        "lotus-wisdom-lotuswisdom_summary",
+    }
+)
+
+# Structured Argumentation is a shared protocol label, not one implementation.
+# The pinned snapshot has five exact, definition-backed visible identities across
+# three audited server lineages:
+#   * Waldzell's standalone server keeps a user-turn-local argument history and
+#     relationship graph and returns cumulative history/graph counts plus IDs;
+#   * the Chirag/ThinkFar Clear Thought lineage produces runtime timestamp IDs
+#     when the model omits argumentId, and later calls reuse those observations;
+#   * Waldzell's compact Clear Thought lineage mutates a session store and returns
+#     a server-created session UUID and aggregate session/store statistics.
+# All successful definition-backed raw results replay against those exact
+# contracts. Error and malformed episodes stay visible to the ordinary
+# validators. Preserve only these case-sensitive identities:
+# underscore/case/composite/appended-JSON lookalikes in the raw snapshot are
+# undefined and do not inherit protection.
+_STRUCTURED_ARGUMENTATION_TOOL_NAMES = frozenset(
+    {
+        "structured-argumentation-server-structuredArgumentation",
+        "structuredArgumentation",
+        "clear-thought-server-structuredargumentation",
+        "structuredargumentation",
+        "clear-thought-structuredargumentation",
+    }
+)
+
+# Analogical Reasoning is one standalone Waldzell MCP lineage rendered under a
+# qualified Kimi-K2/Qwen3 name and a bare OSS name. The model supplies the
+# substantive domains, mappings, scores, justifications, inferences, limits,
+# and continuation state. The server validates/filters them, assigns missing
+# element IDs, mutates an internal history/domain registry, writes a mapping
+# visualization to stderr, and returns a compact current-call projection. All
+# 7,805 captured successes replay exactly without a samplingSummary, although a
+# capture-compatible source revision can request an MCP client-model summary.
+# Errors and malformed calls explain retries and must remain visible to the
+# ordinary validators. Preserve only these two case-sensitive identities; the
+# raw misspelled and cross-server lookalikes are undefined attempt evidence.
+_ANALOGICAL_REASONING_TOOL_NAMES = frozenset(
+    {
+        "analogical-reasoning-server-analogicalReasoning",
+        "analogicalReasoning",
+    }
+)
+
+# Clear Thought mental-model calls contain the model-authored problem analysis,
+# but the deployed servers are explicit tools rather than native hidden thought.
+# The Chirag/ThinkFar lineage validates/coerces the call and returns deterministic
+# status metadata. Waldzell's lineage additionally mutates session state and
+# returns a runtime-supplied session UUID, cumulative model count, and the three
+# most recent model/problem pairs. The pinned snapshot contains three exact
+# visible names and four complete definition fingerprints: the bare OSS name is
+# intentionally shared across the two lineages in different rows. All 11,680
+# parseable definition-backed observations replay exactly against those source
+# contracts; 17 malformed-JSON episodes retain their harness errors. Preserve
+# only these case-sensitive names. Underscore/cross-server/severely misspelled
+# lookalikes remain undefined attempt evidence and do not inherit audited-family
+# membership.
+_MENTAL_MODEL_TOOL_NAMES = frozenset(
+    {
+        "mentalmodel",
+        "clear-thought-server-mentalmodel",
+        "clear-thought-mentalmodel",
+    }
+)
+
+_PRESERVED_REASONING_TOOL_NAMES = (
+    _THINK_TOOL_NAMES
+    | _SEQUENTIAL_THINKING_TOOL_NAMES
+    | _PENTEST_THINKING_TOOL_NAMES
+    | _GAME_DESIGN_THINKING_TOOL_NAMES
+    | _SKIA_ANIMATION_THINKING_TOOL_NAMES
+    | _LOTUS_WISDOM_TOOL_NAMES
+    | _STRUCTURED_ARGUMENTATION_TOOL_NAMES
+    | _ANALOGICAL_REASONING_TOOL_NAMES
+    | _MENTAL_MODEL_TOOL_NAMES
+)
 
 
 def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
@@ -281,6 +424,20 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(THINK_TOOL_FAMILY)
     if called_names & _SEQUENTIAL_THINKING_TOOL_NAMES:
         families.append(SEQUENTIAL_THINKING_TOOL_FAMILY)
+    if called_names & _PENTEST_THINKING_TOOL_NAMES:
+        families.append(PENTEST_THINKING_TOOL_FAMILY)
+    if called_names & _GAME_DESIGN_THINKING_TOOL_NAMES:
+        families.append(GAME_DESIGN_THINKING_TOOL_FAMILY)
+    if called_names & _SKIA_ANIMATION_THINKING_TOOL_NAMES:
+        families.append(SKIA_ANIMATION_THINKING_TOOL_FAMILY)
+    if called_names & _LOTUS_WISDOM_TOOL_NAMES:
+        families.append(LOTUS_WISDOM_TOOL_FAMILY)
+    if called_names & _STRUCTURED_ARGUMENTATION_TOOL_NAMES:
+        families.append(STRUCTURED_ARGUMENTATION_TOOL_FAMILY)
+    if called_names & _ANALOGICAL_REASONING_TOOL_NAMES:
+        families.append(ANALOGICAL_REASONING_TOOL_FAMILY)
+    if called_names & _MENTAL_MODEL_TOOL_NAMES:
+        families.append(MENTAL_MODEL_TOOL_FAMILY)
     return families
 
 
@@ -678,7 +835,10 @@ def _strip_tools(
     """Remove reasoning and/or scaffold tool calls and their positionally-linked
     tool responses, and drop those tools from the tool list. Returns
     ``(changed, removed_reasoning, removed_scaffold)`` where the latter two flag
-    whether a tool of that family was removed (as a call or pruned from the list).
+    whether a call from that family was removed. A definition is pruned only
+    when at least one exact-name call was removed and no exact-name call remains
+    in the source trajectory. Consequently, definitions that were merely
+    available but never called are always preserved.
 
     Only strips an assistant turn whose tool_calls are balanced with the
     following run of tool messages (the loader's normal output). Exact audited
@@ -733,6 +893,8 @@ def _strip_tools(
     changed = False
     removed_reasoning = False
     removed_scaffold = False
+    stripped_call_names: set[str] = set()
+    retained_call_names: set[str] = set()
     out: list[dict[str, Any]] = []
     i = 0
     n = len(msgs)
@@ -751,21 +913,25 @@ def _strip_tools(
             j += 1
         if len(resp) != len(calls):
             out.append(m)  # unbalanced: leave untouched
+            retained_call_names.update(
+                call.get("function", {}).get("name") or "" for call in calls
+            )
             i += 1
             continue
         keep_calls = []
         keep_resp = []
         for call, r in zip(calls, resp, strict=True):
-            strip, is_reasoning = classify(
-                call.get("function", {}).get("name") or "", is_call=True
-            )
+            name = call.get("function", {}).get("name") or ""
+            strip, is_reasoning = classify(name, is_call=True)
             if strip:
                 changed = True
+                stripped_call_names.add(name)
                 if is_reasoning:
                     removed_reasoning = True
                 else:
                     removed_scaffold = True
             else:
+                retained_call_names.add(name)
                 keep_calls.append(call)
                 keep_resp.append(r)
         if keep_calls:
@@ -779,17 +945,14 @@ def _strip_tools(
             out.extend(keep_resp)  # empty
         # else: assistant turn was only stripped calls with no content -> drop it
         i = j
-    # Prune definitions for tools classified as strippable in this episode.
-    # Ordinary state operations remain defined even when they were not called.
+    # A definition is destructive context, not an event. Prune it only when the
+    # source trajectory contained an exact-name call, every such call was
+    # deliberately stripped, and none was retained. An uncalled definition is
+    # therefore always preserved, regardless of broad name classification.
     pruned_tools = []
     for t in sample.tools:
-        strip, is_reasoning = classify((t.get("function") or {}).get("name") or "")
-        if strip:
-            if is_reasoning:
-                removed_reasoning = True
-            else:
-                removed_scaffold = True
-        else:
+        name = (t.get("function") or {}).get("name") or ""
+        if name not in stripped_call_names or name in retained_call_names:
             pruned_tools.append(t)
     tools_changed = len(pruned_tools) != len(sample.tools)
     if changed:

@@ -12,11 +12,19 @@ import pytest
 
 from fcanalysis.format import ConversationSample
 from fcanalysis.loaders.toucan import (
+    ANALOGICAL_REASONING_TOOL_FAMILY,
+    GAME_DESIGN_THINKING_TOOL_FAMILY,
+    LOTUS_WISDOM_TOOL_FAMILY,
+    MENTAL_MODEL_TOOL_FAMILY,
+    PENTEST_THINKING_TOOL_FAMILY,
     REASONING_TOOL_FAMILIES_ANNOTATION,
     SEQUENTIAL_THINKING_TOOL_FAMILY,
+    SKIA_ANIMATION_THINKING_TOOL_FAMILY,
+    STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
     THINK_TOOL_FAMILY,
     ToucanConfig,
     _apply_dataset_config,
+    _ANALOGICAL_REASONING_TOOL_NAMES,
     _convert_messages,
     _convert_sample,
     _ends_incomplete,
@@ -24,8 +32,14 @@ from fcanalysis.loaders.toucan import (
     _is_embedded_tool_system_message,
     _is_reasoning_tool,
     _is_scaffold_tool,
+    _GAME_DESIGN_THINKING_TOOL_NAMES,
+    _LOTUS_WISDOM_TOOL_NAMES,
+    _MENTAL_MODEL_TOOL_NAMES,
+    _PENTEST_THINKING_TOOL_NAMES,
     _PRESERVED_REASONING_TOOL_NAMES,
     _SEQUENTIAL_THINKING_TOOL_NAMES,
+    _SKIA_ANIMATION_THINKING_TOOL_NAMES,
+    _STRUCTURED_ARGUMENTATION_TOOL_NAMES,
     _strip_embedded_tool_system_content,
     _passes_quality,
     _THINK_TOOL_NAMES,
@@ -63,8 +77,91 @@ EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES = (
     "sequentialthinking_tools",
 )
 
+EXPECTED_PENTEST_THINKING_TOOL_NAMES = (
+    "pentestthinkingMCP",
+    "pentestthinking-pentestthinkingMCP",
+)
+
+EXPECTED_GAME_DESIGN_THINKING_TOOL_NAMES = (
+    "gamedesignthinking",
+    "game-engine-server-gamedesignthinking",
+)
+
+EXPECTED_SKIA_ANIMATION_THINKING_TOOL_NAMES = (
+    "skiaanimationthinking",
+    "react-native-skia-animation-thinking-tool-skiaanimationthinking",
+)
+
+EXPECTED_LOTUS_WISDOM_TOOL_NAMES = (
+    "lotuswisdom",
+    "lotuswisdom_summary",
+    "lotus-wisdom-lotuswisdom",
+    "lotus-wisdom-lotuswisdom_summary",
+)
+
+EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES = (
+    "structured-argumentation-server-structuredArgumentation",
+    "structuredArgumentation",
+    "clear-thought-server-structuredargumentation",
+    "structuredargumentation",
+    "clear-thought-structuredargumentation",
+)
+
+EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES = (
+    "analogical-reasoning-server-analogicalReasoning",
+    "analogicalReasoning",
+)
+
+EXPECTED_MENTAL_MODEL_TOOL_NAMES = (
+    "mentalmodel",
+    "clear-thought-server-mentalmodel",
+    "clear-thought-mentalmodel",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
-    EXPECTED_THINK_TOOL_NAMES + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+    EXPECTED_THINK_TOOL_NAMES
+    + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+    + EXPECTED_PENTEST_THINKING_TOOL_NAMES
+    + EXPECTED_GAME_DESIGN_THINKING_TOOL_NAMES
+    + EXPECTED_SKIA_ANIMATION_THINKING_TOOL_NAMES
+    + EXPECTED_LOTUS_WISDOM_TOOL_NAMES
+    + EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES
+    + EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
+    + EXPECTED_MENTAL_MODEL_TOOL_NAMES
+)
+
+# One non-protected witness for every broad legacy reasoning-name rule. These
+# names deliberately exercise the destructive classifier without inheriting an
+# exact audited-family exemption.
+UNCALLED_LEGACY_REASONING_DEFINITION_NAMES = (
+    "unaudited-thinking-probe",
+    "unaudited-clear_thought-probe",
+    "unaudited-clear-thought-probe",
+    "unaudited-think-tool-probe",
+    "unaudited-mentalmodel-probe",
+    "unaudited-analogicalreasoning-probe",
+    "unaudited-collaborativereasoning-probe",
+    "unaudited-visualreasoning-probe",
+    "unaudited-decisionframework-probe",
+    "unaudited-scientificmethod-probe",
+    "unaudited-socraticmethod-probe",
+    "unaudited-metacognitive-probe",
+    "unaudited-structuredargumentation-probe",
+    "unaudited-debuggingapproach-probe",
+    "unaudited-designpattern-probe",
+    "unaudited-chain-of-draft-probe",
+    "unaudited-chain_of_draft-probe",
+    "unaudited-lotuswisdom-probe",
+    "unaudited-think",
+)
+
+UNCALLED_SCAFFOLD_DEFINITION_NAMES = (
+    "server__unlock_probe__",
+    "server__get_instructions",
+    "server-list_resources",
+    "server-read_resource",
+    "server-get_resource",
+    "server-deep_researcher_check",
 )
 
 AUDITED_REASONING_TOOL_CASES = (
@@ -75,6 +172,34 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, SEQUENTIAL_THINKING_TOOL_FAMILY, id=name)
         for name in EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, PENTEST_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_PENTEST_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, GAME_DESIGN_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_GAME_DESIGN_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, SKIA_ANIMATION_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_SKIA_ANIMATION_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, LOTUS_WISDOM_TOOL_FAMILY, id=name)
+        for name in EXPECTED_LOTUS_WISDOM_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, STRUCTURED_ARGUMENTATION_TOOL_FAMILY, id=name)
+        for name in EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, ANALOGICAL_REASONING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, MENTAL_MODEL_TOOL_FAMILY, id=name)
+        for name in EXPECTED_MENTAL_MODEL_TOOL_NAMES
     ),
 )
 
@@ -206,13 +331,52 @@ class TestIsReasoningTool:
             == len(set(EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES))
             == 8
         )
-        assert set(EXPECTED_THINK_TOOL_NAMES).isdisjoint(
-            EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
+        exact_families = (
+            EXPECTED_THINK_TOOL_NAMES,
+            EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES,
+            EXPECTED_PENTEST_THINKING_TOOL_NAMES,
+            EXPECTED_GAME_DESIGN_THINKING_TOOL_NAMES,
+            EXPECTED_SKIA_ANIMATION_THINKING_TOOL_NAMES,
+            EXPECTED_LOTUS_WISDOM_TOOL_NAMES,
+            EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES,
+            EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES,
+            EXPECTED_MENTAL_MODEL_TOOL_NAMES,
+        )
+        assert [len(names) for names in exact_families] == [
+            12,
+            8,
+            2,
+            2,
+            2,
+            4,
+            5,
+            2,
+            3,
+        ]
+        assert sum(len(names) for names in exact_families) == len(
+            set().union(*map(set, exact_families))
         )
         assert _THINK_TOOL_NAMES == frozenset(EXPECTED_THINK_TOOL_NAMES)
         assert _SEQUENTIAL_THINKING_TOOL_NAMES == frozenset(
             EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
         )
+        assert _PENTEST_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_PENTEST_THINKING_TOOL_NAMES
+        )
+        assert _GAME_DESIGN_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_GAME_DESIGN_THINKING_TOOL_NAMES
+        )
+        assert _SKIA_ANIMATION_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_SKIA_ANIMATION_THINKING_TOOL_NAMES
+        )
+        assert _LOTUS_WISDOM_TOOL_NAMES == frozenset(EXPECTED_LOTUS_WISDOM_TOOL_NAMES)
+        assert _STRUCTURED_ARGUMENTATION_TOOL_NAMES == frozenset(
+            EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES
+        )
+        assert _ANALOGICAL_REASONING_TOOL_NAMES == frozenset(
+            EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
+        )
+        assert _MENTAL_MODEL_TOOL_NAMES == frozenset(EXPECTED_MENTAL_MODEL_TOOL_NAMES)
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
         )
@@ -259,10 +423,62 @@ class TestIsReasoningTool:
         assert _is_reasoning_tool("think-tool") is True
 
     def test_reasoning_method_tools(self) -> None:
-        assert _is_reasoning_tool("mentalmodel") is True
-        assert _is_reasoning_tool("analogicalReasoning") is True
+        assert _is_reasoning_tool("mentalmodel") is False
         assert _is_reasoning_tool("collaborativeReasoning") is True
         assert _is_reasoning_tool("visualReasoning") is True
+
+    @pytest.mark.parametrize("name", EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES)
+    def test_two_exact_analogical_reasoning_names_are_preserved(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "analogical-reasoning-server-analogialReasoning",
+            "hotel-booking-server-analogicalReasoning",
+            "AnalogicalReasoning",
+            "analogical_reasoning",
+            'analogicalReasoning", {"analogyId": "a-1',
+        ],
+    )
+    def test_fuzzy_analogical_variants_do_not_inherit_audited_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _ANALOGICAL_REASONING_TOOL_NAMES
+        # The typo and invented underscore spelling are not caught by the legacy
+        # lexical predicate, while the other lookalikes are. Neither heuristic
+        # outcome grants exact-family status.
+        if name in {
+            "analogical-reasoning-server-analogialReasoning",
+            "analogical_reasoning",
+        }:
+            assert _is_reasoning_tool(name) is False
+        else:
+            assert _is_reasoning_tool(name) is True
+
+    @pytest.mark.parametrize("name", EXPECTED_MENTAL_MODEL_TOOL_NAMES)
+    def test_three_exact_mental_model_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-mental_model",
+            "clear_thought-server-mentalmodel",
+            "clear-thought-server-meuqalModel",
+            "clear-thought-server-clearmodel",
+            "Clear-Thought-MentalModel",
+            "hotel-booking-server-mentalmodel",
+            'clear-thought-mentalmodel", {"modelName": "first_principles"',
+        ],
+    )
+    def test_fuzzy_mental_model_variants_do_not_inherit_audited_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _MENTAL_MODEL_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
 
     def test_thought_state_operations_are_not_reasoning(self) -> None:
         for prefix in ("", "think-tool-", "think-tool-server-"):
@@ -279,21 +495,86 @@ class TestIsReasoningTool:
             "scientificMethod",
             "socraticmethod",
             "metacognitiveMonitoring",
-            "structuredArgumentation",
             "debuggingapproach",
             "designpattern",
             "chain-of-draft-server-chain-of-draft",
-            "lotus-wisdom-lotuswisdom",
         ):
             assert _is_reasoning_tool(n) is True, n
 
-    def test_thinking_scaffolds_and_domain_branded(self) -> None:
+    @pytest.mark.parametrize("name", EXPECTED_LOTUS_WISDOM_TOOL_NAMES)
+    def test_four_exact_lotus_wisdom_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "LotusWisdom",
+            "lotuswisdom-framework",
+            "lotus-wisdom-lotuswisdom_summary ",
+            'lotus-wisdom-lotuswisdom", {"tag": "embody',
+        ],
+    )
+    def test_fuzzy_lotus_variants_do_not_inherit_audited_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _LOTUS_WISDOM_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+
+    def test_undefined_lotus_wisdom_misspelling_is_not_an_audited_name(
+        self,
+    ) -> None:
+        # The pinned snapshot contains this one undefined call. Its spelling does
+        # not match either exact operation, so it is retained as an ordinary call
+        # for defined-function validation rather than being granted protection.
+        name = "lotus-wisdom-wisdom"
+        assert name not in _LOTUS_WISDOM_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize("name", EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES)
+    def test_five_exact_structured_argumentation_names_are_preserved(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-structuredArgumentation",
+            "clear-thought-structured_argumentation",
+            "ai-research-assistant---structured-argumentation-server-"
+            "structuredArgumentation",
+            'structured-argumentation-server-structuredArgumentation", '
+            '{"argumentId": "arg-14',
+        ],
+    )
+    def test_fuzzy_structured_argumentation_variants_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _STRUCTURED_ARGUMENTATION_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+
+    def test_other_operation_on_argumentation_server_is_not_in_family(self) -> None:
+        name = "structured-argumentation-server-visualizeArgumentMap"
+        assert name not in _STRUCTURED_ARGUMENTATION_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+
+    def test_unaudited_thinking_scaffolds(self) -> None:
         assert _is_reasoning_tool("systemsthinking") is True
         assert _is_reasoning_tool("creativethinking") is True
-        assert _is_reasoning_tool("pentestthinkingMCP") is True
-        # domain tools branded as "structured thinking" count as reasoning.
-        assert _is_reasoning_tool("gamedesignthinking") is True
-        assert _is_reasoning_tool("skiaanimationthinking") is True
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "pentestthinking-pentesttestingMCP",
+            "pentestthinking-pentestthinkingMcp",
+            "react-native-skia-animationthinkingtool-skiaanimationthinking",
+            'game-engine-server-gamedesignthinking", {"name": "other',
+        ],
+    )
+    def test_fuzzy_domain_variants_do_not_inherit_audited_identity(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is True
 
     def test_not_reasoning(self) -> None:
         assert _is_reasoning_tool("get_weather") is False
@@ -544,8 +825,29 @@ class TestReasoningToolFamilyAnnotations:
     def test_marks_only_families_with_actual_exact_calls(self) -> None:
         sample, _ = _convert_sample(
             conversion_row(
-                called_names=("think", "sequentialthinking"),
-                defined_names=("think", "sequentialthinking", "get_weather"),
+                called_names=(
+                    "think",
+                    "sequentialthinking",
+                    "pentestthinkingMCP",
+                    "gamedesignthinking",
+                    "skiaanimationthinking",
+                    "lotuswisdom",
+                    "structuredArgumentation",
+                    "analogicalReasoning",
+                    "mentalmodel",
+                ),
+                defined_names=(
+                    "think",
+                    "sequentialthinking",
+                    "pentestthinkingMCP",
+                    "gamedesignthinking",
+                    "skiaanimationthinking",
+                    "lotuswisdom",
+                    "structuredArgumentation",
+                    "analogicalReasoning",
+                    "mentalmodel",
+                    "get_weather",
+                ),
             ),
             "OSS",
         )
@@ -554,6 +856,13 @@ class TestReasoningToolFamilyAnnotations:
             REASONING_TOOL_FAMILIES_ANNOTATION: [
                 THINK_TOOL_FAMILY,
                 SEQUENTIAL_THINKING_TOOL_FAMILY,
+                PENTEST_THINKING_TOOL_FAMILY,
+                GAME_DESIGN_THINKING_TOOL_FAMILY,
+                SKIA_ANIMATION_THINKING_TOOL_FAMILY,
+                LOTUS_WISDOM_TOOL_FAMILY,
+                STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
+                ANALOGICAL_REASONING_TOOL_FAMILY,
+                MENTAL_MODEL_TOOL_FAMILY,
             ]
         }
 
@@ -561,16 +870,107 @@ class TestReasoningToolFamilyAnnotations:
         sample, _ = _convert_sample(
             conversion_row(
                 called_names=("get_weather",),
-                defined_names=("get_weather", "think", "sequentialthinking"),
+                defined_names=(
+                    "get_weather",
+                    "think",
+                    "sequentialthinking",
+                    "pentestthinkingMCP",
+                    "gamedesignthinking",
+                    "skiaanimationthinking",
+                    "lotuswisdom",
+                    "structuredArgumentation",
+                    "analogicalReasoning",
+                    "mentalmodel",
+                ),
             ),
             "Kimi-K2",
         )
 
         assert sample.annotations == {}
 
+    def test_uncalled_legacy_definitions_are_preserved_without_marking(self) -> None:
+        defined_names = (
+            "get_weather",
+            *UNCALLED_LEGACY_REASONING_DEFINITION_NAMES,
+            *UNCALLED_SCAFFOLD_DEFINITION_NAMES,
+        )
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=defined_names,
+            ),
+            "Kimi-K2",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample],
+            ToucanConfig(strip_reasoning_tools=True, strip_scaffold_tools=True),
+        )
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.annotations == {}
+        assert sample.tools == original_tools
+
     def test_fuzzy_case_variant_does_not_receive_an_audited_marker(self) -> None:
         sample, _ = _convert_sample(
             conversion_row(called_names=("SequentialThinking",)), "Qwen3"
+        )
+
+        assert sample.annotations == {}
+
+    def test_fuzzy_lotus_variant_does_not_receive_an_audited_marker(self) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=("LotusWisdom",)), "Qwen3"
+        )
+
+        assert sample.annotations == {}
+
+    def test_fuzzy_structured_variant_does_not_receive_a_marker(self) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=("clear-thought-structured_argumentation",)),
+            "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "analogical-reasoning-server-analogialReasoning",
+            "hotel-booking-server-analogicalReasoning",
+            "AnalogicalReasoning",
+            "analogical_reasoning",
+        ],
+    )
+    def test_fuzzy_analogical_variant_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)), "Qwen3"
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-mental_model",
+            "clear_thought-server-mentalmodel",
+            "clear-thought-server-meuqalModel",
+            "clear-thought-server-clearmodel",
+            "Clear-Thought-MentalModel",
+            "hotel-booking-server-mentalmodel",
+        ],
+    )
+    def test_fuzzy_mental_model_variant_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,)),
+            "Qwen3",
         )
 
         assert sample.annotations == {}
@@ -1068,6 +1468,82 @@ class TestStripTools:
         assert _strip_tools(s, True, False) == (False, False, False)
         assert s.messages == original_messages
 
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-structuredArgumentation",
+            "clear-thought-structured_argumentation",
+            "ai-research-assistant---structured-argumentation-server-"
+            "structuredArgumentation",
+            'structured-argumentation-server-structuredArgumentation", '
+            '{"argumentId": "arg-14',
+        ],
+    )
+    def test_undefined_structured_lookalikes_are_left_for_validation(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="Tool does not exist"),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-mental_model",
+            "clear_thought-server-mentalmodel",
+            "clear-thought-server-meuqalModel",
+            "clear-thought-server-clearmodel",
+            "Clear-Thought-MentalModel",
+            "hotel-booking-server-mentalmodel",
+            'clear-thought-mentalmodel", {"modelName": "first_principles"',
+        ],
+    )
+    def test_defined_balanced_mental_model_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _MENTAL_MODEL_TOOL_NAMES
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            'lotus-wisdom-lotuswisdom", {"tag": "embody',
+            "lotus-wisdom-wisdom",
+        ],
+    )
+    def test_undefined_lotus_variants_are_left_for_validation(self, name: str) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="Tool does not exist"),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
     def test_conflicting_name_is_never_partially_stripped(self) -> None:
         first = func("chain-of-draft", description="contract A")
         second = func("chain-of-draft", description="contract B")
@@ -1156,14 +1632,31 @@ class TestStripTools:
         ]
         assert changed is False and rem_r is False
 
-    def test_prunes_uncalled_reasoning_tool_from_list(self) -> None:
-        # A reasoning tool defined but never called is still pruned.
+    def test_preserves_uncalled_reasoning_tool_definition(self) -> None:
         s = conv(
             tools=[func("chain-of-draft"), func("get_weather")],
             messages=[user("u"), assistant(content="hi")],
         )
-        assert _strip_tools(s, True, False)[0] is True
-        assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.tools == original_tools
+
+    @pytest.mark.parametrize("name", UNCALLED_LEGACY_REASONING_DEFINITION_NAMES)
+    def test_preserves_every_uncalled_legacy_reasoning_definition_rule(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is True
+        s = conv(
+            tools=[func(name), func("get_weather")],
+            messages=[user("u"), assistant(content="hi")],
+        )
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.messages == original_messages
+        assert s.tools == original_tools
 
     def test_scaffold_kept_when_flag_off(self) -> None:
         # With strip_scaffold=False, a resource-primitive call is NOT stripped.
@@ -1216,17 +1709,109 @@ class TestStripTools:
         assert (changed, rem_r, rem_s) == (True, True, True)
         assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
 
-    def test_uncalled_scaffold_tool_attributed_via_list_prune(self) -> None:
-        # A scaffold tool DEFINED but never called is still pruned, and the
-        # scaffold family is attributed via the tool-list-prune branch alone
-        # (not the message loop). Pins removed_scaffold from list pruning.
+    @pytest.mark.parametrize("name", UNCALLED_SCAFFOLD_DEFINITION_NAMES)
+    def test_preserves_every_uncalled_scaffold_definition_rule(self, name: str) -> None:
+        assert _is_scaffold_tool(name) is True
         s = conv(
-            tools=[func("srv-read_resource"), func("get_weather")],
+            tools=[func(name), func("get_weather")],
             messages=[user("u"), assistant(content="hi")],
         )
-        changed, rem_r, rem_s = _strip_tools(s, True, True)
-        assert (changed, rem_r, rem_s) == (True, False, True)
-        assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, True) == (False, False, False)
+        assert s.messages == original_messages
+        assert s.tools == original_tools
+
+    def test_prunes_only_definitions_whose_calls_were_actually_stripped(
+        self,
+    ) -> None:
+        s = conv(
+            tools=[
+                func("chain-of-draft"),
+                func("fs-read_resource"),
+                func("mentalmodel"),
+                func("srv-get_resource"),
+                func("get_weather"),
+            ],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(name="chain-of-draft", call_id="reasoning"),
+                        call(name="fs-read_resource", call_id="scaffold"),
+                        call(name="get_weather", call_id="ordinary"),
+                    ]
+                ),
+                tool_response(content="draft", tool_call_id="reasoning"),
+                tool_response(content="file", tool_call_id="scaffold"),
+                tool_response(content="sunny", tool_call_id="ordinary"),
+            ],
+        )
+
+        assert _strip_tools(s, True, True) == (True, True, True)
+        assert [
+            tool_call["function"]["name"] for tool_call in s.messages[0]["tool_calls"]
+        ] == ["get_weather"]
+        assert [tool["function"]["name"] for tool in s.tools] == [
+            "mentalmodel",
+            "srv-get_resource",
+            "get_weather",
+        ]
+
+    def test_unbalanced_episode_protects_same_name_balanced_episode_and_definition(
+        self,
+    ) -> None:
+        s = conv(
+            tools=[func("chain-of-draft")],
+            messages=[
+                assistant(tool_calls=[call(name="chain-of-draft", call_id="first")]),
+                tool_response(content="first", tool_call_id="first"),
+                assistant(
+                    tool_calls=[
+                        call(name="chain-of-draft", call_id="second"),
+                        call(name="chain-of-draft", call_id="third"),
+                    ]
+                ),
+                tool_response(content="second", tool_call_id="second"),
+            ],
+        )
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.messages == original_messages
+        assert s.tools == original_tools
+
+    def test_called_stripped_name_prunes_all_identical_duplicate_definitions(
+        self,
+    ) -> None:
+        definition = func("chain-of-draft", description="same contract")
+        s = conv(
+            tools=[copy.deepcopy(definition), copy.deepcopy(definition)],
+            messages=[
+                assistant(tool_calls=[call(name="chain-of-draft")]),
+                tool_response(content="draft"),
+            ],
+        )
+
+        assert _strip_tools(s, True, False) == (True, True, False)
+        assert s.messages == []
+        assert s.tools == []
+
+    def test_uncalled_conflicting_duplicate_definitions_remain_byte_for_byte(
+        self,
+    ) -> None:
+        s = conv(
+            tools=[
+                func("chain-of-draft", description="contract A"),
+                func("chain-of-draft", description="contract B"),
+            ],
+            messages=[user("u"), assistant(content="done")],
+        )
+        original_tools = copy.deepcopy(s.tools)
+
+        assert _strip_tools(s, True, False) == (False, False, False)
+        assert s.tools == original_tools
 
 
 # --------------------------------------------------------------------------
@@ -1534,6 +2119,1657 @@ class TestApplyDatasetConfig:
         assert [t["function"]["name"] for t in kept[0].tools] == list(
             dict.fromkeys(names)
         )
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "events"),
+        [
+            (
+                "15581dd7-8b4b-53a5-b3aa-128fee7e3e97",
+                "Kimi-K2",
+                [
+                    (
+                        "pentestthinking-pentestthinkingMCP",
+                        '{"nodeId":"root","score":1,"strategyUsed":"beam_search",'
+                        '"stats":{"totalNodes":0}}',
+                    )
+                ],
+            ),
+            (
+                "aed80ff3-6634-5d28-b5fc-23067798dc4c",
+                "Kimi-K2",
+                [
+                    (
+                        "pentestthinking-pentestthinkingMCP",
+                        '{"nodeId":"root-1754716755174",'
+                        '"score":0.6727749999999996,"strategyUsed":"mcts",'
+                        '"stats":{"totalNodes":0}}',
+                    )
+                ],
+            ),
+            (
+                "89f8b724-009b-5740-a2d9-293f05ee9486",
+                "OSS",
+                [
+                    (
+                        "pentestthinkingMCP",
+                        '{"nodeId":"root","score":0.8,"strategyUsed":"beam_search"}',
+                    )
+                ],
+            ),
+            (
+                "1b6538ad-ffd4-52a2-a464-91509274bffa",
+                "Kimi-K2",
+                [
+                    (
+                        "game-engine-server-gamedesignthinking",
+                        '{"error":"m.toLowerCase is not a function","status":"failed"}',
+                    ),
+                    (
+                        "game-engine-server-gamedesignthinking",
+                        '{"components":[],"libraries":[],'
+                        '"gameTitle":"Gravity Flip",'
+                        '"thoughtHistoryLength":1,"isComplete":false}',
+                    ),
+                ],
+            ),
+            (
+                "03beff5b-f4d9-5622-a8bc-12d2fa2d400b",
+                "OSS",
+                [
+                    (
+                        "gamedesignthinking",
+                        '{"components":["overview"],'
+                        '"libraries":["threejs, cannonjs"],'
+                        '"thoughtHistoryLength":1,"isComplete":true}',
+                    )
+                ],
+            ),
+            (
+                "b70a6243-1bc3-519e-a3fc-b18c3dc17e79",
+                "OSS",
+                [
+                    (
+                        "skiaanimationthinking",
+                        '{"branches":[],"thoughtHistoryLength":1,'
+                        '"codeSnippetProvided":false}',
+                    ),
+                    (
+                        "skiaanimationthinking",
+                        '{"branches":[],"thoughtHistoryLength":2,'
+                        '"codeSnippetProvided":true}',
+                    ),
+                ],
+            ),
+            (
+                "e56466ce-7363-55dc-9389-e45cf35cc5af",
+                "Qwen3",
+                [
+                    (
+                        "react-native-skia-animation-thinking-tool-"
+                        "skiaanimationthinking",
+                        '{"branches":[],"thoughtHistoryLength":1,'
+                        '"codeSnippetProvided":false}',
+                    )
+                ],
+            ),
+        ],
+    )
+    def test_real_domain_thinking_episodes_are_preserved(
+        self, sample_id: str, teacher: str, events: list[tuple[str, str]]
+    ) -> None:
+        """Production-derived observation reductions from seven accepted rows."""
+
+        names = [name for name, _ in events]
+        messages = []
+        for index, (name, observation) in enumerate(events):
+            messages.extend(
+                [
+                    assistant(tool_calls=[call(name=name)]),
+                    tool_response(content=observation, tool_call_id=str(index)),
+                ]
+            )
+        messages.append(assistant(content="final answer after the explicit protocol"))
+
+        sample = conv(
+            tools=[func(name) for name in dict.fromkeys(names)],
+            messages=messages,
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert [tool["function"]["name"] for tool in sample.tools] == list(
+            dict.fromkeys(names)
+        )
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "events"),
+        [
+            (
+                "1a30f26f-c05c-5517-a26b-6af0c1611cdd",
+                "Kimi-K2",
+                [
+                    (
+                        "lotus-wisdom-lotuswisdom",
+                        '{"status":"processing","currentStep":"open",'
+                        '"journey":"open","processLength":1}',
+                    ),
+                    (
+                        "lotus-wisdom-lotuswisdom",
+                        '{"status":"MEDITATION_COMPLETE","duration":3,'
+                        '"prompt":"What insights emerged during the pause?",'
+                        '"journey":"open → examine → meditate"}',
+                    ),
+                    (
+                        "lotus-wisdom-lotuswisdom_summary",
+                        '{"journeyLength":5,"domainJourney":"process_flow → '
+                        'meta_cognitive → meditation → non_dual_recognition",'
+                        '"steps":[{"tag":"open","stepNumber":1}]}',
+                    ),
+                ],
+            ),
+            (
+                "38321102-d59c-50a9-a91c-3ff3e96b63a9",
+                "OSS",
+                [
+                    (
+                        "lotuswisdom",
+                        '{"status":"WISDOM_READY","processComplete":true,'
+                        '"finalStep":"express","journeyLength":5,'
+                        '"finalJourney":"open → examine → recognize → integrate → '
+                        'express"}',
+                    ),
+                    (
+                        "lotuswisdom_summary",
+                        '{"journeyLength":5,"steps":['
+                        '{"tag":"open","domain":"process_flow","stepNumber":1}]}',
+                    ),
+                ],
+            ),
+            (
+                "43caabce-276f-5efc-9ab9-b6fec5357a65",
+                "Qwen3",
+                [
+                    (
+                        "lotus-wisdom-lotuswisdom",
+                        '{"status":"WISDOM_READY","processComplete":true,'
+                        '"finalStep":"complete","journeyLength":5,'
+                        '"instruction":"PROCESS_COMPLETE_SPEAK_WISDOM"}',
+                    )
+                ],
+            ),
+            (
+                "6b790412-5e05-5de8-8726-fbd7e545a4af",
+                "Qwen3",
+                [
+                    (
+                        "lotus-wisdom-lotuswisdom",
+                        '{"error":"Invalid tag: skillful_means. Must be one of: '
+                        "upaya, expedient, direct, gradual, sudden, recognize, "
+                        "transform, integrate, transcend, embody, examine, reflect, "
+                        'verify, refine, complete, open, engage, express, meditate",'
+                        '"status":"failed"}',
+                    ),
+                    (
+                        "lotus-wisdom-lotuswisdom",
+                        '{"status":"processing","currentStep":"upaya",'
+                        '"journey":"open → examine → upaya","processLength":3}',
+                    ),
+                ],
+            ),
+        ],
+    )
+    def test_real_lotus_wisdom_episodes_are_preserved(
+        self, sample_id: str, teacher: str, events: list[tuple[str, str]]
+    ) -> None:
+        """Production-derived reductions cover both namespaces and all results."""
+
+        names = [name for name, _ in events]
+        messages = []
+        for index, (name, observation) in enumerate(events):
+            messages.extend(
+                [
+                    assistant(tool_calls=[call(name=name)]),
+                    tool_response(content=observation, tool_call_id=str(index)),
+                ]
+            )
+        messages.append(assistant(content="final answer after the Lotus protocol"))
+        sample = conv(
+            tools=[func(name) for name in dict.fromkeys(names)],
+            messages=messages,
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_lotus_turn_local_state_reset_observations_are_preserved(self) -> None:
+        # Production UUID bc3ea0e4-6ad0-57b0-98f4-ee6ccb2278d7 exposes the
+        # observed harness boundary: the second user turn's corrected `engage`
+        # call returns a one-step journey instead of inheriting turn 1 state.
+        name = "lotus-wisdom-lotuswisdom"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                user("first inquiry"),
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"status":"processing","journey":"open → examine → '
+                    'recognize → meditate → integrate","processLength":5}'
+                ),
+                assistant(content="first answer"),
+                user("follow-up inquiry"),
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"error":"Invalid tag: engaging. Must be one of: '
+                    "upaya, expedient, direct, gradual, sudden, recognize, transform, "
+                    "integrate, transcend, embody, examine, reflect, verify, refine, "
+                    'complete, open, engage, express, meditate","status":"failed"}'
+                ),
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"status":"processing","currentStep":"engage",'
+                    '"journey":"engage","processLength":1}'
+                ),
+                assistant(content="second answer"),
+            ],
+            raw=qrow(subset="multi-turn"),
+        )
+        sample.sample_id = "bc3ea0e4-6ad0-57b0-98f4-ee6ccb2278d7"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "events"),
+        [
+            (
+                "bd8f707c-8bd8-5f3d-bb30-4e343c9269b6",
+                "Kimi-K2",
+                "structured-argumentation-server-structuredArgumentation",
+                [
+                    (
+                        {
+                            "claim": "Automated crisis allocation is faster",
+                            "premises": ["Delay may cost lives"],
+                            "conclusion": "Use automated support",
+                            "argumentType": "thesis",
+                            "confidence": 0.8,
+                            "nextArgumentNeeded": True,
+                            "suggestedNextTypes": ["antithesis"],
+                        },
+                        '{"argumentId":"arg-1","argumentType":"thesis",'
+                        '"nextArgumentNeeded":true,"suggestedNextTypes":'
+                        '["antithesis"],"argumentHistoryLength":1,'
+                        '"relationshipCount":1}',
+                    ),
+                    (
+                        {
+                            "claim": "Automation lacks human judgment",
+                            "premises": ["Context affects ethical choices"],
+                            "conclusion": "Do not automate final authority",
+                            "argumentType": "antithesis",
+                            "confidence": 0.75,
+                            "respondsTo": "arg-1",
+                            "contradicts": ["arg-1"],
+                            "nextArgumentNeeded": True,
+                            "suggestedNextTypes": ["objection", "synthesis"],
+                        },
+                        '{"argumentId":"arg-2","argumentType":"antithesis",'
+                        '"nextArgumentNeeded":true,"suggestedNextTypes":'
+                        '["objection","synthesis"],"argumentHistoryLength":2,'
+                        '"relationshipCount":2}',
+                    ),
+                ],
+            ),
+            (
+                "0856dfe8-eb92-5c60-af55-9e60b27e9888",
+                "OSS",
+                "structuredArgumentation",
+                [
+                    (
+                        {
+                            "claim": "Use daily stand-ups",
+                            "premises": ["They surface blockers"],
+                            "conclusion": "Alignment improves",
+                            "argumentId": "A1",
+                            "argumentType": "thesis",
+                            "confidence": 0.9,
+                            "nextArgumentNeeded": True,
+                            "suggestedNextTypes": ["antithesis"],
+                        },
+                        '{"argumentId":"A1","argumentType":"thesis",'
+                        '"nextArgumentNeeded":true,"suggestedNextTypes":'
+                        '["antithesis"],"argumentHistoryLength":1,'
+                        '"relationshipCount":1}',
+                    ),
+                    (
+                        {
+                            "claim": "Stand-ups can waste time",
+                            "premises": ["They can repeat task-board data"],
+                            "conclusion": "Strict focus is required",
+                            "argumentId": "A2",
+                            "argumentType": "antithesis",
+                            "confidence": 0.85,
+                            "respondsTo": "A1",
+                            "nextArgumentNeeded": True,
+                            "suggestedNextTypes": ["synthesis"],
+                        },
+                        '{"argumentId":"A2","argumentType":"antithesis",'
+                        '"nextArgumentNeeded":true,"suggestedNextTypes":'
+                        '["synthesis"],"argumentHistoryLength":2,'
+                        '"relationshipCount":2}',
+                    ),
+                ],
+            ),
+            (
+                "c65c17c5-65f7-55e5-a06a-a390c8c275b6",
+                "Qwen3",
+                "clear-thought-server-structuredargumentation",
+                [
+                    (
+                        {
+                            "claim": "Centralized logs improve correlation",
+                            "premises": ["Timestamps need synchronization"],
+                            "conclusion": "Centralize and synchronize logs",
+                            "argumentType": "thesis",
+                            "confidence": 0.95,
+                            "nextArgumentNeeded": True,
+                        },
+                        '{"argumentType":"thesis","claim":"Centralized logs '
+                        'improve correlation","confidence":0.95,'
+                        '"nextArgumentNeeded":true,'
+                        '"argumentId":"arg-1756620618128","status":"success"}',
+                    ),
+                    (
+                        {
+                            "claim": "Time synchronization is critical",
+                            "premises": ["Unsynchronized logs mislead"],
+                            "conclusion": "Use a shared time reference",
+                            "argumentType": "objection",
+                            "confidence": 0.9,
+                            "respondsTo": "arg-1756620618128",
+                            "nextArgumentNeeded": True,
+                        },
+                        '{"argumentType":"objection","claim":"Time '
+                        'synchronization is critical","confidence":0.9,'
+                        '"nextArgumentNeeded":true,'
+                        '"argumentId":"arg-1756620623244","status":"success"}',
+                    ),
+                ],
+            ),
+            (
+                "a5662ed5-c9ac-5ed0-adc9-123902c84138",
+                "OSS",
+                "structuredargumentation",
+                [
+                    (
+                        {
+                            "claim": "Green zoning improves resilience",
+                            "premises": ["Green infrastructure reduces runoff"],
+                            "conclusion": "Adopt the ordinance",
+                            "argumentId": "arg1",
+                            "argumentType": "thesis",
+                            "confidence": 0.92,
+                            "nextArgumentNeeded": True,
+                        },
+                        '{"argumentType":"thesis","claim":"Green zoning '
+                        'improves resilience","confidence":0.92,'
+                        '"nextArgumentNeeded":true,"argumentId":"arg1",'
+                        '"status":"success"}',
+                    ),
+                    (
+                        {
+                            "claim": "Green zoning can raise costs",
+                            "premises": ["Requirements reduce buildable area"],
+                            "conclusion": "Affordability may worsen",
+                            "argumentId": "arg2",
+                            "argumentType": "antithesis",
+                            "respondsTo": "arg1",
+                            "confidence": 0.85,
+                            "nextArgumentNeeded": True,
+                        },
+                        '{"argumentType":"antithesis","claim":"Green zoning '
+                        'can raise costs","confidence":0.85,'
+                        '"nextArgumentNeeded":true,"argumentId":"arg2",'
+                        '"status":"success"}',
+                    ),
+                ],
+            ),
+            (
+                "5804fe49-69d3-5b6f-83e0-ee146b99dd86",
+                "Qwen3",
+                "clear-thought-structuredargumentation",
+                [
+                    (
+                        {
+                            "claim": "The proposed project is most effective",
+                            "premises": ["It addresses the core issue"] * 4,
+                            "conclusion": "Approve and fund it",
+                            "argumentType": "deductive",
+                            "confidence": 0.9,
+                            "nextArgumentNeeded": True,
+                        },
+                        '{"claim":"The proposed project is most effective",'
+                        '"premisesCount":4,"argumentType":"deductive",'
+                        '"confidence":0.9,"nextArgumentNeeded":true,'
+                        '"status":"success","sessionContext":{'
+                        '"sessionId":"25a01a8e-cac5-4b9f-ba93-24ba28689c69",'
+                        '"totalOperations":1,"creativeStoreStats":{'
+                        '"totalSessions":1,"activeSessions":1,"totalIdeas":4,'
+                        '"totalInsights":1,"totalConnections":0,'
+                        '"averageIdeasPerSession":4,"uniqueTechniques":1,'
+                        '"techniqueUsage":{"socratic-method":1},'
+                        '"topTechniques":[{"technique":"socratic-method",'
+                        '"count":1}]}}}',
+                    ),
+                ],
+            ),
+        ],
+    )
+    def test_real_structured_argumentation_episodes_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        events: list[tuple[dict, str]],
+    ) -> None:
+        """Production reductions cover all five exact identities and lineages."""
+
+        messages = []
+        for index, (arguments, observation) in enumerate(events):
+            messages.extend(
+                [
+                    assistant(
+                        tool_calls=[
+                            call(
+                                name=name,
+                                arguments=orjson.dumps(arguments).decode(),
+                            )
+                        ]
+                    ),
+                    tool_response(content=observation, tool_call_id=str(index)),
+                ]
+            )
+        messages.append(assistant(content="final answer after argumentation"))
+        sample = conv(tools=[func(name)], messages=messages, raw=qrow())
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_structured_argumentation_user_turn_state_reset_is_preserved(self) -> None:
+        # Production UUID bd8f707c-8bd8-5f3d-bb30-4e343c9269b6 ends its first
+        # user turn at history length 8, then starts the next turn at 1. A row-
+        # global replay would incorrectly predict 9; the Toucan harness boundary
+        # is therefore part of the observed episode semantics.
+        name = "structured-argumentation-server-structuredArgumentation"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                user("first issue"),
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"argumentId":"arg-8",'
+                    '"argumentHistoryLength":8,"relationshipCount":8}'
+                ),
+                assistant(content="first answer"),
+                user("follow-up issue"),
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"argumentId":"arg-9",'
+                    '"argumentHistoryLength":1,"relationshipCount":1}'
+                ),
+                assistant(content="follow-up answer"),
+            ],
+            raw=qrow(subset="multi-turn"),
+        )
+        sample.sample_id = "bd8f707c-8bd8-5f3d-bb30-4e343c9269b6"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_structured_argumentation_error_and_retry_are_preserved(self) -> None:
+        # Production UUID 634e88ab-84bd-5cd4-9120-4c6668e165a4 returns this
+        # validation error when nextArgumentNeeded is absent, then continues the
+        # argumentation episode. The dataset-specific transform must not erase the
+        # evidence; universal argument validation can reject the row later.
+        name = "structured-argumentation-server-structuredArgumentation"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments='{"claim":"bounded analogy",'
+                            '"premises":["formal similarity"],'
+                            '"conclusion":"use cautiously",'
+                            '"argumentType":"synthesis","confidence":0.88}',
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"error":"Invalid nextArgumentNeeded: must be a '
+                    'boolean","status":"failed"}'
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments='{"claim":"bounded analogy",'
+                            '"premises":["formal similarity"],'
+                            '"conclusion":"use cautiously",'
+                            '"argumentType":"synthesis","confidence":0.88,'
+                            '"nextArgumentNeeded":false}',
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"argumentId":"arg-3",'
+                    '"argumentHistoryLength":3,"relationshipCount":3,'
+                    '"nextArgumentNeeded":false}'
+                ),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = "634e88ab-84bd-5cd4-9120-4c6668e165a4"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_exact_structured_name_with_unparseable_arguments_is_not_hidden(
+        self,
+    ) -> None:
+        name = "structured-argumentation-server-structuredArgumentation"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name, arguments='{"claim":')]),
+                tool_response(content="Malformed tool call"),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_terminal_next_argument_needed_true_episode_is_not_stripped(self) -> None:
+        # Production UUID bbfdfe34-252a-579d-a226-52d6d61e5449 ends on this tool
+        # result. Production's incomplete-termination drop handles that separate
+        # quality issue; reasoning stripping must not rewrite the source episode.
+        name = "structured-argumentation-server-structuredArgumentation"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"argumentId":"angels_objection_01",'
+                    '"argumentType":"objection","nextArgumentNeeded":true,'
+                    '"suggestedNextTypes":["rebuttal"],'
+                    '"argumentHistoryLength":4,"relationshipCount":4}'
+                ),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "events"),
+        [
+            (
+                "68074f1d-535b-5fac-a2ae-7191d5a1b5e9",
+                "Kimi-K2",
+                "analogical-reasoning-server-analogicalReasoning",
+                [
+                    (
+                        {
+                            "sourceDomain": {
+                                "name": "Ecosystem Sustainability",
+                                "elements": [],
+                            },
+                            "targetDomain": {
+                                "name": "Urban Economic Sustainability",
+                                "elements": [],
+                            },
+                            "mappings": [{}] * 7,
+                            "analogyId": "ecosystem-urban-economics-043",
+                            "purpose": "creative-generation",
+                            "confidence": 0.85,
+                            "iteration": 1,
+                            "nextOperationNeeded": True,
+                            "suggestedOperations": [
+                                "draw-inference",
+                                "evaluate-limitation",
+                            ],
+                        },
+                        '{"analogyId":"ecosystem-urban-economics-043",'
+                        '"purpose":"creative-generation","iteration":1,'
+                        '"sourceDomain":"Ecosystem Sustainability",'
+                        '"targetDomain":"Urban Economic Sustainability",'
+                        '"mappingCount":7,"inferenceCount":0,'
+                        '"nextOperationNeeded":true,"suggestedOperations":'
+                        '["draw-inference","evaluate-limitation"]}',
+                    ),
+                    (
+                        {
+                            "sourceDomain": {
+                                "name": "Ecosystem Sustainability",
+                                "elements": [],
+                            },
+                            "targetDomain": {
+                                "name": "Urban Economic Sustainability",
+                                "elements": [],
+                            },
+                            "inferences": [{}] * 5,
+                            "analogyId": "ecosystem-urban-economics-043",
+                            "purpose": "creative-generation",
+                            "confidence": 0.9,
+                            "iteration": 2,
+                            "nextOperationNeeded": True,
+                            "suggestedOperations": ["evaluate-limitation"],
+                        },
+                        '{"analogyId":"ecosystem-urban-economics-043",'
+                        '"purpose":"creative-generation","iteration":2,'
+                        '"sourceDomain":"Ecosystem Sustainability",'
+                        '"targetDomain":"Urban Economic Sustainability",'
+                        '"mappingCount":0,"inferenceCount":5,'
+                        '"nextOperationNeeded":true,"suggestedOperations":'
+                        '["evaluate-limitation"]}',
+                    ),
+                ],
+            ),
+            (
+                "b2201cd0-2e19-5d94-bc97-2d5c8d70b701",
+                "OSS",
+                "analogicalReasoning",
+                [
+                    (
+                        {
+                            "sourceDomain": {
+                                "name": "Library Committee",
+                                "elements": [],
+                            },
+                            "targetDomain": {
+                                "name": "Blockchain Network",
+                                "elements": [],
+                            },
+                            "mappings": [{}] * 5,
+                            "inferences": [{}],
+                            "analogyId": "AN001",
+                            "purpose": "explanation",
+                            "confidence": 0.9,
+                            "iteration": 1,
+                            "nextOperationNeeded": False,
+                        },
+                        '{"analogyId":"AN001","purpose":"explanation",'
+                        '"iteration":1,"sourceDomain":"Library Committee",'
+                        '"targetDomain":"Blockchain Network",'
+                        '"mappingCount":5,"inferenceCount":1,'
+                        '"nextOperationNeeded":false}',
+                    )
+                ],
+            ),
+            (
+                "ee728302-569f-51f2-a716-cc6a19047d8c",
+                "Qwen3",
+                "analogical-reasoning-server-analogicalReasoning",
+                [
+                    (
+                        {
+                            "sourceDomain": {
+                                "name": "Telecommunication Network",
+                                "elements": [],
+                            },
+                            "targetDomain": {
+                                "name": "Quantum Entanglement",
+                                "elements": [],
+                            },
+                            "mappings": [{}] * 3,
+                            "inferences": [{}, {}],
+                            "analogyId": "QE-Telecom",
+                            "purpose": "explanation",
+                            "confidence": 0.8,
+                            "iteration": 1,
+                            "nextOperationNeeded": True,
+                            "suggestedOperations": [
+                                "add-mapping",
+                                "revise-mapping",
+                                "draw-inference",
+                            ],
+                        },
+                        '{"analogyId":"QE-Telecom","purpose":"explanation",'
+                        '"iteration":1,'
+                        '"sourceDomain":"Telecommunication Network",'
+                        '"targetDomain":"Quantum Entanglement",'
+                        '"mappingCount":3,"inferenceCount":2,'
+                        '"nextOperationNeeded":true,"suggestedOperations":'
+                        '["add-mapping","revise-mapping","draw-inference"]}',
+                    )
+                ],
+            ),
+        ],
+    )
+    def test_real_analogical_reasoning_episodes_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        events: list[tuple[dict, str]],
+    ) -> None:
+        """Production reductions cover both exact identities and all teachers."""
+
+        messages = []
+        for index, (arguments, observation) in enumerate(events):
+            call_id = f"analogical-{index}"
+            messages.extend(
+                [
+                    assistant(
+                        tool_calls=[
+                            call(
+                                name=name,
+                                arguments=orjson.dumps(arguments).decode(),
+                                call_id=call_id,
+                            )
+                        ]
+                    ),
+                    tool_response(content=observation, tool_call_id=call_id),
+                ]
+            )
+        messages.append(assistant(content="final answer after the analogy"))
+        sample = conv(tools=[func(name)], messages=messages, raw=qrow())
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_analogical_runtime_generated_element_ids_are_not_hidden(self) -> None:
+        # Production UUID 4cf95823-27f1-5365-bcd8-e38ec0ca867c omitted some
+        # element IDs. The server mutates those elements by assigning IDs before
+        # returning this iteration-2 summary, so the call is not a pure echo.
+        name = "analogical-reasoning-server-analogicalReasoning"
+        arguments = {
+            "sourceDomain": {
+                "name": "Supply Chain Logistics",
+                "elements": [
+                    {
+                        "name": "Distribution hub",
+                        "type": "entity",
+                        "description": "Routes material through the network",
+                    }
+                ],
+            },
+            "targetDomain": {
+                "name": "Neural Networks",
+                "elements": [
+                    {
+                        "id": "neuron",
+                        "name": "Neuron",
+                        "type": "entity",
+                        "description": "Routes signals through a network",
+                    }
+                ],
+            },
+            "mappings": [{}] * 10,
+            "inferences": [{}, {}],
+            "analogyId": "enhanced-supply-chain-neural-analogy",
+            "purpose": "explanation",
+            "confidence": 0.9,
+            "iteration": 2,
+            "nextOperationNeeded": False,
+        }
+        observation = (
+            '{"analogyId":"enhanced-supply-chain-neural-analogy",'
+            '"purpose":"explanation","iteration":2,'
+            '"sourceDomain":"Supply Chain Logistics",'
+            '"targetDomain":"Neural Networks","mappingCount":10,'
+            '"inferenceCount":2,"nextOperationNeeded":false}'
+        )
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(name=name, arguments=orjson.dumps(arguments).decode())
+                    ]
+                ),
+                tool_response(content=observation),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = "4cf95823-27f1-5365-bcd8-e38ec0ca867c"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_analogical_server_validation_error_and_retry_are_preserved(self) -> None:
+        # Production UUID 78f8abdf-d849-593d-915d-549cc4f32f4d first omitted
+        # required element descriptions, then retried. Both the error evidence
+        # and the later successful call must remain visible to validators.
+        name = "analogical-reasoning-server-analogicalReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(
+                                {
+                                    "sourceDomain": {
+                                        "name": "Airbnb",
+                                        "elements": [
+                                            {
+                                                "id": "supply",
+                                                "name": "Host supply",
+                                                "type": "entity",
+                                            }
+                                        ],
+                                    },
+                                    "targetDomain": {
+                                        "name": "Videographer Marketplace",
+                                        "elements": [],
+                                    },
+                                    "analogyId": "EventVid-Airbnb-001",
+                                    "purpose": "explanation",
+                                    "confidence": 0.8,
+                                    "iteration": 1,
+                                    "nextOperationNeeded": True,
+                                }
+                            ).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"error":"Invalid element description for '
+                    'element supply: must be a string","status":"failed"}'
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(
+                                {
+                                    "sourceDomain": {
+                                        "name": "Airbnb",
+                                        "elements": [],
+                                    },
+                                    "targetDomain": {
+                                        "name": "Videographer Marketplace",
+                                        "elements": [],
+                                    },
+                                    "analogyId": "EventVid-Airbnb-001",
+                                    "purpose": "explanation",
+                                    "confidence": 0.8,
+                                    "iteration": 1,
+                                    "nextOperationNeeded": True,
+                                    "suggestedOperations": ["draw-inference"],
+                                }
+                            ).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"analogyId":"EventVid-Airbnb-001",'
+                    '"purpose":"explanation","iteration":1,'
+                    '"sourceDomain":"Airbnb",'
+                    '"targetDomain":"Videographer Marketplace",'
+                    '"mappingCount":0,"inferenceCount":0,'
+                    '"nextOperationNeeded":true,'
+                    '"suggestedOperations":["draw-inference"]}'
+                ),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = "78f8abdf-d849-593d-915d-549cc4f32f4d"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_analogical_harness_decode_error_and_retry_are_preserved(self) -> None:
+        # Production UUID bbcb911b-e576-5d3a-9562-32c5ed106baa contains an
+        # invalid JSON call followed by a successful corrected call.
+        name = "analogical-reasoning-server-analogicalReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments='{"sourceDomain":{"name":"Water",',
+                        )
+                    ]
+                ),
+                tool_response(
+                    content="An error occurred when calling tool "
+                    "`analogical-reasoning-server-analogicalReasoning`: "
+                    "JSONDecodeError: Expecting value"
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(
+                                {
+                                    "sourceDomain": {
+                                        "name": "Water Wave Phenomena",
+                                        "elements": [],
+                                    },
+                                    "targetDomain": {
+                                        "name": "Quantum Superposition",
+                                        "elements": [],
+                                    },
+                                    "mappings": [{}] * 7,
+                                    "inferences": [{}, {}, {}],
+                                    "analogyId": (
+                                        "quantum_superposition_water_waves_v1"
+                                    ),
+                                    "purpose": "explanation",
+                                    "confidence": 0.75,
+                                    "iteration": 1,
+                                    "nextOperationNeeded": False,
+                                }
+                            ).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"analogyId":'
+                    '"quantum_superposition_water_waves_v1",'
+                    '"purpose":"explanation","iteration":1,'
+                    '"sourceDomain":"Water Wave Phenomena",'
+                    '"targetDomain":"Quantum Superposition",'
+                    '"mappingCount":7,"inferenceCount":3,'
+                    '"nextOperationNeeded":false}'
+                ),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = "bbcb911b-e576-5d3a-9562-32c5ed106baa"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_analogical_nested_string_argument_error_and_retry_are_preserved(
+        self,
+    ) -> None:
+        # Production UUID d673405f-d069-5a06-b1a5-a602f71da332 passes a JSON
+        # string where the MCP client requires a dictionary, then retries with a
+        # dictionary. This harness-level failure must not be transformed away.
+        name = "analogical-reasoning-server-analogicalReasoning"
+        valid_arguments = {
+            "sourceDomain": {"name": "Marathon Running", "elements": []},
+            "targetDomain": {"name": "Company Profitability", "elements": []},
+            "mappings": [{}, {}, {}],
+            "inferences": [{}],
+            "analogyId": "profitability-marathon",
+            "purpose": "explanation",
+            "confidence": 0.75,
+            "iteration": 0,
+            "nextOperationNeeded": True,
+            "suggestedOperations": [
+                "add-mapping",
+                "revise-mapping",
+                "draw-inference",
+            ],
+        }
+        nested_string = orjson.dumps(orjson.dumps(valid_arguments).decode()).decode()
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name, arguments=nested_string)]),
+                tool_response(
+                    content="ValidationError: arguments Input should be a valid "
+                    "dictionary"
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(valid_arguments).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"analogyId":"profitability-marathon",'
+                    '"purpose":"explanation","iteration":0,'
+                    '"sourceDomain":"Marathon Running",'
+                    '"targetDomain":"Company Profitability",'
+                    '"mappingCount":3,"inferenceCount":1,'
+                    '"nextOperationNeeded":true,"suggestedOperations":'
+                    '["add-mapping","revise-mapping","draw-inference"]}'
+                ),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = "d673405f-d069-5a06-b1a5-a602f71da332"
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_undefined_exact_analogical_call_is_marked_but_not_hidden(self) -> None:
+        # Production UUID 01be4095-2d51-52e2-a87a-8e55d2ccf82f calls the exact
+        # qualified identity without advertising that definition. The marker
+        # records the explicit trace; it does not waive definedness validation.
+        name = "analogical-reasoning-server-analogicalReasoning"
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=("get_weather",)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [ANALOGICAL_REASONING_TOOL_FAMILY]
+        }
+
+    @pytest.mark.parametrize("name", EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES)
+    def test_unused_exact_analogical_definition_is_retained_without_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=(name, "get_weather"),
+            ),
+            "OSS",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "analogical-reasoning-server-analogialReasoning",
+            "hotel-booking-server-analogicalReasoning",
+        ],
+    )
+    def test_undefined_fuzzy_analogical_calls_are_not_family_members(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("analogical-reasoning-server-analogicalReasoning",),
+            ),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_mixed_parallel_analogical_and_ordinary_calls_remain_coherent(
+        self,
+    ) -> None:
+        analogical = "analogicalReasoning"
+        sample = conv(
+            tools=[func(analogical), func("get_weather")],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(name=analogical, call_id="analogy"),
+                        call(name="get_weather", call_id="weather"),
+                    ]
+                ),
+                tool_response(
+                    content='{"analogyId":"a","nextOperationNeeded":false}',
+                    tool_call_id="analogy",
+                ),
+                tool_response(content="sunny", tool_call_id="weather"),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_unbalanced_exact_analogical_call_is_not_hidden(self) -> None:
+        name = "analogicalReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[assistant(tool_calls=[call(name=name)])],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_conflicting_analogical_definitions_drop_before_transformation(
+        self,
+    ) -> None:
+        name = "analogicalReasoning"
+        definitions = [
+            func(name, description="definition A"),
+            func(name, description="definition B"),
+        ]
+        raw = qrow()
+        raw["available_tools"] = orjson.dumps(definitions).decode()
+        sample = conv(
+            tools=copy.deepcopy(definitions),
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="observation"),
+                assistant(content="final answer"),
+            ],
+            raw=raw,
+        )
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample], ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == []
+        assert drops == {"conflicting_duplicate_tools": 1}
+        assert transforms == {}
+
+    def test_terminal_analogical_continuation_true_is_not_stripped(self) -> None:
+        name = "analogical-reasoning-server-analogicalReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"analogyId":"a-1",'
+                    '"nextOperationNeeded":true,'
+                    '"suggestedOperations":["draw-inference"]}'
+                ),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    @pytest.mark.parametrize(
+        "observation",
+        [
+            '{"analogyId":"a-1","purpose":"evaluation",'
+            '"iteration":0.5,"sourceDomain":"A","targetDomain":"B",'
+            '"mappingCount":0,"inferenceCount":0,'
+            '"nextOperationNeeded":false}',
+            '{"analogyId":"a-1","purpose":"explanation",'
+            '"iteration":1,"sourceDomain":"A","targetDomain":"B",'
+            '"mappingCount":0,"inferenceCount":0,'
+            '"nextOperationNeeded":false,'
+            '"samplingSummary":"future server-generated summary"}',
+        ],
+        ids=["runtime-schema-divergence", "future-sampling-summary"],
+    )
+    def test_analogical_success_variants_are_preserved_without_result_heuristics(
+        self, observation: str
+    ) -> None:
+        # The first case is accepted by the audited runtime despite violating the
+        # advertised purpose enum/integer intent. The second is compatible with
+        # the later upstream sampling implementation but absent from this raw
+        # snapshot. Neither uncertainty authorizes destructive rewriting.
+        name = "analogicalReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=observation),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "arguments", "observation"),
+        [
+            (
+                "419bd1d6-f450-5104-af40-b47d2f8b6a97",
+                "Kimi-K2",
+                "clear-thought-server-mentalmodel",
+                {
+                    "modelName": "first_principles",
+                    "problem": "Evaluate a startup architecture decision",
+                    "steps": ["Identify constraints", "Compare trade-offs"],
+                    "reasoning": "Start from operational requirements.",
+                    "conclusion": "Use the smallest reversible architecture.",
+                },
+                '{"modelName":"first_principles","status":"success",'
+                '"hasSteps":true,"hasConclusion":true}',
+            ),
+            (
+                "494f133f-ceac-529e-bc3d-bfad6e2feaea",
+                "Kimi-K2",
+                "clear-thought-server-mentalmodel",
+                {
+                    "modelName": "first_principles",
+                    "problem": "Scale a collaborative whiteboard",
+                    "steps": ["Measure WebSocket limits"],
+                },
+                '{"modelName":"first_principles","status":"success",'
+                '"hasSteps":true,"hasConclusion":false}',
+            ),
+            (
+                "74bbcbca-f35b-5f79-ade8-0ffeb60c35da",
+                "OSS",
+                "mentalmodel",
+                {
+                    "modelName": "first_principles",
+                    "problem": "Choose an MVP architecture",
+                    "steps": ["Identify goals", "Evaluate constraints"],
+                    "reasoning": "Compare actual need against engineering cost.",
+                    "conclusion": "Favor maintainability with scaling hooks.",
+                },
+                '{"modelName":"first_principles","status":"success",'
+                '"hasSteps":true,"hasConclusion":true}',
+            ),
+            (
+                "e7178321-e93c-5b11-9fcf-a929777ff425",
+                "Qwen3",
+                "clear-thought-mentalmodel",
+                {
+                    "modelName": "first_principles",
+                    "problem": "Recurring project failures in the team",
+                    "steps": ["Define the issue", "Identify gaps"],
+                    "reasoning": "Break the problem into fundamental elements.",
+                    "conclusion": "Address the foundational process gaps.",
+                },
+                '{"modelName":"first_principles","status":"success",'
+                '"hasSteps":true,"hasConclusion":true,'
+                '"sessionContext":{"sessionId":'
+                '"4c4b897b-67cd-4b95-b8e0-939e4b0b6302",'
+                '"totalMentalModels":1,"recentModels":['
+                '{"modelName":"first_principles",'
+                '"problem":"Recurring project failures in the team"}]}}',
+            ),
+        ],
+    )
+    def test_real_mental_model_success_contracts_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        arguments: dict,
+        observation: str,
+    ) -> None:
+        """Pin both source lineages, all exact names, and all teachers."""
+
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(name=name, arguments=orjson.dumps(arguments).decode())
+                    ]
+                ),
+                tool_response(content=observation),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_mental_model_harness_decode_error_and_retry_are_preserved(self) -> None:
+        # Production UUID d65f0f37-b90a-54bf-afdb-2084cc1a5fd2 contains two
+        # malformed calls before a later successful exact-name retry.
+        name = "clear-thought-server-mentalmodel"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments='{"modelName":"pareto_principle",',
+                        )
+                    ]
+                ),
+                tool_response(
+                    content="An error occurred when calling tool "
+                    "`clear-thought-server-mentalmodel`: JSONDecodeError"
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(
+                                {
+                                    "modelName": "pareto_principle",
+                                    "problem": "Prioritize the critical work",
+                                    "steps": ["Rank impact", "Check feasibility"],
+                                    "conclusion": "Select the highest-impact set.",
+                                }
+                            ).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"modelName":"pareto_principle",'
+                    '"status":"success","hasSteps":true,'
+                    '"hasConclusion":true}'
+                ),
+                assistant(content="final answer"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_mental_model_failed_status_without_retry_is_preserved(self) -> None:
+        name = "mentalmodel"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments=orjson.dumps(
+                                {"modelName": "", "problem": "Choose an option"}
+                            ).decode(),
+                        )
+                    ]
+                ),
+                tool_response(
+                    content='{"error":"Invalid modelName: must be a string",'
+                    '"status":"failed"}'
+                ),
+                assistant(content="I could not apply the requested model."),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+    def test_undefined_exact_mental_model_call_is_marked_but_not_hidden(
+        self,
+    ) -> None:
+        # Three pinned rows use this exact audited spelling without advertising
+        # it. The marker records the attempted family call; defined-function
+        # validation remains responsible for rejecting the episode.
+        name = "clear-thought-mentalmodel"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("clear-thought-server-mentalmodel",),
+            ),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [MENTAL_MODEL_TOOL_FAMILY]
+        }
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-mental_model",
+            "clear_thought-server-mentalmodel",
+            "clear-thought-server-meuqalModel",
+            "clear-thought-server-clearmodel",
+        ],
+    )
+    def test_undefined_fuzzy_mental_model_calls_are_not_family_members(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("clear-thought-server-mentalmodel",),
+            ),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_mental_model_definition_variation_across_rows_is_allowed(self) -> None:
+        name = "mentalmodel"
+        samples = []
+        for description in (
+            "Chirag/ThinkFar contract",
+            "Waldzell stateful contract",
+        ):
+            sample = conv(
+                tools=[func(name, description=description)],
+                messages=[
+                    assistant(tool_calls=[call(name=name)]),
+                    tool_response(content="observation"),
+                    assistant(content="done"),
+                ],
+                raw=qrow(),
+            )
+            raw_tools = copy.deepcopy(sample.tools)
+            sample.raw["available_tools"] = orjson.dumps(raw_tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples,
+            ToucanConfig(drop_conflicting_duplicate_tools=True),
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+        assert [sample.tools[0]["function"]["description"] for sample in kept] == [
+            "Chirag/ThinkFar contract",
+            "Waldzell stateful contract",
+        ]
+
+    def test_terminal_mental_model_call_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "clear-thought-server-mentalmodel"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(
+                    content='{"modelName":"first_principles",'
+                    '"status":"success","hasSteps":true,'
+                    '"hasConclusion":true}'
+                ),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert drops == {}
+        assert transforms == {}
+        assert kept == [sample]
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
 
     def test_all_audited_think_writes_are_preserved_without_state_reads(self) -> None:
         s = conv(
