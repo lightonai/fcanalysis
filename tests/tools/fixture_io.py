@@ -53,15 +53,20 @@ def write_fixture(
 ) -> dict[str, Any]:
     """Write all five fixture files for one (loader, config) run.
 
-    Atomicity contract: `output.hash` is written LAST via temp+rename,
-    so its presence on disk strictly implies the other four files are
-    complete. The fixture-skip check (`output.hash` exists) is therefore
-    safe even across crashes or SIGINT mid-write.
+    Completion contract: any old `output.hash` and its temp are removed before
+    rewriting begins, then the new hash is written LAST via temp+rename. Its
+    presence therefore implies that this invocation completed the other four
+    writes. This invalidation step is essential for forced rewrites: otherwise
+    an interrupted run could leave the old hash beside a new partial output.
 
     Returns a summary dict with sample_count and hash for the caller to
     log.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
+    hash_path = out_dir / "output.hash"
+    hash_tmp = out_dir / "output.hash.tmp"
+    hash_path.unlink(missing_ok=True)
+    hash_tmp.unlink(missing_ok=True)
 
     config_doc = {
         "dataset_config": _serialize_config(dataset_config),
@@ -86,9 +91,8 @@ def write_fixture(
         for sample in subset:
             fh.write(sample_to_jsonl_line(sample))
 
-    hash_tmp = out_dir / "output.hash.tmp"
     hash_tmp.write_text(full_hash + "\n")
-    hash_tmp.rename(out_dir / "output.hash")
+    hash_tmp.rename(hash_path)
 
     return {"sample_count": total, "hash": full_hash}
 
