@@ -93,14 +93,15 @@ Dataset-specific config (Stage 2, before universal filters):
         * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
           only purpose is to structure/record the model's reasoning (the result
           echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content. Nine audited
+          calls, the structural analog of <think>/reasoning_content. Ten audited
           families are unconditional preservation exceptions: all twelve exact
           audited ``think``/thought-state names, all eight exact sequential-
           thinking names, and the two exact names in each of the pentest, game-
           design, and Skia-animation thinking families, plus the four exact Lotus
           Wisdom names, five exact Structured Argumentation names, and two exact
-          Analogical Reasoning names, and three exact Clear Thought mental-model
-          names. Their calls, paired observations, and definitions remain intact
+          Analogical Reasoning names, three exact Clear Thought mental-model
+          names, and five exact Decision Framework names. Their calls, paired
+          observations, and definitions remain intact
           even when this transform is enabled. Lotus
           writes maintain a turn-local journey read by the summary operation.
           Structured Argumentation spans a stateful argument graph, a runtime-ID-
@@ -109,7 +110,10 @@ Dataset-specific config (Stage 2, before universal filters):
           Reasoning validates model-authored analogies, assigns missing element
           IDs, and records server-local state. Clear Thought mental-model calls
           validate model-authored analyses and return either deterministic status
-          metadata or hidden session context. Undefined calls and calls under a
+          metadata or hidden session context. Decision Framework spans an echo-
+          like Clear Thought implementation, a stateful/calculating standalone
+          implementation, and a Clear Thought session-store implementation.
+          Undefined calls and calls under a
           conflicting or unbalanced name are also retained so downstream
           validators see the source defect. Other legacy name families cover
           chain-of-draft and
@@ -177,8 +181,9 @@ class ToucanConfig:
     # Legacy reasoning scaffolds are stripped by DEFAULT, except for the exact
     # audited think/thought-state, sequential-thinking, pentest-thinking, game-
     # design-thinking, Skia-animation-thinking, Lotus Wisdom, Structured
-    # Argumentation, Analogical Reasoning, and Clear Thought mental-model families,
-    # which are always preserved and marked for downstream row-level selection.
+    # Argumentation, Analogical Reasoning, Clear Thought mental-model, and Decision
+    # Framework families, which are always preserved and marked for downstream
+    # row-level selection.
     # Framework SCAFFOLD plumbing
     # (server-unlock handshakes, MCP resource primitives, the degenerate
     # deep_researcher async poller) is kept by default -- it is real (often
@@ -265,6 +270,7 @@ LOTUS_WISDOM_TOOL_FAMILY = "lotus_wisdom"
 STRUCTURED_ARGUMENTATION_TOOL_FAMILY = "structured_argumentation"
 ANALOGICAL_REASONING_TOOL_FAMILY = "analogical_reasoning"
 MENTAL_MODEL_TOOL_FAMILY = "mental_model"
+DECISION_FRAMEWORK_TOOL_FAMILY = "decision_framework"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -394,6 +400,30 @@ _MENTAL_MODEL_TOOL_NAMES = frozenset(
     }
 )
 
+# Decision Framework is a shared protocol label across three audited MCP
+# lineages in the pinned snapshot. Chirag/ThinkFar shallowly validates and then
+# returns the model-authored decision object, with formatter errors remaining
+# visible. Waldzell's standalone server assigns missing element IDs, records
+# decision state, calculates expected-value or multi-criteria scores, and
+# returns a compact projection. Waldzell Clear Thought stores decisions and
+# exposes session/store context; that exact spelling is definition-only in the
+# snapshot. The five exact visible names span six complete definition
+# fingerprints because bare ``decisionframework`` is shared by two lineages in
+# different rows. All 13,263 definition-backed captured calls replay against
+# the two called source contracts, including 187 argument-decode/request errors
+# and 951 runtime/formatter failures. Preserve only these case-sensitive names;
+# the observed underscore spelling and serialized Sequential Thinking names are
+# undefined anomaly evidence and do not inherit this audited identity.
+_DECISION_FRAMEWORK_TOOL_NAMES = frozenset(
+    {
+        "decisionFramework",
+        "decision-framework-server-decisionFramework",
+        "decisionframework",
+        "clear-thought-server-decisionframework",
+        "clear-thought-decisionframework",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -404,6 +434,7 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _STRUCTURED_ARGUMENTATION_TOOL_NAMES
     | _ANALOGICAL_REASONING_TOOL_NAMES
     | _MENTAL_MODEL_TOOL_NAMES
+    | _DECISION_FRAMEWORK_TOOL_NAMES
 )
 
 
@@ -438,6 +469,8 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(ANALOGICAL_REASONING_TOOL_FAMILY)
     if called_names & _MENTAL_MODEL_TOOL_NAMES:
         families.append(MENTAL_MODEL_TOOL_FAMILY)
+    if called_names & _DECISION_FRAMEWORK_TOOL_NAMES:
+        families.append(DECISION_FRAMEWORK_TOOL_FAMILY)
     return families
 
 

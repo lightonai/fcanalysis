@@ -13,6 +13,7 @@ import pytest
 from fcanalysis.format import ConversationSample
 from fcanalysis.loaders.toucan import (
     ANALOGICAL_REASONING_TOOL_FAMILY,
+    DECISION_FRAMEWORK_TOOL_FAMILY,
     GAME_DESIGN_THINKING_TOOL_FAMILY,
     LOTUS_WISDOM_TOOL_FAMILY,
     MENTAL_MODEL_TOOL_FAMILY,
@@ -25,6 +26,7 @@ from fcanalysis.loaders.toucan import (
     ToucanConfig,
     _apply_dataset_config,
     _ANALOGICAL_REASONING_TOOL_NAMES,
+    _DECISION_FRAMEWORK_TOOL_NAMES,
     _convert_messages,
     _convert_sample,
     _ends_incomplete,
@@ -118,6 +120,14 @@ EXPECTED_MENTAL_MODEL_TOOL_NAMES = (
     "clear-thought-mentalmodel",
 )
 
+EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES = (
+    "decisionFramework",
+    "decision-framework-server-decisionFramework",
+    "decisionframework",
+    "clear-thought-server-decisionframework",
+    "clear-thought-decisionframework",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -128,6 +138,7 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES
     + EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
     + EXPECTED_MENTAL_MODEL_TOOL_NAMES
+    + EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -200,6 +211,10 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, MENTAL_MODEL_TOOL_FAMILY, id=name)
         for name in EXPECTED_MENTAL_MODEL_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, DECISION_FRAMEWORK_TOOL_FAMILY, id=name)
+        for name in EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
     ),
 )
 
@@ -341,6 +356,7 @@ class TestIsReasoningTool:
             EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES,
             EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES,
             EXPECTED_MENTAL_MODEL_TOOL_NAMES,
+            EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
             12,
@@ -352,6 +368,7 @@ class TestIsReasoningTool:
             5,
             2,
             3,
+            5,
         ]
         assert sum(len(names) for names in exact_families) == len(
             set().union(*map(set, exact_families))
@@ -377,6 +394,9 @@ class TestIsReasoningTool:
             EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
         )
         assert _MENTAL_MODEL_TOOL_NAMES == frozenset(EXPECTED_MENTAL_MODEL_TOOL_NAMES)
+        assert _DECISION_FRAMEWORK_TOOL_NAMES == frozenset(
+            EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
+        )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
         )
@@ -480,6 +500,28 @@ class TestIsReasoningTool:
         assert name not in _MENTAL_MODEL_TOOL_NAMES
         assert _is_reasoning_tool(name) is True
 
+    @pytest.mark.parametrize("name", EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES)
+    def test_five_exact_decision_framework_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-decision_framework",
+            "DecisionFramework",
+            "decision-framework-server-decisionframework",
+            "hotel-booking-server-decisionFramework",
+            'decisionFramework", {"decisionId": "d-1"',
+            'model-context-protocol-server-sequentialthinking\\", '
+            '{\\"thought\\": \\"apply a decision framework\\"',
+        ],
+    )
+    def test_fuzzy_decision_framework_variants_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _DECISION_FRAMEWORK_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+
     def test_thought_state_operations_are_not_reasoning(self) -> None:
         for prefix in ("", "think-tool-", "think-tool-server-"):
             assert _is_reasoning_tool(f"{prefix}get_thoughts") is False
@@ -490,8 +532,6 @@ class TestIsReasoningTool:
         # the whole reasoning-server op vocabulary, incl. standalone prefixes
         # and bare names that the upstream loader missed.
         for n in (
-            "decisionFramework",
-            "decision-framework-server-decisionFramework",
             "scientificMethod",
             "socraticmethod",
             "metacognitiveMonitoring",
@@ -835,6 +875,7 @@ class TestReasoningToolFamilyAnnotations:
                     "structuredArgumentation",
                     "analogicalReasoning",
                     "mentalmodel",
+                    "decisionFramework",
                 ),
                 defined_names=(
                     "think",
@@ -846,6 +887,7 @@ class TestReasoningToolFamilyAnnotations:
                     "structuredArgumentation",
                     "analogicalReasoning",
                     "mentalmodel",
+                    "decisionFramework",
                     "get_weather",
                 ),
             ),
@@ -863,6 +905,7 @@ class TestReasoningToolFamilyAnnotations:
                 STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
                 ANALOGICAL_REASONING_TOOL_FAMILY,
                 MENTAL_MODEL_TOOL_FAMILY,
+                DECISION_FRAMEWORK_TOOL_FAMILY,
             ]
         }
 
@@ -881,6 +924,7 @@ class TestReasoningToolFamilyAnnotations:
                     "structuredArgumentation",
                     "analogicalReasoning",
                     "mentalmodel",
+                    "decisionFramework",
                 ),
             ),
             "Kimi-K2",
@@ -966,6 +1010,25 @@ class TestReasoningToolFamilyAnnotations:
         ],
     )
     def test_fuzzy_mental_model_variant_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,)),
+            "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-decision_framework",
+            "DecisionFramework",
+            "decision-framework-server-decisionframework",
+            "hotel-booking-server-decisionFramework",
+        ],
+    )
+    def test_fuzzy_decision_framework_variant_does_not_receive_a_marker(
         self, name: str
     ) -> None:
         sample, _ = _convert_sample(
@@ -1521,6 +1584,50 @@ class TestStripTools:
         assert _strip_tools(sample, True, False) == (True, True, False)
         assert sample.messages == []
         assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-decision_framework",
+            "DecisionFramework",
+            "decision-framework-server-decisionframework",
+            "hotel-booking-server-decisionFramework",
+            'decisionFramework", {"decisionId": "d-1"',
+        ],
+    )
+    def test_defined_balanced_decision_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _DECISION_FRAMEWORK_TOOL_NAMES
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    def test_undefined_observed_decision_underscore_call_is_left_for_validation(
+        self,
+    ) -> None:
+        name = "clear-thought-decision_framework"
+        sample = conv(
+            tools=[func("clear-thought-decisionframework")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=f"Tool {name} does not exists."),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
 
     @pytest.mark.parametrize(
         "name",
@@ -3770,6 +3877,217 @@ class TestApplyDatasetConfig:
         )
         assert dropped == []
         assert drop_reasons == {"incomplete_termination": 1}
+
+    def test_decision_framework_called_lineages_are_preserved_together(self) -> None:
+        names = (
+            "decisionFramework",
+            "decision-framework-server-decisionFramework",
+            "decisionframework",
+            "clear-thought-server-decisionframework",
+        )
+        sample, _ = _convert_sample(
+            conversion_row(called_names=names),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [DECISION_FRAMEWORK_TOOL_FAMILY]
+        }
+
+    def test_decision_framework_success_and_error_observations_are_preserved(
+        self,
+    ) -> None:
+        chirag = "clear-thought-server-decisionframework"
+        standalone = "decision-framework-server-decisionFramework"
+        sample = conv(
+            tools=[func(chirag), func(standalone)],
+            messages=[
+                assistant(tool_calls=[call(name=chirag, call_id="c-success")]),
+                tool_response(
+                    content='{"decisionId":"d-1","stage":"decision"}',
+                    tool_call_id="c-success",
+                ),
+                assistant(tool_calls=[call(name=chirag, call_id="c-format")]),
+                tool_response(
+                    content="McpError: criterion.weight.toFixed is not a function",
+                    tool_call_id="c-format",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="s-success")]),
+                tool_response(
+                    content='{"decisionId":"d-2","optionCount":2}',
+                    tool_call_id="s-success",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="s-error")]),
+                tool_response(
+                    content='{"error":"Invalid riskTolerance: must be a string",'
+                    '"status":"failed"}',
+                    tool_call_id="s-error",
+                ),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_uncalled_clear_thought_decision_definition_is_unmarked_and_kept(
+        self,
+    ) -> None:
+        name = "clear-thought-decisionframework"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=("get_weather", name),
+            ),
+            "Qwen3",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_undefined_exact_decision_call_is_marked_but_not_hidden(self) -> None:
+        name = "decisionframework"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("clear-thought-server-decisionframework",),
+            ),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [DECISION_FRAMEWORK_TOOL_FAMILY]
+        }
+
+    def test_undefined_fuzzy_decision_call_is_unmarked_and_not_hidden(self) -> None:
+        name = "clear-thought-decision_framework"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("clear-thought-decisionframework",),
+            ),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_decision_framework_definition_variation_across_rows_is_allowed(
+        self,
+    ) -> None:
+        name = "decisionframework"
+        samples = []
+        for description in (
+            "Chirag/ThinkFar echo contract",
+            "Waldzell Clear Thought session-store contract",
+        ):
+            sample = conv(
+                tools=[func(name, description=description)],
+                messages=[user("u"), assistant(content="done")],
+                raw=qrow(),
+            )
+            sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples,
+            ToucanConfig(drop_conflicting_duplicate_tools=True),
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+        assert [sample.tools[0]["function"]["description"] for sample in kept] == [
+            "Chirag/ThinkFar echo contract",
+            "Waldzell Clear Thought session-store contract",
+        ]
+
+    def test_terminal_decision_call_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "clear-thought-server-decisionframework"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"decisionId":"d-1","stage":"decision"}'),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    def test_serialized_sequential_name_is_not_a_decision_family_call(self) -> None:
+        name = (
+            'model-context-protocol-server-sequentialthinking\\", '
+            '{\\"thought\\": \\"apply a decision framework\\"'
+        )
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=("get_weather",)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.annotations == {}
 
     def test_all_audited_think_writes_are_preserved_without_state_reads(self) -> None:
         s = conv(
