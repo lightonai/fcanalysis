@@ -277,6 +277,8 @@ DECISION_FRAMEWORK_TOOL_FAMILY = "decision_framework"
 SCIENTIFIC_METHOD_TOOL_FAMILY = "scientific_method"
 DEBUGGING_APPROACH_TOOL_FAMILY = "debugging_approach"
 DESIGN_PATTERN_TOOL_FAMILY = "design_pattern"
+COLLABORATIVE_REASONING_TOOL_FAMILY = "collaborative_reasoning"
+VISUAL_REASONING_TOOL_FAMILY = "visual_reasoning"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -485,6 +487,50 @@ _DESIGN_PATTERN_TOOL_NAMES = frozenset(
     }
 )
 
+# Collaborative Reasoning is a shared protocol label across three audited MCP
+# lineages in the pinned snapshot. Chirag/ThinkFar shallowly validates the
+# model-authored collaboration object, executes a formatting pass whose nested
+# field failures are externally visible, and otherwise echoes the object. The
+# standalone Waldzell server validates/coerces personas, contributions, and
+# disagreements, mutates registries/history, can select the next persona, and
+# returns a compact projection. Waldzell Clear Thought stores sessions and
+# returns a runtime session UUID plus recent-session context. The five exact
+# visible names span six complete definition fingerprints because bare
+# ``collaborativereasoning`` is shared by the legacy and compact lineages in
+# separate rows. Preserve only these case-sensitive identities; observed
+# underscore, misspelled, and composite names do not inherit membership.
+_COLLABORATIVE_REASONING_TOOL_NAMES = frozenset(
+    {
+        "collaborativeReasoning",
+        "collaborative-reasoning-server-collaborativeReasoning",
+        "collaborativereasoning",
+        "clear-thought-server-collaborativereasoning",
+        "clear-thought-collaborativereasoning",
+    }
+)
+
+# Visual Reasoning likewise spans three audited MCP lineages and five exact
+# visible names/six definition fingerprints. The legacy handler logs every
+# element before returning deterministic diagram metadata, so missing nested
+# properties can produce an embedded handler error. The standalone server is
+# explicitly stateful: at Toucan's observed user-turn scope it accumulates
+# diagram elements and operation history, assigns missing element IDs, and
+# returns cumulative counts. Its implementation also requires a truthy
+# transformationType even though the advertised schema marks it optional; the
+# resulting structured failures remain valuable visible evidence. Waldzell
+# Clear Thought stores operations and is designed to return a runtime session
+# UUID, aggregate store statistics, and recent operations; its two definitions
+# are uncalled in this snapshot. Preserve only these case-sensitive identities.
+_VISUAL_REASONING_TOOL_NAMES = frozenset(
+    {
+        "visualReasoning",
+        "visual-reasoning-server-visualReasoning",
+        "visualreasoning",
+        "clear-thought-server-visualreasoning",
+        "clear-thought-visualreasoning",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -499,6 +545,8 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _SCIENTIFIC_METHOD_TOOL_NAMES
     | _DEBUGGING_APPROACH_TOOL_NAMES
     | _DESIGN_PATTERN_TOOL_NAMES
+    | _COLLABORATIVE_REASONING_TOOL_NAMES
+    | _VISUAL_REASONING_TOOL_NAMES
 )
 
 
@@ -541,6 +589,10 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(DEBUGGING_APPROACH_TOOL_FAMILY)
     if called_names & _DESIGN_PATTERN_TOOL_NAMES:
         families.append(DESIGN_PATTERN_TOOL_FAMILY)
+    if called_names & _COLLABORATIVE_REASONING_TOOL_NAMES:
+        families.append(COLLABORATIVE_REASONING_TOOL_FAMILY)
+    if called_names & _VISUAL_REASONING_TOOL_NAMES:
+        families.append(VISUAL_REASONING_TOOL_FAMILY)
     return families
 
 

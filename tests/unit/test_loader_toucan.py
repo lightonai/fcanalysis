@@ -14,6 +14,7 @@ from fcanalysis.format import ConversationSample
 from fcanalysis.validation import has_invalid_arguments, has_undefined_function_calls
 from fcanalysis.loaders.toucan import (
     ANALOGICAL_REASONING_TOOL_FAMILY,
+    COLLABORATIVE_REASONING_TOOL_FAMILY,
     DECISION_FRAMEWORK_TOOL_FAMILY,
     DEBUGGING_APPROACH_TOOL_FAMILY,
     DESIGN_PATTERN_TOOL_FAMILY,
@@ -27,9 +28,11 @@ from fcanalysis.loaders.toucan import (
     SKIA_ANIMATION_THINKING_TOOL_FAMILY,
     STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
     THINK_TOOL_FAMILY,
+    VISUAL_REASONING_TOOL_FAMILY,
     ToucanConfig,
     _apply_dataset_config,
     _ANALOGICAL_REASONING_TOOL_NAMES,
+    _COLLABORATIVE_REASONING_TOOL_NAMES,
     _DECISION_FRAMEWORK_TOOL_NAMES,
     _DEBUGGING_APPROACH_TOOL_NAMES,
     _DESIGN_PATTERN_TOOL_NAMES,
@@ -52,6 +55,7 @@ from fcanalysis.loaders.toucan import (
     _strip_embedded_tool_system_content,
     _passes_quality,
     _THINK_TOOL_NAMES,
+    _VISUAL_REASONING_TOOL_NAMES,
     _stage1_issues,
     _strip_tools,
     load,
@@ -154,6 +158,22 @@ EXPECTED_DESIGN_PATTERN_TOOL_NAMES = (
     "clear-thought-server-designpattern",
 )
 
+EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES = (
+    "collaborativeReasoning",
+    "collaborative-reasoning-server-collaborativeReasoning",
+    "collaborativereasoning",
+    "clear-thought-server-collaborativereasoning",
+    "clear-thought-collaborativereasoning",
+)
+
+EXPECTED_VISUAL_REASONING_TOOL_NAMES = (
+    "visualReasoning",
+    "visual-reasoning-server-visualReasoning",
+    "visualreasoning",
+    "clear-thought-server-visualreasoning",
+    "clear-thought-visualreasoning",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -168,6 +188,8 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
     + EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES
     + EXPECTED_DESIGN_PATTERN_TOOL_NAMES
+    + EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES
+    + EXPECTED_VISUAL_REASONING_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -256,6 +278,14 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, DESIGN_PATTERN_TOOL_FAMILY, id=name)
         for name in EXPECTED_DESIGN_PATTERN_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, COLLABORATIVE_REASONING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, VISUAL_REASONING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_VISUAL_REASONING_TOOL_NAMES
     ),
 )
 
@@ -401,6 +431,8 @@ class TestIsReasoningTool:
             EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES,
             EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES,
             EXPECTED_DESIGN_PATTERN_TOOL_NAMES,
+            EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES,
+            EXPECTED_VISUAL_REASONING_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
             12,
@@ -416,6 +448,8 @@ class TestIsReasoningTool:
             5,
             3,
             2,
+            5,
+            5,
         ]
         assert sum(len(names) for names in exact_families) == len(
             set().union(*map(set, exact_families))
@@ -452,6 +486,12 @@ class TestIsReasoningTool:
         )
         assert _DESIGN_PATTERN_TOOL_NAMES == frozenset(
             EXPECTED_DESIGN_PATTERN_TOOL_NAMES
+        )
+        assert _COLLABORATIVE_REASONING_TOOL_NAMES == frozenset(
+            EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES
+        )
+        assert _VISUAL_REASONING_TOOL_NAMES == frozenset(
+            EXPECTED_VISUAL_REASONING_TOOL_NAMES
         )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
@@ -500,8 +540,36 @@ class TestIsReasoningTool:
 
     def test_reasoning_method_tools(self) -> None:
         assert _is_reasoning_tool("mentalmodel") is False
-        assert _is_reasoning_tool("collaborativeReasoning") is True
-        assert _is_reasoning_tool("visualReasoning") is True
+        assert _is_reasoning_tool("collaborativeReasoning") is False
+        assert _is_reasoning_tool("visualReasoning") is False
+
+    @pytest.mark.parametrize("name", EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES)
+    def test_five_exact_collaborative_reasoning_names_are_preserved(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize("name", EXPECTED_VISUAL_REASONING_TOOL_NAMES)
+    def test_five_exact_visual_reasoning_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-collaborative_reasoning",
+            "clear-thought-server-collaboratereasoning",
+            "collaborative-reasoning-server-collaboraborReasoning",
+            "virtual-reasoning-server-visualReasoning",
+            "CollaborativeReasoning",
+            "VisualReasoning",
+            'visualReasoning", {"diagramId": "d-1"',
+        ],
+    )
+    def test_collaborative_visual_lookalikes_do_not_inherit_audited_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _COLLABORATIVE_REASONING_TOOL_NAMES
+        assert name not in _VISUAL_REASONING_TOOL_NAMES
 
     @pytest.mark.parametrize("name", EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES)
     def test_two_exact_analogical_reasoning_names_are_preserved(
@@ -998,6 +1066,8 @@ class TestReasoningToolFamilyAnnotations:
                     "scientificMethod",
                     "debuggingapproach",
                     "designpattern",
+                    "collaborativeReasoning",
+                    "visualReasoning",
                 ),
                 defined_names=(
                     "think",
@@ -1013,6 +1083,8 @@ class TestReasoningToolFamilyAnnotations:
                     "scientificMethod",
                     "debuggingapproach",
                     "designpattern",
+                    "collaborativeReasoning",
+                    "visualReasoning",
                     "get_weather",
                 ),
             ),
@@ -1034,6 +1106,8 @@ class TestReasoningToolFamilyAnnotations:
                 SCIENTIFIC_METHOD_TOOL_FAMILY,
                 DEBUGGING_APPROACH_TOOL_FAMILY,
                 DESIGN_PATTERN_TOOL_FAMILY,
+                COLLABORATIVE_REASONING_TOOL_FAMILY,
+                VISUAL_REASONING_TOOL_FAMILY,
             ]
         }
 
@@ -1056,6 +1130,8 @@ class TestReasoningToolFamilyAnnotations:
                     "scientificMethod",
                     "clear-thought-debuggingapproach",
                     "clear-thought-server-designpattern",
+                    "clear-thought-collaborativereasoning",
+                    "clear-thought-visualreasoning",
                 ),
             ),
             "Kimi-K2",
@@ -1107,6 +1183,26 @@ class TestReasoningToolFamilyAnnotations:
         sample, _ = _convert_sample(
             conversion_row(called_names=("clear-thought-structured_argumentation",)),
             "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-collaborative_reasoning",
+            "clear-thought-server-collaboratereasoning",
+            "collaborative-reasoning-server-collaboraborReasoning",
+            "virtual-reasoning-server-visualReasoning",
+            "CollaborativeReasoning",
+            "VisualReasoning",
+        ],
+    )
+    def test_collaborative_visual_lookalike_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)), "Qwen3"
         )
 
         assert sample.annotations == {}
@@ -4830,6 +4926,283 @@ class TestApplyDatasetConfig:
             messages=[
                 assistant(tool_calls=[call(name=name)]),
                 tool_response(content="design status"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    def test_collaborative_and_visual_lineages_are_preserved_together(self) -> None:
+        names = (
+            "collaborativeReasoning",
+            "collaborative-reasoning-server-collaborativeReasoning",
+            "collaborativereasoning",
+            "clear-thought-server-collaborativereasoning",
+            "clear-thought-collaborativereasoning",
+            "visualReasoning",
+            "visual-reasoning-server-visualReasoning",
+            "visualreasoning",
+            "clear-thought-server-visualreasoning",
+            "clear-thought-visualreasoning",
+        )
+        sample, _ = _convert_sample(conversion_row(called_names=names), "Qwen3")
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [
+                COLLABORATIVE_REASONING_TOOL_FAMILY,
+                VISUAL_REASONING_TOOL_FAMILY,
+            ]
+        }
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "observation", "family"),
+        [
+            (
+                "cd6aabab-ace0-53cf-84db-0766ab781830",
+                "Kimi-K2",
+                "clear-thought-server-collaborativereasoning",
+                '{"topic":"root cause analysis","nextContributionNeeded":true}',
+                COLLABORATIVE_REASONING_TOOL_FAMILY,
+            ),
+            (
+                "43948be7-bb3d-53db-a288-1de3f8f35dfa",
+                "Kimi-K2",
+                "collaborative-reasoning-server-collaborativeReasoning",
+                '{"sessionId":"session-1","nextContributionNeeded":true}',
+                COLLABORATIVE_REASONING_TOOL_FAMILY,
+            ),
+            (
+                "79f0967b-812c-52d5-98c3-ee64a40ffe28",
+                "Qwen3",
+                "clear-thought-collaborativereasoning",
+                '{"status":"success","sessionContext":{"sessionId":"runtime-uuid"}}',
+                COLLABORATIVE_REASONING_TOOL_FAMILY,
+            ),
+            (
+                "8694a637-351f-5f21-af4b-7a927ce4bd68",
+                "Kimi-K2",
+                "clear-thought-server-visualreasoning",
+                '{"content":[{"type":"text","text":"{\\"status\\":\\"success\\"}"}]}',
+                VISUAL_REASONING_TOOL_FAMILY,
+            ),
+            (
+                "a18dc779-c8a9-5094-a59d-19d0ef5f2b33",
+                "OSS",
+                "visualreasoning",
+                '{"content":[{"type":"text","text":"{\\"elementCount\\":1}"}]}',
+                VISUAL_REASONING_TOOL_FAMILY,
+            ),
+            (
+                "86984058-6e05-5912-800e-86edecd5fc09",
+                "Qwen3",
+                "visual-reasoning-server-visualReasoning",
+                '{"diagramId":"d-1","elementCount":2,"historyLength":3}',
+                VISUAL_REASONING_TOOL_FAMILY,
+            ),
+        ],
+    )
+    def test_real_collaborative_visual_success_witnesses_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        observation: str,
+        family: str,
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=observation),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        sample.annotations = {REASONING_TOOL_FAMILIES_ANNOTATION: [family]}
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_collaborative_visual_failures_and_retries_remain_visible(self) -> None:
+        collaborative = "clear-thought-server-collaborativereasoning"
+        visual = "visual-reasoning-server-visualReasoning"
+        sample = conv(
+            tools=[func(collaborative), func(visual)],
+            messages=[
+                assistant(
+                    tool_calls=[call(name=collaborative, call_id="collab-error")]
+                ),
+                tool_response(
+                    content="McpError: Cannot read properties of undefined (reading 'join')",
+                    tool_call_id="collab-error",
+                ),
+                assistant(
+                    tool_calls=[call(name=collaborative, call_id="collab-retry")]
+                ),
+                tool_response(
+                    content='{"topic":"retry succeeded"}', tool_call_id="collab-retry"
+                ),
+                assistant(tool_calls=[call(name=visual, call_id="visual-error")]),
+                tool_response(
+                    content='{"error":"Missing required property: transformationType","status":"failed"}',
+                    tool_call_id="visual-error",
+                ),
+                assistant(tool_calls=[call(name=visual, call_id="visual-retry")]),
+                tool_response(
+                    content='{"diagramId":"d-1","historyLength":1}',
+                    tool_call_id="visual-retry",
+                ),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+    def test_standalone_visual_cumulative_state_observations_are_preserved(
+        self,
+    ) -> None:
+        name = "visualReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name, call_id="create")]),
+                tool_response(
+                    content='{"diagramId":"d","elementCount":1,"historyLength":1}',
+                    tool_call_id="create",
+                ),
+                assistant(tool_calls=[call(name=name, call_id="update")]),
+                tool_response(
+                    content='{"diagramId":"d","elementCount":1,"historyLength":2}',
+                    tool_call_id="update",
+                ),
+                assistant(content="The second result depends on the first call."),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+    def test_uncalled_compact_collaborative_visual_definitions_are_unmarked_and_kept(
+        self,
+    ) -> None:
+        names = (
+            "clear-thought-collaborativereasoning",
+            "clear-thought-visualreasoning",
+        )
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=("get_weather", *names),
+            ),
+            "Kimi-K2",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_undefined_exact_visual_call_is_marked_but_not_hidden(self) -> None:
+        name = "visualreasoning"
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=("get_weather",)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [VISUAL_REASONING_TOOL_FAMILY]
+        }
+        assert has_undefined_function_calls(sample) is True
+
+    @pytest.mark.parametrize("name", ["collaborativereasoning", "visualreasoning"])
+    def test_collaborative_visual_definition_variation_across_rows_is_allowed(
+        self, name: str
+    ) -> None:
+        samples = []
+        for description in (
+            "Chirag/ThinkFar legacy contract",
+            "Waldzell Clear Thought state-store contract",
+        ):
+            sample = conv(
+                tools=[func(name, description=description)],
+                messages=[user("u"), assistant(content="done")],
+                raw=qrow(),
+            )
+            sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples, ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+
+    def test_terminal_visual_call_is_preserved_then_incomplete_gate_drops(self) -> None:
+        name = "visual-reasoning-server-visualReasoning"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"nextOperationNeeded":true}'),
             ],
             raw=qrow(),
         )
