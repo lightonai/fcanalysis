@@ -275,6 +275,8 @@ ANALOGICAL_REASONING_TOOL_FAMILY = "analogical_reasoning"
 MENTAL_MODEL_TOOL_FAMILY = "mental_model"
 DECISION_FRAMEWORK_TOOL_FAMILY = "decision_framework"
 SCIENTIFIC_METHOD_TOOL_FAMILY = "scientific_method"
+DEBUGGING_APPROACH_TOOL_FAMILY = "debugging_approach"
+DESIGN_PATTERN_TOOL_FAMILY = "design_pattern"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -453,6 +455,36 @@ _SCIENTIFIC_METHOD_TOOL_NAMES = frozenset(
     }
 )
 
+# Debugging Approach and Design Pattern are explicit Clear Thought operations,
+# not native hidden chain-of-thought. The Chirag/ThinkFar lineage validates and
+# normalizes model-authored debugging/design structures and returns deterministic
+# status metadata; all 16,890 handler-produced observations in the pinned
+# snapshot replay exactly against those handlers. Its remaining 57 calls expose
+# argument-decode failures and are retained for ordinary parseability checks.
+# Waldzell's distinct Debugging Approach contract mutates session state and is
+# designed to return a runtime session UUID plus cumulative/recent debugging
+# context; both Waldzell definition fingerprints are definition-only in this
+# snapshot. The five exact visible names span six complete definition
+# fingerprints because bare ``debuggingapproach`` is shared across the two
+# lineages in different rows. Preserve only these case-sensitive identities.
+# The observed underscore spelling, unsupported Clear Thought Design alias,
+# integration-pattern name, and malformed composite names are undefined and do
+# not inherit audited-family membership.
+_DEBUGGING_APPROACH_TOOL_NAMES = frozenset(
+    {
+        "debuggingapproach",
+        "clear-thought-server-debuggingapproach",
+        "clear-thought-debuggingapproach",
+    }
+)
+
+_DESIGN_PATTERN_TOOL_NAMES = frozenset(
+    {
+        "designpattern",
+        "clear-thought-server-designpattern",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -465,6 +497,8 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _MENTAL_MODEL_TOOL_NAMES
     | _DECISION_FRAMEWORK_TOOL_NAMES
     | _SCIENTIFIC_METHOD_TOOL_NAMES
+    | _DEBUGGING_APPROACH_TOOL_NAMES
+    | _DESIGN_PATTERN_TOOL_NAMES
 )
 
 
@@ -503,6 +537,10 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(DECISION_FRAMEWORK_TOOL_FAMILY)
     if called_names & _SCIENTIFIC_METHOD_TOOL_NAMES:
         families.append(SCIENTIFIC_METHOD_TOOL_FAMILY)
+    if called_names & _DEBUGGING_APPROACH_TOOL_NAMES:
+        families.append(DEBUGGING_APPROACH_TOOL_FAMILY)
+    if called_names & _DESIGN_PATTERN_TOOL_NAMES:
+        families.append(DESIGN_PATTERN_TOOL_FAMILY)
     return families
 
 

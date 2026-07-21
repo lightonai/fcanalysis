@@ -7,7 +7,7 @@
     "low_quality": 1356891
   },
   "dataset_config_transform_counts": {
-    "stripped_reasoning_tools": 44
+    "stripped_reasoning_tools": 42
   },
   "filter_config": {
     "require_balanced_cardinality": true,

@@ -11,9 +11,12 @@ import orjson
 import pytest
 
 from fcanalysis.format import ConversationSample
+from fcanalysis.validation import has_invalid_arguments, has_undefined_function_calls
 from fcanalysis.loaders.toucan import (
     ANALOGICAL_REASONING_TOOL_FAMILY,
     DECISION_FRAMEWORK_TOOL_FAMILY,
+    DEBUGGING_APPROACH_TOOL_FAMILY,
+    DESIGN_PATTERN_TOOL_FAMILY,
     GAME_DESIGN_THINKING_TOOL_FAMILY,
     LOTUS_WISDOM_TOOL_FAMILY,
     MENTAL_MODEL_TOOL_FAMILY,
@@ -28,6 +31,8 @@ from fcanalysis.loaders.toucan import (
     _apply_dataset_config,
     _ANALOGICAL_REASONING_TOOL_NAMES,
     _DECISION_FRAMEWORK_TOOL_NAMES,
+    _DEBUGGING_APPROACH_TOOL_NAMES,
+    _DESIGN_PATTERN_TOOL_NAMES,
     _convert_messages,
     _convert_sample,
     _ends_incomplete,
@@ -138,6 +143,17 @@ EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES = (
     "clear-thought-scientificmethod",
 )
 
+EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES = (
+    "debuggingapproach",
+    "clear-thought-server-debuggingapproach",
+    "clear-thought-debuggingapproach",
+)
+
+EXPECTED_DESIGN_PATTERN_TOOL_NAMES = (
+    "designpattern",
+    "clear-thought-server-designpattern",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -150,6 +166,8 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_MENTAL_MODEL_TOOL_NAMES
     + EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
     + EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
+    + EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES
+    + EXPECTED_DESIGN_PATTERN_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -230,6 +248,14 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, SCIENTIFIC_METHOD_TOOL_FAMILY, id=name)
         for name in EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, DEBUGGING_APPROACH_TOOL_FAMILY, id=name)
+        for name in EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, DESIGN_PATTERN_TOOL_FAMILY, id=name)
+        for name in EXPECTED_DESIGN_PATTERN_TOOL_NAMES
     ),
 )
 
@@ -373,6 +399,8 @@ class TestIsReasoningTool:
             EXPECTED_MENTAL_MODEL_TOOL_NAMES,
             EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES,
             EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES,
+            EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES,
+            EXPECTED_DESIGN_PATTERN_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
             12,
@@ -386,6 +414,8 @@ class TestIsReasoningTool:
             3,
             5,
             5,
+            3,
+            2,
         ]
         assert sum(len(names) for names in exact_families) == len(
             set().union(*map(set, exact_families))
@@ -416,6 +446,12 @@ class TestIsReasoningTool:
         )
         assert _SCIENTIFIC_METHOD_TOOL_NAMES == frozenset(
             EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
+        )
+        assert _DEBUGGING_APPROACH_TOOL_NAMES == frozenset(
+            EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES
+        )
+        assert _DESIGN_PATTERN_TOOL_NAMES == frozenset(
+            EXPECTED_DESIGN_PATTERN_TOOL_NAMES
         )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
@@ -569,6 +605,45 @@ class TestIsReasoningTool:
         assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
         assert _is_reasoning_tool(name) is False
 
+    @pytest.mark.parametrize("name", EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES)
+    def test_three_exact_debugging_approach_names_are_preserved(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize("name", EXPECTED_DESIGN_PATTERN_TOOL_NAMES)
+    def test_two_exact_design_pattern_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-debugging_approach",
+            "clear-thought-designpattern",
+            "clear-thought-server-integrationpattern",
+        ],
+    )
+    def test_observed_clear_thought_debugging_design_lookalikes_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
+        assert name not in _DESIGN_PATTERN_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "search_files_by_pattern",
+            'flux-imagegen-server-generateImage", {"prompt": "professional design"',
+        ],
+    )
+    def test_lexical_pattern_false_positives_are_not_reasoning_tools(
+        self, name: str
+    ) -> None:
+        assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
+        assert name not in _DESIGN_PATTERN_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+
     def test_thought_state_operations_are_not_reasoning(self) -> None:
         for prefix in ("", "think-tool-", "think-tool-server-"):
             assert _is_reasoning_tool(f"{prefix}get_thoughts") is False
@@ -581,8 +656,6 @@ class TestIsReasoningTool:
         for n in (
             "socraticmethod",
             "metacognitiveMonitoring",
-            "debuggingapproach",
-            "designpattern",
             "chain-of-draft-server-chain-of-draft",
         ):
             assert _is_reasoning_tool(n) is True, n
@@ -923,6 +996,8 @@ class TestReasoningToolFamilyAnnotations:
                     "mentalmodel",
                     "decisionFramework",
                     "scientificMethod",
+                    "debuggingapproach",
+                    "designpattern",
                 ),
                 defined_names=(
                     "think",
@@ -936,6 +1011,8 @@ class TestReasoningToolFamilyAnnotations:
                     "mentalmodel",
                     "decisionFramework",
                     "scientificMethod",
+                    "debuggingapproach",
+                    "designpattern",
                     "get_weather",
                 ),
             ),
@@ -955,6 +1032,8 @@ class TestReasoningToolFamilyAnnotations:
                 MENTAL_MODEL_TOOL_FAMILY,
                 DECISION_FRAMEWORK_TOOL_FAMILY,
                 SCIENTIFIC_METHOD_TOOL_FAMILY,
+                DEBUGGING_APPROACH_TOOL_FAMILY,
+                DESIGN_PATTERN_TOOL_FAMILY,
             ]
         }
 
@@ -975,6 +1054,8 @@ class TestReasoningToolFamilyAnnotations:
                     "mentalmodel",
                     "decisionFramework",
                     "scientificMethod",
+                    "clear-thought-debuggingapproach",
+                    "clear-thought-server-designpattern",
                 ),
             ),
             "Kimi-K2",
@@ -1084,6 +1165,24 @@ class TestReasoningToolFamilyAnnotations:
         sample, _ = _convert_sample(
             conversion_row(called_names=(name,)),
             "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-debugging_approach",
+            "clear-thought-designpattern",
+            "clear-thought-server-integrationpattern",
+            "search_files_by_pattern",
+        ],
+    )
+    def test_observed_debugging_design_nearby_name_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)), "Qwen3"
         )
 
         assert sample.annotations == {}
@@ -1625,6 +1724,56 @@ class TestStripTools:
 
         assert _strip_tools(sample, True, False) == (False, False, False)
         assert sample.messages == original_messages
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-debugging_approach",
+            "clear-thought-designpattern",
+            "clear-thought-server-integrationpattern",
+        ],
+    )
+    def test_defined_balanced_debugging_design_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
+        assert name not in _DESIGN_PATTERN_TOOL_NAMES
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-debugging_approach",
+            "clear-thought-designpattern",
+            "clear-thought-server-integrationpattern",
+        ],
+    )
+    def test_undefined_debugging_design_lookalikes_are_left_for_validation(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="Tool does not exist"),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
 
     @pytest.mark.parametrize(
         "name",
@@ -4404,6 +4553,283 @@ class TestApplyDatasetConfig:
             messages=[
                 assistant(tool_calls=[call(name=name)]),
                 tool_response(content='{"content":[{"type":"text","text":"success"}]}'),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    def test_debugging_and_design_lineages_are_preserved_together(self) -> None:
+        names = (
+            "debuggingapproach",
+            "clear-thought-server-debuggingapproach",
+            "clear-thought-debuggingapproach",
+            "designpattern",
+            "clear-thought-server-designpattern",
+        )
+        sample, _ = _convert_sample(conversion_row(called_names=names), "Qwen3")
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [
+                DEBUGGING_APPROACH_TOOL_FAMILY,
+                DESIGN_PATTERN_TOOL_FAMILY,
+            ]
+        }
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "observation", "family"),
+        [
+            (
+                "cd6aabab-ace0-53cf-84db-0766ab781830",
+                "Kimi-K2",
+                "clear-thought-server-debuggingapproach",
+                '{"content":[{"type":"text","text":"{\\n  \\"approachName\\": '
+                '\\"divide_conquer\\",\\n  \\"status\\": \\"success\\",\\n  '
+                '\\"hasSteps\\": true,\\n  \\"hasResolution\\": false\\n}"}]}',
+                DEBUGGING_APPROACH_TOOL_FAMILY,
+            ),
+            (
+                "d8045c3f-c607-55d7-83df-eee7117cd769",
+                "OSS",
+                "debuggingapproach",
+                '{"content":[{"type":"text","text":"debug status"}]}',
+                DEBUGGING_APPROACH_TOOL_FAMILY,
+            ),
+            (
+                "cd6aabab-ace0-53cf-84db-0766ab781830",
+                "Kimi-K2",
+                "clear-thought-server-designpattern",
+                '{"content":[{"type":"text","text":"design status"}]}',
+                DESIGN_PATTERN_TOOL_FAMILY,
+            ),
+            (
+                "3be63bfe-5a78-56e6-8f90-a3be5fe548a4",
+                "OSS",
+                "designpattern",
+                '{"content":[{"type":"text","text":"design status"}]}',
+                DESIGN_PATTERN_TOOL_FAMILY,
+            ),
+        ],
+    )
+    def test_real_debugging_design_success_witnesses_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        observation: str,
+        family: str,
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=observation),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        sample.annotations = {REASONING_TOOL_FAMILIES_ANNOTATION: [family]}
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_debugging_design_handler_and_decode_failures_remain_visible(self) -> None:
+        debugging = "clear-thought-server-debuggingapproach"
+        design = "clear-thought-server-designpattern"
+        sample = conv(
+            tools=[func(debugging), func(design)],
+            messages=[
+                assistant(tool_calls=[call(name=debugging, call_id="debug-error")]),
+                tool_response(
+                    content=(
+                        '{"content":[{"type":"text","text":'
+                        '"{\\n  \\"error\\": \\"Invalid approachName: must be a string\\",'
+                        '\\n  \\"status\\": \\"failed\\"\\n}"}],"isError":true}'
+                    ),
+                    tool_call_id="debug-error",
+                ),
+                assistant(
+                    tool_calls=[
+                        call(name=design, arguments="{broken", call_id="design-decode")
+                    ]
+                ),
+                tool_response(
+                    content="JSONDecodeError: Unterminated string",
+                    tool_call_id="design-decode",
+                ),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert _stage1_issues(sample.messages) == {"unparseable_tool_call_arguments": 1}
+
+    def test_preservation_exposes_invalid_debugging_design_arguments(self) -> None:
+        name = "designpattern"
+        parameters = {
+            "type": "object",
+            "properties": {
+                "patternName": {"type": "string"},
+                "context": {"type": "string"},
+            },
+            "required": ["patternName", "context"],
+        }
+        sample = conv(
+            tools=[func(name, parameters=parameters)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments={"patternName": "scalability", "extra": True},
+                        )
+                    ]
+                ),
+                tool_response(content="handler status"),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert has_invalid_arguments(sample) is True
+
+    def test_uncalled_waldzell_debugging_definitions_are_unmarked_and_kept(
+        self,
+    ) -> None:
+        samples = []
+        for name in ("debuggingapproach", "clear-thought-debuggingapproach"):
+            sample, _ = _convert_sample(
+                conversion_row(
+                    called_names=("get_weather",),
+                    defined_names=("get_weather", name),
+                ),
+                "OSS",
+            )
+            samples.append(sample)
+        original_tools = [copy.deepcopy(sample.tools) for sample in samples]
+
+        kept, drops, transforms = _apply_dataset_config(samples, ToucanConfig())
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+        assert [sample.tools for sample in samples] == original_tools
+        assert [sample.annotations for sample in samples] == [{}, {}]
+
+    @pytest.mark.parametrize(
+        ("name", "defined_name", "family"),
+        [
+            (
+                "debuggingapproach",
+                "clear-thought-server-debuggingapproach",
+                DEBUGGING_APPROACH_TOOL_FAMILY,
+            ),
+            (
+                "designpattern",
+                "clear-thought-server-designpattern",
+                DESIGN_PATTERN_TOOL_FAMILY,
+            ),
+        ],
+    )
+    def test_undefined_exact_debugging_design_call_is_marked_but_not_hidden(
+        self, name: str, defined_name: str, family: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(defined_name,)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {REASONING_TOOL_FAMILIES_ANNOTATION: [family]}
+        assert has_undefined_function_calls(sample) is True
+
+    def test_debugging_definition_variation_across_rows_is_allowed(self) -> None:
+        name = "debuggingapproach"
+        samples = []
+        for description in (
+            "Chirag/ThinkFar deterministic-status contract",
+            "Waldzell session-store contract",
+        ):
+            sample = conv(
+                tools=[func(name, description=description)],
+                messages=[user("u"), assistant(content="done")],
+                raw=qrow(),
+            )
+            sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples, ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+
+    def test_terminal_design_call_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "clear-thought-server-designpattern"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="design status"),
             ],
             raw=qrow(),
         )
