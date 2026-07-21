@@ -93,14 +93,15 @@ Dataset-specific config (Stage 2, before universal filters):
         * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
           only purpose is to structure/record the model's reasoning (the result
           echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content. Ten audited
+          calls, the structural analog of <think>/reasoning_content. Eleven audited
           families are unconditional preservation exceptions: all twelve exact
           audited ``think``/thought-state names, all eight exact sequential-
           thinking names, and the two exact names in each of the pentest, game-
           design, and Skia-animation thinking families, plus the four exact Lotus
           Wisdom names, five exact Structured Argumentation names, and two exact
           Analogical Reasoning names, three exact Clear Thought mental-model
-          names, and five exact Decision Framework names. Their calls, paired
+          names, five exact Decision Framework names, and five exact Scientific
+          Method names. Their calls, paired
           observations, and definitions remain intact
           even when this transform is enabled. Lotus
           writes maintain a turn-local journey read by the summary operation.
@@ -113,6 +114,8 @@ Dataset-specific config (Stage 2, before universal filters):
           metadata or hidden session context. Decision Framework spans an echo-
           like Clear Thought implementation, a stateful/calculating standalone
           implementation, and a Clear Thought session-store implementation.
+          Scientific Method spans deterministic-status Clear Thought, stateful
+          standalone, and Clear Thought session-store implementations.
           Undefined calls and calls under a
           conflicting or unbalanced name are also retained so downstream
           validators see the source defect. Other legacy name families cover
@@ -181,9 +184,9 @@ class ToucanConfig:
     # Legacy reasoning scaffolds are stripped by DEFAULT, except for the exact
     # audited think/thought-state, sequential-thinking, pentest-thinking, game-
     # design-thinking, Skia-animation-thinking, Lotus Wisdom, Structured
-    # Argumentation, Analogical Reasoning, Clear Thought mental-model, and Decision
-    # Framework families, which are always preserved and marked for downstream
-    # row-level selection.
+    # Argumentation, Analogical Reasoning, Clear Thought mental-model, Decision
+    # Framework, and Scientific Method families, which are always preserved and
+    # marked for downstream row-level selection.
     # Framework SCAFFOLD plumbing
     # (server-unlock handshakes, MCP resource primitives, the degenerate
     # deep_researcher async poller) is kept by default -- it is real (often
@@ -271,6 +274,7 @@ STRUCTURED_ARGUMENTATION_TOOL_FAMILY = "structured_argumentation"
 ANALOGICAL_REASONING_TOOL_FAMILY = "analogical_reasoning"
 MENTAL_MODEL_TOOL_FAMILY = "mental_model"
 DECISION_FRAMEWORK_TOOL_FAMILY = "decision_framework"
+SCIENTIFIC_METHOD_TOOL_FAMILY = "scientific_method"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -424,6 +428,31 @@ _DECISION_FRAMEWORK_TOOL_NAMES = frozenset(
     }
 )
 
+# Scientific Method is a shared protocol label across three audited MCP
+# lineages in the pinned snapshot. Chirag/ThinkFar shallowly validates the
+# model-authored inquiry and returns deterministic stage/status metadata.
+# Waldzell's standalone server performs stage-specific validation, stores
+# inquiry/hypothesis/experiment state, and returns a compact current-call
+# projection. Waldzell Clear Thought stores inquiries and is designed to expose
+# hidden session context; both of its captured definition fingerprints are
+# definition-only here. The five exact visible names span six complete
+# definition fingerprints because bare ``scientificmethod`` is shared by two
+# lineages in different rows. The full replay accounts for all 16,626 exact
+# definition-backed calls: 14,375 successes, 1,235 handler errors, 1,009
+# argument-decode/request errors, and seven transport failures whose handler
+# result is unobservable. Preserve only these case-sensitive names. The nine
+# observed underscore, case, truncated, suffixed, and cross-server attempts are
+# undefined anomaly evidence and do not inherit this audited identity.
+_SCIENTIFIC_METHOD_TOOL_NAMES = frozenset(
+    {
+        "scientificMethod",
+        "scientific-method-server-scientificMethod",
+        "scientificmethod",
+        "clear-thought-server-scientificmethod",
+        "clear-thought-scientificmethod",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -435,6 +464,7 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _ANALOGICAL_REASONING_TOOL_NAMES
     | _MENTAL_MODEL_TOOL_NAMES
     | _DECISION_FRAMEWORK_TOOL_NAMES
+    | _SCIENTIFIC_METHOD_TOOL_NAMES
 )
 
 
@@ -471,6 +501,8 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(MENTAL_MODEL_TOOL_FAMILY)
     if called_names & _DECISION_FRAMEWORK_TOOL_NAMES:
         families.append(DECISION_FRAMEWORK_TOOL_FAMILY)
+    if called_names & _SCIENTIFIC_METHOD_TOOL_NAMES:
+        families.append(SCIENTIFIC_METHOD_TOOL_FAMILY)
     return families
 
 

@@ -19,6 +19,7 @@ from fcanalysis.loaders.toucan import (
     MENTAL_MODEL_TOOL_FAMILY,
     PENTEST_THINKING_TOOL_FAMILY,
     REASONING_TOOL_FAMILIES_ANNOTATION,
+    SCIENTIFIC_METHOD_TOOL_FAMILY,
     SEQUENTIAL_THINKING_TOOL_FAMILY,
     SKIA_ANIMATION_THINKING_TOOL_FAMILY,
     STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
@@ -39,6 +40,7 @@ from fcanalysis.loaders.toucan import (
     _MENTAL_MODEL_TOOL_NAMES,
     _PENTEST_THINKING_TOOL_NAMES,
     _PRESERVED_REASONING_TOOL_NAMES,
+    _SCIENTIFIC_METHOD_TOOL_NAMES,
     _SEQUENTIAL_THINKING_TOOL_NAMES,
     _SKIA_ANIMATION_THINKING_TOOL_NAMES,
     _STRUCTURED_ARGUMENTATION_TOOL_NAMES,
@@ -128,6 +130,14 @@ EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES = (
     "clear-thought-decisionframework",
 )
 
+EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES = (
+    "scientificMethod",
+    "scientific-method-server-scientificMethod",
+    "scientificmethod",
+    "clear-thought-server-scientificmethod",
+    "clear-thought-scientificmethod",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -139,6 +149,7 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES
     + EXPECTED_MENTAL_MODEL_TOOL_NAMES
     + EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
+    + EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -215,6 +226,10 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, DECISION_FRAMEWORK_TOOL_FAMILY, id=name)
         for name in EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, SCIENTIFIC_METHOD_TOOL_FAMILY, id=name)
+        for name in EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
     ),
 )
 
@@ -357,6 +372,7 @@ class TestIsReasoningTool:
             EXPECTED_ANALOGICAL_REASONING_TOOL_NAMES,
             EXPECTED_MENTAL_MODEL_TOOL_NAMES,
             EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES,
+            EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
             12,
@@ -368,6 +384,7 @@ class TestIsReasoningTool:
             5,
             2,
             3,
+            5,
             5,
         ]
         assert sum(len(names) for names in exact_families) == len(
@@ -396,6 +413,9 @@ class TestIsReasoningTool:
         assert _MENTAL_MODEL_TOOL_NAMES == frozenset(EXPECTED_MENTAL_MODEL_TOOL_NAMES)
         assert _DECISION_FRAMEWORK_TOOL_NAMES == frozenset(
             EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES
+        )
+        assert _SCIENTIFIC_METHOD_TOOL_NAMES == frozenset(
+            EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES
         )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
@@ -522,6 +542,33 @@ class TestIsReasoningTool:
         assert name not in _DECISION_FRAMEWORK_TOOL_NAMES
         assert _is_reasoning_tool(name) is True
 
+    @pytest.mark.parametrize("name", EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES)
+    def test_five_exact_scientific_method_names_are_preserved(self, name: str) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-scientific_method",
+            "clear-thought-server-meticScientificMethod",
+            "clear-thought-server-scientificmethod@8751",
+            "clear-thought-server-se scientificmethod",
+            "scientific-method-server-scientificmethod",
+        ],
+    )
+    def test_observed_scientific_method_lookalikes_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+
+    def test_severely_misspelled_scientific_name_is_neither_promoted_nor_classified(
+        self,
+    ) -> None:
+        name = "scientific-method-server-scienticMethod"
+        assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+
     def test_thought_state_operations_are_not_reasoning(self) -> None:
         for prefix in ("", "think-tool-", "think-tool-server-"):
             assert _is_reasoning_tool(f"{prefix}get_thoughts") is False
@@ -532,7 +579,6 @@ class TestIsReasoningTool:
         # the whole reasoning-server op vocabulary, incl. standalone prefixes
         # and bare names that the upstream loader missed.
         for n in (
-            "scientificMethod",
             "socraticmethod",
             "metacognitiveMonitoring",
             "debuggingapproach",
@@ -876,6 +922,7 @@ class TestReasoningToolFamilyAnnotations:
                     "analogicalReasoning",
                     "mentalmodel",
                     "decisionFramework",
+                    "scientificMethod",
                 ),
                 defined_names=(
                     "think",
@@ -888,6 +935,7 @@ class TestReasoningToolFamilyAnnotations:
                     "analogicalReasoning",
                     "mentalmodel",
                     "decisionFramework",
+                    "scientificMethod",
                     "get_weather",
                 ),
             ),
@@ -906,6 +954,7 @@ class TestReasoningToolFamilyAnnotations:
                 ANALOGICAL_REASONING_TOOL_FAMILY,
                 MENTAL_MODEL_TOOL_FAMILY,
                 DECISION_FRAMEWORK_TOOL_FAMILY,
+                SCIENTIFIC_METHOD_TOOL_FAMILY,
             ]
         }
 
@@ -925,6 +974,7 @@ class TestReasoningToolFamilyAnnotations:
                     "analogicalReasoning",
                     "mentalmodel",
                     "decisionFramework",
+                    "scientificMethod",
                 ),
             ),
             "Kimi-K2",
@@ -1031,6 +1081,25 @@ class TestReasoningToolFamilyAnnotations:
     def test_fuzzy_decision_framework_variant_does_not_receive_a_marker(
         self, name: str
     ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,)),
+            "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-scientific_method",
+            "clear-thought-server-meticScientificMethod",
+            "clear-thought-server-scientificmethod@8751",
+            "clear-thought-server-se scientificmethod",
+            "scientific-method-server-scienticMethod",
+            "scientific-method-server-scientificmethod",
+        ],
+    )
+    def test_observed_scientific_method_lookalike_is_unmarked(self, name: str) -> None:
         sample, _ = _convert_sample(
             conversion_row(called_names=(name,)),
             "Qwen3",
@@ -1585,6 +1654,24 @@ class TestStripTools:
         assert sample.messages == []
         assert sample.tools == []
 
+    def test_defined_severely_misspelled_scientific_name_fails_closed(self) -> None:
+        name = "scientific-method-server-scienticMethod"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
     @pytest.mark.parametrize(
         "name",
         [
@@ -1617,6 +1704,60 @@ class TestStripTools:
         name = "clear-thought-decision_framework"
         sample = conv(
             tools=[func("clear-thought-decisionframework")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=f"Tool {name} does not exists."),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-scientific_method",
+            "clear-thought-server-meticScientificMethod",
+            "clear-thought-server-scientificmethod@8751",
+            "clear-thought-server-se scientificmethod",
+            "scientific-method-server-scientificmethod",
+        ],
+    )
+    def test_defined_balanced_scientific_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-scientific_method",
+            "clear-thought-server-meticScientificMethod",
+            "clear-thought-server-scientificmethod@8751",
+            "clear-thought-server-se scientificmethod",
+            "scientific-method-server-scienticMethod",
+            "scientific-method-server-scientificmethod",
+        ],
+    )
+    def test_undefined_observed_scientific_lookalikes_remain_visible(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
             messages=[
                 assistant(tool_calls=[call(name=name)]),
                 tool_response(content=f"Tool {name} does not exists."),
@@ -4088,6 +4229,199 @@ class TestApplyDatasetConfig:
         assert transforms == {}
         assert sample.messages == original_messages
         assert sample.annotations == {}
+
+    def test_scientific_method_called_lineages_are_preserved_together(self) -> None:
+        names = (
+            "scientificMethod",
+            "scientific-method-server-scientificMethod",
+            "scientificmethod",
+            "clear-thought-server-scientificmethod",
+        )
+        sample, _ = _convert_sample(
+            conversion_row(called_names=names),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_scientific_method_success_error_decode_and_transport_results_are_kept(
+        self,
+    ) -> None:
+        chirag = "clear-thought-server-scientificmethod"
+        standalone = "scientific-method-server-scientificMethod"
+        sample = conv(
+            tools=[func(chirag), func(standalone)],
+            messages=[
+                assistant(tool_calls=[call(name=chirag, call_id="c-success")]),
+                tool_response(
+                    content=(
+                        '{"content":[{"type":"text","text":'
+                        '"{\\n  \\"stage\\": \\"question\\"\\n}"}]}'
+                    ),
+                    tool_call_id="c-success",
+                ),
+                assistant(tool_calls=[call(name=chirag, call_id="c-error")]),
+                tool_response(
+                    content=(
+                        '{"content":[{"type":"text","text":'
+                        '"{\\n  \\"status\\": \\"failed\\"\\n}"}],'
+                        '"isError":true}'
+                    ),
+                    tool_call_id="c-error",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="s-success")]),
+                tool_response(
+                    content=(
+                        '{"inquiryId":"i-1","stage":"question","iteration":1,'
+                        '"hasObservation":false,"hasQuestion":true,'
+                        '"hasHypothesis":false,"hasExperiment":false,'
+                        '"hasAnalysis":false,"hasConclusion":false,'
+                        '"nextStageNeeded":true}'
+                    ),
+                    tool_call_id="s-success",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="s-error")]),
+                tool_response(
+                    content='{"error":"Invalid inquiryId: must be a string",'
+                    '"status":"failed"}',
+                    tool_call_id="s-error",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="decode")]),
+                tool_response(
+                    content="JSONDecodeError: Expecting ',' delimiter",
+                    tool_call_id="decode",
+                ),
+                assistant(tool_calls=[call(name=standalone, call_id="transport")]),
+                tool_response(
+                    content="Session reconnect (client creation) exception: Session terminated",
+                    tool_call_id="transport",
+                ),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_uncalled_clear_thought_scientific_definition_is_unmarked_and_kept(
+        self,
+    ) -> None:
+        name = "clear-thought-scientificmethod"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=("get_weather", name),
+            ),
+            "Qwen3",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize("name", ["scientificMethod", "scientificmethod"])
+    def test_undefined_exact_scientific_call_is_marked_but_not_hidden(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(name,),
+                defined_names=("clear-thought-server-scientificmethod",),
+            ),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [SCIENTIFIC_METHOD_TOOL_FAMILY]
+        }
+
+    def test_scientific_method_definition_variation_across_rows_is_allowed(
+        self,
+    ) -> None:
+        name = "scientificmethod"
+        samples = []
+        for description in (
+            "Chirag/ThinkFar deterministic-status contract",
+            "Waldzell Clear Thought session-store contract",
+        ):
+            sample = conv(
+                tools=[func(name, description=description)],
+                messages=[user("u"), assistant(content="done")],
+                raw=qrow(),
+            )
+            sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples,
+            ToucanConfig(drop_conflicting_duplicate_tools=True),
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+        assert [sample.tools[0]["function"]["description"] for sample in kept] == [
+            "Chirag/ThinkFar deterministic-status contract",
+            "Waldzell Clear Thought session-store contract",
+        ]
+
+    def test_terminal_scientific_call_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "clear-thought-server-scientificmethod"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"content":[{"type":"text","text":"success"}]}'),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
 
     def test_all_audited_think_writes_are_preserved_without_state_reads(self) -> None:
         s = conv(
