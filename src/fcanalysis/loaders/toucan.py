@@ -279,6 +279,7 @@ DEBUGGING_APPROACH_TOOL_FAMILY = "debugging_approach"
 DESIGN_PATTERN_TOOL_FAMILY = "design_pattern"
 COLLABORATIVE_REASONING_TOOL_FAMILY = "collaborative_reasoning"
 VISUAL_REASONING_TOOL_FAMILY = "visual_reasoning"
+METACOGNITIVE_MONITORING_TOOL_FAMILY = "metacognitive_monitoring"
 
 _THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
     _THOUGHT_WRITE_NAMESPACE_BY_NAME
@@ -531,6 +532,31 @@ _VISUAL_REASONING_TOOL_NAMES = frozenset(
     }
 )
 
+# Metacognitive Monitoring is a shared protocol label across three audited MCP
+# lineages and five exact visible identities/six definition fingerprints in the
+# pinned Toucan snapshot. The Chirag/ThinkFar Clear Thought handler shallowly
+# validates the model-authored assessment, can expose formatter failures, and
+# otherwise returns deterministic status metadata. Waldzell's standalone
+# server performs deeper validation/coercion, mutates monitoring/knowledge/claim
+# state, and returns a compact current-call projection. Waldzell Clear Thought
+# stores assessments and is designed to expose runtime session/store context;
+# both of its exact definitions are uncalled in this snapshot. The complete
+# census found 5,739 exact calls: 5,732 are definition-backed and seven bare
+# lowercase calls are undefined. Every one of the 5,658 parseable defined
+# call/result pairs replays exactly against its pinned lineage contract; the
+# other 74 expose argument-decode failures. Preserve only these case-sensitive
+# identities. The four observed fuzzy, misspelled, and appended-argument names
+# are undefined attempt evidence and do not inherit audited-family membership.
+_METACOGNITIVE_MONITORING_TOOL_NAMES = frozenset(
+    {
+        "metacognitiveMonitoring",
+        "metacognitive-monitoring-server-metacognitiveMonitoring",
+        "metacognitivemonitoring",
+        "clear-thought-server-metacognitivemonitoring",
+        "clear-thought-metacognitivemonitoring",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -547,6 +573,7 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _DESIGN_PATTERN_TOOL_NAMES
     | _COLLABORATIVE_REASONING_TOOL_NAMES
     | _VISUAL_REASONING_TOOL_NAMES
+    | _METACOGNITIVE_MONITORING_TOOL_NAMES
 )
 
 
@@ -593,6 +620,8 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(COLLABORATIVE_REASONING_TOOL_FAMILY)
     if called_names & _VISUAL_REASONING_TOOL_NAMES:
         families.append(VISUAL_REASONING_TOOL_FAMILY)
+    if called_names & _METACOGNITIVE_MONITORING_TOOL_NAMES:
+        families.append(METACOGNITIVE_MONITORING_TOOL_FAMILY)
     return families
 
 

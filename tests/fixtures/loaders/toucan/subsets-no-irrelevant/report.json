@@ -8,7 +8,7 @@
     "subset_not_selected": 159276
   },
   "dataset_config_transform_counts": {
-    "stripped_reasoning_tools": 2251
+    "stripped_reasoning_tools": 1285
   },
   "filter_config": {
     "require_balanced_cardinality": true,
@@ -18,11 +18,11 @@
     "strip_thinking": true
   },
   "filter_drop_reasons": {
-    "invalid_arguments": 13130,
+    "invalid_arguments": 13209,
     "undefined_function_calls": 2423,
-    "unparseable_arguments": 2101
+    "unparseable_arguments": 2124
   },
-  "filtered_count": 346577,
+  "filtered_count": 346481,
   "raw_count": 1527259,
   "stage1_count": 1527259,
   "stage1_drop_reasons": {},

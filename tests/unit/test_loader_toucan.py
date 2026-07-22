@@ -21,6 +21,7 @@ from fcanalysis.loaders.toucan import (
     GAME_DESIGN_THINKING_TOOL_FAMILY,
     LOTUS_WISDOM_TOOL_FAMILY,
     MENTAL_MODEL_TOOL_FAMILY,
+    METACOGNITIVE_MONITORING_TOOL_FAMILY,
     PENTEST_THINKING_TOOL_FAMILY,
     REASONING_TOOL_FAMILIES_ANNOTATION,
     SCIENTIFIC_METHOD_TOOL_FAMILY,
@@ -46,6 +47,7 @@ from fcanalysis.loaders.toucan import (
     _GAME_DESIGN_THINKING_TOOL_NAMES,
     _LOTUS_WISDOM_TOOL_NAMES,
     _MENTAL_MODEL_TOOL_NAMES,
+    _METACOGNITIVE_MONITORING_TOOL_NAMES,
     _PENTEST_THINKING_TOOL_NAMES,
     _PRESERVED_REASONING_TOOL_NAMES,
     _SCIENTIFIC_METHOD_TOOL_NAMES,
@@ -174,6 +176,14 @@ EXPECTED_VISUAL_REASONING_TOOL_NAMES = (
     "clear-thought-visualreasoning",
 )
 
+EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES = (
+    "metacognitiveMonitoring",
+    "metacognitive-monitoring-server-metacognitiveMonitoring",
+    "metacognitivemonitoring",
+    "clear-thought-server-metacognitivemonitoring",
+    "clear-thought-metacognitivemonitoring",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -190,6 +200,7 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_DESIGN_PATTERN_TOOL_NAMES
     + EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES
     + EXPECTED_VISUAL_REASONING_TOOL_NAMES
+    + EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -286,6 +297,10 @@ AUDITED_REASONING_TOOL_CASES = (
     *(
         pytest.param(name, VISUAL_REASONING_TOOL_FAMILY, id=name)
         for name in EXPECTED_VISUAL_REASONING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, METACOGNITIVE_MONITORING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
     ),
 )
 
@@ -433,6 +448,7 @@ class TestIsReasoningTool:
             EXPECTED_DESIGN_PATTERN_TOOL_NAMES,
             EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES,
             EXPECTED_VISUAL_REASONING_TOOL_NAMES,
+            EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
             12,
@@ -448,6 +464,7 @@ class TestIsReasoningTool:
             5,
             3,
             2,
+            5,
             5,
             5,
         ]
@@ -492,6 +509,9 @@ class TestIsReasoningTool:
         )
         assert _VISUAL_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_VISUAL_REASONING_TOOL_NAMES
+        )
+        assert _METACOGNITIVE_MONITORING_TOOL_NAMES == frozenset(
+            EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
         )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
@@ -552,6 +572,29 @@ class TestIsReasoningTool:
     @pytest.mark.parametrize("name", EXPECTED_VISUAL_REASONING_TOOL_NAMES)
     def test_five_exact_visual_reasoning_names_are_preserved(self, name: str) -> None:
         assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize("name", EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES)
+    def test_five_exact_metacognitive_monitoring_names_are_preserved(
+        self, name: str
+    ) -> None:
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-server-metacognitive-monitoring",
+            "clear-thought-server-metagognitivemonitoring",
+            "mcpognitive-monitoring-server-metacognitiveMonitoring",
+            'metacognitive-monitoring-server-metacognitiveMonitoring", '
+            '{"task": "Detect and mitigate systematic bias in weather forecast '
+            "models and services for outdoor corporate event planning",
+        ],
+    )
+    def test_observed_metacognitive_lookalikes_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _METACOGNITIVE_MONITORING_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
 
     @pytest.mark.parametrize(
         "name",
@@ -723,10 +766,10 @@ class TestIsReasoningTool:
         # and bare names that the upstream loader missed.
         for n in (
             "socraticmethod",
-            "metacognitiveMonitoring",
             "chain-of-draft-server-chain-of-draft",
         ):
             assert _is_reasoning_tool(n) is True, n
+        assert _is_reasoning_tool("metacognitiveMonitoring") is False
 
     @pytest.mark.parametrize("name", EXPECTED_LOTUS_WISDOM_TOOL_NAMES)
     def test_four_exact_lotus_wisdom_names_are_preserved(self, name: str) -> None:
@@ -1068,6 +1111,7 @@ class TestReasoningToolFamilyAnnotations:
                     "designpattern",
                     "collaborativeReasoning",
                     "visualReasoning",
+                    "metacognitiveMonitoring",
                 ),
                 defined_names=(
                     "think",
@@ -1085,6 +1129,7 @@ class TestReasoningToolFamilyAnnotations:
                     "designpattern",
                     "collaborativeReasoning",
                     "visualReasoning",
+                    "metacognitiveMonitoring",
                     "get_weather",
                 ),
             ),
@@ -1108,6 +1153,7 @@ class TestReasoningToolFamilyAnnotations:
                 DESIGN_PATTERN_TOOL_FAMILY,
                 COLLABORATIVE_REASONING_TOOL_FAMILY,
                 VISUAL_REASONING_TOOL_FAMILY,
+                METACOGNITIVE_MONITORING_TOOL_FAMILY,
             ]
         }
 
@@ -1132,6 +1178,7 @@ class TestReasoningToolFamilyAnnotations:
                     "clear-thought-server-designpattern",
                     "clear-thought-collaborativereasoning",
                     "clear-thought-visualreasoning",
+                    "clear-thought-metacognitivemonitoring",
                 ),
             ),
             "Kimi-K2",
@@ -1199,6 +1246,26 @@ class TestReasoningToolFamilyAnnotations:
         ],
     )
     def test_collaborative_visual_lookalike_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)), "Qwen3"
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-server-metacognitive-monitoring",
+            "clear-thought-server-metagognitivemonitoring",
+            "mcpognitive-monitoring-server-metacognitiveMonitoring",
+            'metacognitive-monitoring-server-metacognitiveMonitoring", '
+            '{"task": "Detect and mitigate systematic bias in weather forecast '
+            "models and services for outdoor corporate event planning",
+        ],
+    )
+    def test_observed_metacognitive_lookalike_does_not_receive_a_marker(
         self, name: str
     ) -> None:
         sample, _ = _convert_sample(
@@ -1794,6 +1861,61 @@ class TestStripTools:
         # undefined call must not be deleted before defined-function validation.
         assert _strip_tools(s, True, False) == (False, False, False)
         assert s.messages == original_messages
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-server-metacognitive-monitoring",
+            "clear-thought-server-metagognitivemonitoring",
+            "mcpognitive-monitoring-server-metacognitiveMonitoring",
+            'metacognitive-monitoring-server-metacognitiveMonitoring", '
+            '{"task": "Detect and mitigate systematic bias in weather forecast '
+            "models and services for outdoor corporate event planning",
+        ],
+    )
+    def test_defined_balanced_metacognitive_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _METACOGNITIVE_MONITORING_TOOL_NAMES
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-server-metacognitive-monitoring",
+            "clear-thought-server-metagognitivemonitoring",
+            "mcpognitive-monitoring-server-metacognitiveMonitoring",
+            'metacognitive-monitoring-server-metacognitiveMonitoring", '
+            '{"task": "Detect and mitigate systematic bias in weather forecast '
+            "models and services for outdoor corporate event planning",
+        ],
+    )
+    def test_undefined_observed_metacognitive_lookalikes_remain_visible(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=f"Tool {name} does not exist."),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
 
     @pytest.mark.parametrize(
         "name",
@@ -5203,6 +5325,322 @@ class TestApplyDatasetConfig:
             messages=[
                 assistant(tool_calls=[call(name=name)]),
                 tool_response(content='{"nextOperationNeeded":true}'),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, _ = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+
+    def test_all_metacognitive_monitoring_lineages_are_preserved_together(
+        self,
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [METACOGNITIVE_MONITORING_TOOL_FAMILY]
+        }
+
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "observation"),
+        [
+            (
+                "0ba9af6c-b72c-5814-b279-c244709fa647",
+                "Kimi-K2",
+                "clear-thought-server-metacognitivemonitoring",
+                '{"content":[{"type":"text","text":"{\\"status\\":\\"success\\"}"}]}',
+            ),
+            (
+                "bbbb18b1-e24f-5510-a20b-65f300c8876f",
+                "Qwen3",
+                "clear-thought-server-metacognitivemonitoring",
+                '{"content":[{"type":"text","text":"{\\"iteration\\":0}"}]}',
+            ),
+            (
+                "e6b97313-cf98-5fbc-b2a7-5e5949da8f9b",
+                "Kimi-K2",
+                "metacognitive-monitoring-server-metacognitiveMonitoring",
+                '{"monitoringId":"m-1","nextAssessmentNeeded":true}',
+            ),
+            (
+                "f955d541-7a6b-5200-bb1f-327148ebda41",
+                "Qwen3",
+                "metacognitive-monitoring-server-metacognitiveMonitoring",
+                '{"monitoringId":"m-2","claimCount":2}',
+            ),
+            (
+                "066fe43c-fa32-5570-a80b-527ff389ea0b",
+                "OSS",
+                "metacognitiveMonitoring",
+                '{"monitoringId":"m-3","reasoningStepCount":1}',
+            ),
+            (
+                "8e13f0e8-fd5b-5856-a2f8-9179f381092d",
+                "OSS",
+                "metacognitivemonitoring",
+                '{"content":[{"type":"text","text":"{\\"status\\":\\"success\\"}"}]}',
+            ),
+        ],
+    )
+    def test_real_metacognitive_monitoring_success_witnesses_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        observation: str,
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=observation),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        sample.sample_id = sample_id
+        sample.dataset = f"Agent-Ark/Toucan-1.5M:{teacher}"
+        sample.annotations = {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [METACOGNITIVE_MONITORING_TOOL_FAMILY]
+        }
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_metacognitive_handler_decode_failures_and_retries_remain_visible(
+        self,
+    ) -> None:
+        legacy = "clear-thought-server-metacognitivemonitoring"
+        standalone = "metacognitive-monitoring-server-metacognitiveMonitoring"
+        sample = conv(
+            tools=[func(legacy), func(standalone)],
+            messages=[
+                assistant(tool_calls=[call(name=legacy, call_id="legacy-error")]),
+                tool_response(
+                    content=(
+                        '{"content":[{"type":"text","text":'
+                        '"{\\"error\\":\\"Invalid iteration value\\",'
+                        '\\"status\\":\\"failed\\"}"}],"isError":true}'
+                    ),
+                    tool_call_id="legacy-error",
+                ),
+                assistant(tool_calls=[call(name=legacy, call_id="legacy-retry")]),
+                tool_response(
+                    content='{"content":[{"type":"text","text":"success"}]}',
+                    tool_call_id="legacy-retry",
+                ),
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=standalone,
+                            arguments="{broken",
+                            call_id="standalone-decode",
+                        )
+                    ]
+                ),
+                tool_response(
+                    content="JSONDecodeError: Unterminated string",
+                    tool_call_id="standalone-decode",
+                ),
+                assistant(
+                    tool_calls=[call(name=standalone, call_id="standalone-retry")]
+                ),
+                tool_response(
+                    content='{"monitoringId":"m","status":"success"}',
+                    tool_call_id="standalone-retry",
+                ),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert _stage1_issues(sample.messages) == {"unparseable_tool_call_arguments": 1}
+
+    def test_preservation_exposes_invalid_metacognitive_arguments(self) -> None:
+        name = "metacognitiveMonitoring"
+        parameters = {
+            "type": "object",
+            "properties": {
+                "monitoringId": {"type": "string"},
+                "overallConfidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                },
+            },
+            "required": ["monitoringId", "overallConfidence"],
+        }
+        sample = conv(
+            tools=[func(name, parameters=parameters)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments={
+                                "monitoringId": "m",
+                                "overallConfidence": "not-a-number",
+                            },
+                        )
+                    ]
+                ),
+                tool_response(content='{"status":"failed"}'),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert has_invalid_arguments(sample) is True
+
+    def test_uncalled_compact_metacognitive_definitions_are_unmarked_and_kept(
+        self,
+    ) -> None:
+        names = (
+            "metacognitivemonitoring",
+            "clear-thought-metacognitivemonitoring",
+        )
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=("get_weather",),
+                defined_names=("get_weather", *names),
+            ),
+            "Kimi-K2",
+        )
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.tools == original_tools
+        assert sample.annotations == {}
+
+    def test_undefined_exact_metacognitive_call_is_marked_but_not_hidden(
+        self,
+    ) -> None:
+        name = "metacognitivemonitoring"
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=("get_weather",)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [METACOGNITIVE_MONITORING_TOOL_FAMILY]
+        }
+        assert has_undefined_function_calls(sample) is True
+
+    def test_metacognitive_definition_variation_across_rows_is_allowed(
+        self,
+    ) -> None:
+        samples = []
+        for description in (
+            "Chirag/ThinkFar legacy contract",
+            "Waldzell Clear Thought state-store contract",
+        ):
+            sample = conv(
+                tools=[func("metacognitivemonitoring", description=description)],
+                messages=[user("u"), assistant(content="done")],
+                raw=qrow(),
+            )
+            sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+            samples.append(sample)
+
+        kept, drops, transforms = _apply_dataset_config(
+            samples, ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == samples
+        assert drops == {}
+        assert transforms == {}
+
+    def test_next_assessment_true_without_another_family_call_is_preserved(
+        self,
+    ) -> None:
+        name = "metacognitive-monitoring-server-metacognitiveMonitoring"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"nextAssessmentNeeded":true}'),
+                assistant(content="The task is complete after using other evidence."),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+    def test_terminal_metacognitive_call_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "metacognitive-monitoring-server-metacognitiveMonitoring"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"nextAssessmentNeeded":true}'),
             ],
             raw=qrow(),
         )
