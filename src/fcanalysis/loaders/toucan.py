@@ -90,70 +90,26 @@ Dataset-specific config (Stage 2, before universal filters):
       Object-key order is canonicalized, but no schema or description is
       heuristically normalized. Same-name variation across different rows is
       allowed; byte-equivalent duplicates within one row are not conflicts.
-    - ``strip_reasoning_tools`` (DEFAULT ON) and ``strip_scaffold_tools``
-      (default off): two transforms (run on survivors, after the drops) that
-      remove tool calls and their positionally-linked tool responses, and drop
-      the exact-name definitions of calls actually removed. Definitions that
-      were available but never called are always retained. Only balanced
-      assistant turns are stripped; an assistant turn left with no calls and no
-      content is dropped (any reasoning_content goes with it).
-        * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
-          only purpose is to structure/record the model's reasoning (the result
-          echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content. Twenty-two
-          audited families are unconditional preservation exceptions: all
-          fourteen exact audited ``think``/thought-state names, all eight exact
-          sequential-
-          thinking names, and the two exact names in each of the pentest, game-
-          design, and Skia-animation thinking families, plus the four exact Lotus
-          Wisdom names, five exact Structured Argumentation names, and two exact
-          Analogical Reasoning names, three exact Clear Thought mental-model
-          names, five exact Decision Framework names, five exact Scientific
-          Method names, and the exact Programming Paradigm, Chain of Draft,
-          Creative Thinking, Systems Thinking, Socratic Method, and unified
-          Clear Thought dispatcher identities.
-          Their calls, paired
-          observations, and definitions remain intact
-          even when this transform is enabled. Lotus
-          writes maintain a turn-local journey read by the summary operation.
-          Structured Argumentation spans a stateful argument graph, a runtime-ID-
-          producing Clear Thought implementation, and a compact Clear Thought
-          implementation that exposes hidden session statistics. Analogical
-          Reasoning validates model-authored analogies, assigns missing element
-          IDs, and records server-local state. Clear Thought mental-model calls
-          validate model-authored analyses and return either deterministic status
-          metadata or hidden session context. Decision Framework spans an echo-
-          like Clear Thought implementation, a stateful/calculating standalone
-          implementation, and a Clear Thought session-store implementation.
-          Scientific Method spans deterministic-status Clear Thought, stateful
-          standalone, and Clear Thought session-store implementations.
-          Six exact Clear Thought session-info/export/import operations are
-          also non-strippable ordinary state tools, but do not add reasoning
-          action markers.
-          Two exact Clear Thought MCP resource primitives are protected from
-          reasoning stripping as ordinary scaffold tools; they add no marker
-          and remain controlled by the separate scaffold flag.
-          Undefined calls and calls under a
-          conflicting or unbalanced name are also retained so downstream
-          validators see the source defect.
-        * ``strip_scaffold_tools`` removes non-reasoning framework PLUMBING:
-          server-unlock handshakes ``__unlock*`` / ``__get_instructions``, MCP
-          resource primitives ``list_resources`` / ``read_resource`` /
-          ``get_resource``, and the ``deep_researcher`` framework-injected async
-          research tool. These are real, often information-bearing tool calls
-          (deep_researcher returns cited reports ~57% of the time; read_resource
-          returns file/doc content) -- removing them is lossy -- so they are KEPT
-          BY DEFAULT. Defined-function validation uses the canonical
-          teacher-visible context extracted from the system template, with
-          ``available_tools`` only as the no-template fallback.
-          Turning on strip_scaffold_tools can rescue the surrounding domain calls,
-          but it can also hide undefined framework calls and remove observations
-          the final answer used; treat it as an explicit analysis variant, not the
-          production cleaning path.
+    - ``strip_scaffold_tools`` (default off): an explicit counterfactual
+      transform, run on survivors after the drops, that removes selected
+      framework-plumbing calls and their positionally linked responses. It can
+      remove server-unlock handshakes, MCP resource primitives, and the
+      ``deep_researcher`` async protocol. These calls are real and often
+      information-bearing, so production keeps them. The counterfactual can hide
+      malformed calls or delete observations used by later assistant messages;
+      it must not be interpreted as a quality improvement.
+    - Reasoning tools are never rewritten. Twenty-two exact audited action
+      families are preserved intact and annotated outside model-visible content
+      under ``reasoning_tool_families`` when actually called. Uncalled
+      definitions remain available but unmarked. Six ordinary Clear Thought
+      session-state identities and two information-bearing resource identities
+      are also retained without reasoning-family markers. Fuzzy, misspelled,
+      case-shifted, undefined, conflicting, and unbalanced calls remain visible
+      to the ordinary validators rather than being deleted by a name heuristic.
 
-      NOTE: this reasoning vs scaffold split, the audited-family preservation
-      rules, and canonical tool-context normalization are deliberate divergences
-      from the upstream loader.
+      NOTE: reasoning-tool preservation, the opt-in scaffold counterfactual, and
+      canonical tool-context normalization are deliberate divergences from the
+      upstream loader.
 
 Universal filters then apply (strip_thinking removes the OSS reasoning_content;
 the four drop filters compose orthogonally per the base class).
@@ -196,37 +152,18 @@ class ToucanConfig:
     require_full_tool_use: bool = True
     drop_incomplete_termination: bool = False
     drop_conflicting_duplicate_tools: bool = False
-    # Two independent strip transforms (see _is_reasoning_tool / _is_scaffold_tool).
-    # Legacy reasoning scaffolds are stripped by DEFAULT, except for the exact
-    # audited think/thought-state, sequential-thinking, pentest-thinking, game-
-    # design-thinking, Skia-animation-thinking, Lotus Wisdom, Structured
-    # Argumentation, Analogical Reasoning, Clear Thought mental-model, Decision
-    # Framework, Scientific Method, Programming Paradigm, Chain of Draft,
-    # Creative Thinking, Systems Thinking, and Socratic Method families, which
-    # are always preserved and marked for downstream row-level selection. Exact
-    # Clear Thought session operations are also retained as ordinary state
-    # tools, without adding a reasoning action marker.
-    # Framework SCAFFOLD plumbing
-    # (server-unlock handshakes, MCP resource primitives, the degenerate
-    # deep_researcher async poller) is kept by default -- it is real (often
-    # information-bearing) tool use, not reasoning. strip_scaffold_tools is an
-    # explicit analysis/debug variant because it can hide undefined framework
+    # Framework scaffold plumbing is kept by default because it is real, often
+    # information-bearing tool use. This opt-in counterfactual can hide malformed
     # calls and remove observations used by the final answer.
-    strip_reasoning_tools: bool = True
     strip_scaffold_tools: bool = False
 
 
-# Reasoning/thinking scaffolds: tools whose sole purpose is to structure or
-# record the model's own reasoning (the result echoes the thought back; no
-# external information). These are reasoning-as-tool-calls -- the structural
-# analog of <think>/reasoning_content -- and are stripped by default.
-#
-# The token set is broader than the upstream loader and was audited against the
-# 4,868-tool catalog for name coverage. Name matching is not, by itself, proof
-# that a particular episode is safely removable. The exact audited preservation
-# vocabularies below take precedence over this legacy broad predicate.
-_REASONING_TOOL_SUBSTRINGS = (
-    "thinking",  # systemsthinking, creativethinking, *thinking domain tools, sequentialthinking
+# Retained solely to reproduce and census the retired name-based policy. This
+# heuristic never authorizes production transformation. Exact audited reasoning
+# identities and ordinary state/resource false positives are excluded so the
+# helper reports only unresolved legacy candidates.
+_LEGACY_REASONING_SUBSTRINGS = (
+    "thinking",
     "clear_thought",
     "clear-thought",
     "think-tool",
@@ -237,7 +174,7 @@ _REASONING_TOOL_SUBSTRINGS = (
     "decisionframework",
     "scientificmethod",
     "socraticmethod",
-    "metacognit",  # metacognitiveMonitoring and variants
+    "metacognit",
     "structuredargumentation",
     "debuggingapproach",
     "designpattern",
@@ -280,8 +217,8 @@ _THOUGHT_WRITE_NAMESPACE_BY_NAME = {
 # Exact call-name vocabularies established by the full pinned-snapshot audits.
 # Preservation is deliberately name-exact: case variants, misspellings, and
 # names with serialized arguments appended do not inherit an audited identity.
-# Such undefined calls are nevertheless retained by _strip_tools so universal
-# defined-function validation can reject them rather than being bypassed.
+# Such undefined calls remain visible so universal defined-function validation
+# can reject them rather than being bypassed.
 REASONING_TOOL_FAMILIES_ANNOTATION = "reasoning_tool_families"
 THINK_TOOL_FAMILY = "think_tool"
 SEQUENTIAL_THINKING_TOOL_FAMILY = "sequential_thinking"
@@ -713,7 +650,7 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
 )
 
-_AUDITED_NON_STRIPPABLE_TOOL_NAMES = (
+_LEGACY_REASONING_EXCLUSIONS = (
     _PRESERVED_REASONING_TOOL_NAMES
     | _CLEAR_THOUGHT_SESSION_TOOL_NAMES
     | _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
@@ -839,17 +776,20 @@ _SCAFFOLD_TOOL_SUBSTRINGS = (
 )
 
 
-def _is_reasoning_tool(name: str) -> bool:
-    # These exact, audited families are explicit tool actions. They are retained
-    # intact and can later be selected out at row granularity via annotations.
-    if name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES:
+def _legacy_reasoning_candidate(name: str) -> bool:
+    """Return whether the retired broad heuristic would target this name.
+
+    This is an audit/census helper only. Production never deletes a tool call
+    because this predicate returns true.
+    """
+
+    if name in _LEGACY_REASONING_EXCLUSIONS:
         return False
     low = name.lower()
-    # bare or namespaced "think" tool, plus the reasoning substring families
     return (
         low.endswith("-think")
         or low == "think"
-        or any(s in low for s in _REASONING_TOOL_SUBSTRINGS)
+        or any(s in low for s in _LEGACY_REASONING_SUBSTRINGS)
     )
 
 
@@ -1309,23 +1249,25 @@ def _has_conflicting_duplicate_tools(value: Any) -> bool:
     return bool(_conflicting_duplicate_tool_names(tools))
 
 
-def _strip_tools(
+def _legacy_tool_projection(
     sample: ConversationSample, strip_reasoning: bool, strip_scaffold: bool
 ) -> tuple[bool, bool, bool]:
-    """Remove reasoning and/or scaffold tool calls and their positionally-linked
-    tool responses, and drop those tools from the tool list. Returns
-    ``(changed, removed_reasoning, removed_scaffold)`` where the latter two flag
-    whether a call from that family was removed. A definition is pruned only
-    when at least one exact-name call was removed and no exact-name call remains
-    in the source trajectory. Consequently, definitions that were merely
-    available but never called are always preserved.
+    """Reproduce retired reasoning and optional scaffold projections for audit.
+
+    Production calls this helper only for the separately registered scaffold
+    counterfactual, always with ``strip_reasoning=False``. The reasoning branch
+    remains available solely to reproduce historical artifacts and tests; no
+    ``ToucanConfig`` field can enable it.
+
+    A definition is pruned only when at least one exact-name call was removed
+    and no exact-name call remains in the source trajectory. Definitions that
+    were merely available but never called are always preserved.
 
     Only strips an assistant turn whose tool_calls are balanced with the
-    following run of tool messages (the loader's normal output). Exact audited
-    preservation names, undefined calls, and every call/definition under a
-    conflicting or unbalanced visible name remain untouched. This prevents a
-    transform from hiding the very defect that a downstream validator must see.
-    Reasoning is checked before scaffold for deterministic off-catalog overlap.
+    following run of tool messages. Undefined calls and every call/definition
+    under a conflicting or unbalanced visible name remain untouched. This
+    prevents the counterfactual from hiding the very defect that a downstream
+    validator must see.
     """
 
     defined_names = {
@@ -1358,12 +1300,12 @@ def _strip_tools(
         i = j
 
     def classify(name: str, *, is_call: bool = False) -> tuple[bool, bool]:
-        # returns (should_strip, is_reasoning)
+        # Returns (should_strip, is_reasoning).
         if name in conflicting_names or name in unbalanced_names:
             return False, False
         if is_call and name not in defined_names:
             return False, False
-        if strip_reasoning and _is_reasoning_tool(name):
+        if strip_reasoning and _legacy_reasoning_candidate(name):
             return True, True
         if strip_scaffold and _is_scaffold_tool(name):
             return True, False
@@ -1476,16 +1418,13 @@ def _apply_dataset_config(
     if d_confdup:
         drops["conflicting_duplicate_tools"] = d_confdup
     # transform on survivors, after drops (loader-checklist ordering)
-    if config.strip_reasoning_tools or config.strip_scaffold_tools:
-        n_reasoning = n_scaffold = 0
+    if config.strip_scaffold_tools:
+        n_scaffold = 0
         for s in kept:
-            _, removed_reasoning, removed_scaffold = _strip_tools(
-                s, config.strip_reasoning_tools, config.strip_scaffold_tools
+            _, _, removed_scaffold = _legacy_tool_projection(
+                s, strip_reasoning=False, strip_scaffold=True
             )
-            n_reasoning += removed_reasoning
             n_scaffold += removed_scaffold
-        if n_reasoning:
-            transforms["stripped_reasoning_tools"] = n_reasoning
         if n_scaffold:
             transforms["stripped_scaffold_tools"] = n_scaffold
     if d_term:

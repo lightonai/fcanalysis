@@ -213,8 +213,8 @@ TOOLMIND_SPECS: list[FixtureSpec] = _build_specs(
 )
 
 
-# strip_reasoning_tools defaults True (reasoning stripped by default);
-# strip_scaffold_tools defaults False (framework plumbing kept by default).
+# Reasoning-tool trajectories are preserved and marked. strip_scaffold_tools
+# defaults False; its registered variant is an explicit lossy counterfactual.
 _TOUCAN_PROD = ToucanConfig(
     drop_low_quality=True,
     require_full_tool_use=True,
@@ -229,7 +229,6 @@ TOUCAN_SPECS: list[FixtureSpec] = _build_specs(
         "require_full_tool_use",
         "drop_incomplete_termination",
         "drop_conflicting_duplicate_tools",
-        "strip_reasoning_tools",  # prod default True -> no-strip_reasoning_tools variant
     ],
     extra_variants=[
         (

@@ -8,7 +8,6 @@
     "min_question_quality": 5,
     "min_scenario_realism": 5,
     "require_full_tool_use": true,
-    "strip_reasoning_tools": true,
     "strip_scaffold_tools": false,
     "subsets": [
       "irrelevant"

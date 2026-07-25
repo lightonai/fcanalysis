@@ -6,6 +6,7 @@ semantics that the conversion and Stage 2 config depend on.
 """
 
 import copy
+from dataclasses import fields
 
 import orjson
 import pytest
@@ -38,7 +39,7 @@ from fcanalysis.loaders.toucan import (
     VISUAL_REASONING_TOOL_FAMILY,
     ToucanConfig,
     _apply_dataset_config,
-    _AUDITED_NON_STRIPPABLE_TOOL_NAMES,
+    _LEGACY_REASONING_EXCLUSIONS,
     _ANALOGICAL_REASONING_TOOL_NAMES,
     _COLLABORATIVE_REASONING_TOOL_NAMES,
     _CHAIN_OF_DRAFT_TOOL_NAMES,
@@ -55,7 +56,7 @@ from fcanalysis.loaders.toucan import (
     _ends_incomplete,
     _has_conflicting_duplicate_tools,
     _is_embedded_tool_system_message,
-    _is_reasoning_tool,
+    _legacy_reasoning_candidate,
     _is_scaffold_tool,
     _GAME_DESIGN_THINKING_TOOL_NAMES,
     _LOTUS_WISDOM_TOOL_NAMES,
@@ -76,7 +77,7 @@ from fcanalysis.loaders.toucan import (
     _SYSTEMS_THINKING_TOOL_NAMES,
     _VISUAL_REASONING_TOOL_NAMES,
     _stage1_issues,
-    _strip_tools,
+    _legacy_tool_projection,
     load,
 )
 
@@ -269,7 +270,7 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
 )
 
-EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES = (
+EXPECTED_LEGACY_REASONING_EXCLUSIONS = (
     EXPECTED_PRESERVED_REASONING_TOOL_NAMES
     + EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES
     + EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
@@ -515,11 +516,11 @@ def conversion_row(called_names=(), defined_names=None):
 
 
 # --------------------------------------------------------------------------
-# _is_reasoning_tool / _is_scaffold_tool
+# _legacy_reasoning_candidate / _is_scaffold_tool
 # --------------------------------------------------------------------------
 
 
-class TestIsReasoningTool:
+class TestLegacyReasoningCandidate:
     def test_exact_preservation_vocabularies_are_complete_and_disjoint(self) -> None:
         """Pin the curation contract independently of loader construction."""
 
@@ -651,8 +652,8 @@ class TestIsReasoningTool:
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
         )
-        assert _AUDITED_NON_STRIPPABLE_TOOL_NAMES == frozenset(
-            EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES
+        assert _LEGACY_REASONING_EXCLUSIONS == frozenset(
+            EXPECTED_LEGACY_REASONING_EXCLUSIONS
         )
         assert not (_PRESERVED_REASONING_TOOL_NAMES & _CLEAR_THOUGHT_SESSION_TOOL_NAMES)
         assert not (
@@ -670,19 +671,19 @@ class TestIsReasoningTool:
         self, name: str, family: str
     ) -> None:
         del family
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     def test_audited_think_names_are_preserved_but_lookalikes_are_not(self) -> None:
-        assert _is_reasoning_tool("think") is False
-        assert _is_reasoning_tool("think-tool-think") is False
-        assert _is_reasoning_tool("think-tool-server-think") is False
-        assert _is_reasoning_tool("think-mcp-server-think") is False
-        assert _is_reasoning_tool("think-tank-think") is False
+        assert _legacy_reasoning_candidate("think") is False
+        assert _legacy_reasoning_candidate("think-tool-think") is False
+        assert _legacy_reasoning_candidate("think-tool-server-think") is False
+        assert _legacy_reasoning_candidate("think-mcp-server-think") is False
+        assert _legacy_reasoning_candidate("think-tank-think") is False
         # Tool names are case-sensitive; an unaudited variant does not inherit
         # an audited identity merely through case folding.
-        assert _is_reasoning_tool("THINK") is True
-        assert _is_reasoning_tool("server-think") is True
-        assert _is_reasoning_tool("think-mcp-think") is True
+        assert _legacy_reasoning_candidate("THINK") is True
+        assert _legacy_reasoning_candidate("server-think") is True
+        assert _legacy_reasoning_candidate("think-mcp-think") is True
 
     @pytest.mark.parametrize(
         "name",
@@ -698,35 +699,35 @@ class TestIsReasoningTool:
         ],
     )
     def test_eight_exact_sequential_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     def test_core_families(self) -> None:
-        assert _is_reasoning_tool("mcp-sequentialthinking-tools") is True
-        assert _is_reasoning_tool("clear_thought") is False
-        assert _is_reasoning_tool("clear-thought-clear_thought") is False
-        assert _is_reasoning_tool("clear-thought") is True
-        assert _is_reasoning_tool("think-tool") is True
+        assert _legacy_reasoning_candidate("mcp-sequentialthinking-tools") is True
+        assert _legacy_reasoning_candidate("clear_thought") is False
+        assert _legacy_reasoning_candidate("clear-thought-clear_thought") is False
+        assert _legacy_reasoning_candidate("clear-thought") is True
+        assert _legacy_reasoning_candidate("think-tool") is True
 
     def test_reasoning_method_tools(self) -> None:
-        assert _is_reasoning_tool("mentalmodel") is False
-        assert _is_reasoning_tool("collaborativeReasoning") is False
-        assert _is_reasoning_tool("visualReasoning") is False
+        assert _legacy_reasoning_candidate("mentalmodel") is False
+        assert _legacy_reasoning_candidate("collaborativeReasoning") is False
+        assert _legacy_reasoning_candidate("visualReasoning") is False
 
     @pytest.mark.parametrize("name", EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES)
     def test_five_exact_collaborative_reasoning_names_are_preserved(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize("name", EXPECTED_VISUAL_REASONING_TOOL_NAMES)
     def test_five_exact_visual_reasoning_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize("name", EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES)
     def test_five_exact_metacognitive_monitoring_names_are_preserved(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -743,7 +744,7 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _METACOGNITIVE_MONITORING_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     @pytest.mark.parametrize(
         "name",
@@ -767,7 +768,7 @@ class TestIsReasoningTool:
     def test_two_exact_analogical_reasoning_names_are_preserved(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -790,13 +791,13 @@ class TestIsReasoningTool:
             "analogical-reasoning-server-analogialReasoning",
             "analogical_reasoning",
         }:
-            assert _is_reasoning_tool(name) is False
+            assert _legacy_reasoning_candidate(name) is False
         else:
-            assert _is_reasoning_tool(name) is True
+            assert _legacy_reasoning_candidate(name) is True
 
     @pytest.mark.parametrize("name", EXPECTED_MENTAL_MODEL_TOOL_NAMES)
     def test_three_exact_mental_model_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -814,11 +815,11 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _MENTAL_MODEL_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     @pytest.mark.parametrize("name", EXPECTED_DECISION_FRAMEWORK_TOOL_NAMES)
     def test_five_exact_decision_framework_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -836,11 +837,11 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _DECISION_FRAMEWORK_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     @pytest.mark.parametrize("name", EXPECTED_SCIENTIFIC_METHOD_TOOL_NAMES)
     def test_five_exact_scientific_method_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -856,24 +857,24 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     def test_severely_misspelled_scientific_name_is_neither_promoted_nor_classified(
         self,
     ) -> None:
         name = "scientific-method-server-scienticMethod"
         assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize("name", EXPECTED_DEBUGGING_APPROACH_TOOL_NAMES)
     def test_three_exact_debugging_approach_names_are_preserved(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize("name", EXPECTED_DESIGN_PATTERN_TOOL_NAMES)
     def test_two_exact_design_pattern_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -888,7 +889,7 @@ class TestIsReasoningTool:
     ) -> None:
         assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
         assert name not in _DESIGN_PATTERN_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     @pytest.mark.parametrize(
         "name",
@@ -902,13 +903,13 @@ class TestIsReasoningTool:
     ) -> None:
         assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
         assert name not in _DESIGN_PATTERN_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     def test_thought_state_operations_are_not_reasoning(self) -> None:
         for prefix in ("", "think-tool-", "think-tool-server-"):
-            assert _is_reasoning_tool(f"{prefix}get_thoughts") is False
-            assert _is_reasoning_tool(f"{prefix}get_thought_stats") is False
-            assert _is_reasoning_tool(f"{prefix}clear_thoughts") is False
+            assert _legacy_reasoning_candidate(f"{prefix}get_thoughts") is False
+            assert _legacy_reasoning_candidate(f"{prefix}get_thought_stats") is False
+            assert _legacy_reasoning_candidate(f"{prefix}clear_thoughts") is False
 
     def test_newly_audited_clear_thought_and_chain_operations(self) -> None:
         for n in (
@@ -918,12 +919,12 @@ class TestIsReasoningTool:
             "creativethinking",
             "systemsthinking",
         ):
-            assert _is_reasoning_tool(n) is False, n
-        assert _is_reasoning_tool("metacognitiveMonitoring") is False
+            assert _legacy_reasoning_candidate(n) is False, n
+        assert _legacy_reasoning_candidate("metacognitiveMonitoring") is False
 
     @pytest.mark.parametrize("name", EXPECTED_LOTUS_WISDOM_TOOL_NAMES)
     def test_four_exact_lotus_wisdom_names_are_preserved(self, name: str) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -938,7 +939,7 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _LOTUS_WISDOM_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     def test_undefined_lotus_wisdom_misspelling_is_not_an_audited_name(
         self,
@@ -948,13 +949,13 @@ class TestIsReasoningTool:
         # for defined-function validation rather than being granted protection.
         name = "lotus-wisdom-wisdom"
         assert name not in _LOTUS_WISDOM_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize("name", EXPECTED_STRUCTURED_ARGUMENTATION_TOOL_NAMES)
     def test_five_exact_structured_argumentation_names_are_preserved(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -971,17 +972,17 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _STRUCTURED_ARGUMENTATION_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     def test_other_operation_on_argumentation_server_is_not_in_family(self) -> None:
         name = "structured-argumentation-server-visualizeArgumentMap"
         assert name not in _STRUCTURED_ARGUMENTATION_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert _legacy_reasoning_candidate(name) is False
 
     def test_exact_compact_thinking_methods_are_preserved(self) -> None:
-        assert _is_reasoning_tool("systemsthinking") is False
-        assert _is_reasoning_tool("creativethinking") is False
-        assert _is_reasoning_tool("socraticmethod") is False
+        assert _legacy_reasoning_candidate("systemsthinking") is False
+        assert _legacy_reasoning_candidate("creativethinking") is False
+        assert _legacy_reasoning_candidate("socraticmethod") is False
 
     @pytest.mark.parametrize(
         "name",
@@ -1011,8 +1012,8 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _PRESERVED_REASONING_TOOL_NAMES
-        assert name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert name in _LEGACY_REASONING_EXCLUSIONS
+        assert _legacy_reasoning_candidate(name) is False
 
     @pytest.mark.parametrize(
         "name",
@@ -1033,8 +1034,8 @@ class TestIsReasoningTool:
         self, name: str
     ) -> None:
         assert name not in _PRESERVED_REASONING_TOOL_NAMES
-        assert name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
+        assert name in _LEGACY_REASONING_EXCLUSIONS
+        assert _legacy_reasoning_candidate(name) is False
         assert _is_scaffold_tool(name) is True
 
     @pytest.mark.parametrize(
@@ -1049,23 +1050,25 @@ class TestIsReasoningTool:
     def test_fuzzy_domain_variants_do_not_inherit_audited_identity(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
 
     def test_not_reasoning(self) -> None:
-        assert _is_reasoning_tool("get_weather") is False
-        assert _is_reasoning_tool("rethink") is False  # no -think suffix/bare/thinking
+        assert _legacy_reasoning_candidate("get_weather") is False
+        assert (
+            _legacy_reasoning_candidate("rethink") is False
+        )  # no -think suffix/bare/thinking
         # the think-tank server's real ops, despite "think" in the server name
-        assert _is_reasoning_tool("think-tank-exa_search") is False
-        assert _is_reasoning_tool("think-tank-create_relations") is False
-        assert _is_reasoning_tool("think-tank-list_tasks") is False
+        assert _legacy_reasoning_candidate("think-tank-exa_search") is False
+        assert _legacy_reasoning_candidate("think-tank-create_relations") is False
+        assert _legacy_reasoning_candidate("think-tank-list_tasks") is False
         # model-listing utility, not a reasoning scaffold
-        assert _is_reasoning_tool("listReasoningModels") is False
-        assert _is_reasoning_tool("mindbridge-listReasoningModels") is False
+        assert _legacy_reasoning_candidate("listReasoningModels") is False
+        assert _legacy_reasoning_candidate("mindbridge-listReasoningModels") is False
 
     def test_scaffold_tools_are_not_reasoning(self) -> None:
         # reasoning and scaffold token sets are disjoint
-        assert _is_reasoning_tool("fs-list_resources") is False
-        assert _is_reasoning_tool("exa-search-deep_researcher_check") is False
+        assert _legacy_reasoning_candidate("fs-list_resources") is False
+        assert _legacy_reasoning_candidate("exa-search-deep_researcher_check") is False
 
 
 class TestIsScaffoldTool:
@@ -1658,7 +1661,7 @@ class TestReasoningToolFamilyAnnotations:
 
         kept, drops, transforms = _apply_dataset_config(
             [sample],
-            ToucanConfig(strip_reasoning_tools=True, strip_scaffold_tools=True),
+            ToucanConfig(strip_scaffold_tools=True),
         )
 
         assert kept == [sample]
@@ -2337,11 +2340,11 @@ class TestHasConflictingDuplicateTools:
 
 
 # --------------------------------------------------------------------------
-# _strip_tools  (mutating transform; returns (changed, removed_reasoning, removed_scaffold))
+# _legacy_tool_projection  (mutating transform; returns (changed, removed_reasoning, removed_scaffold))
 # --------------------------------------------------------------------------
 
 
-class TestStripTools:
+class TestLegacyProjectionForAudit:
     def test_no_reasoning_tools_unchanged(self) -> None:
         s = conv(
             tools=[func("get_weather")],
@@ -2350,9 +2353,9 @@ class TestStripTools:
                 tool_response(),
             ],
         )
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
 
-    @pytest.mark.parametrize("name", EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES)
+    @pytest.mark.parametrize("name", EXPECTED_LEGACY_REASONING_EXCLUSIONS)
     def test_audited_tool_calls_are_always_preserved(self, name: str) -> None:
         s = conv(
             tools=[func(name)],
@@ -2365,11 +2368,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(s.messages)
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.messages == original_messages
         assert s.tools == original_tools
 
-    @pytest.mark.parametrize("name", EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES)
+    @pytest.mark.parametrize("name", EXPECTED_LEGACY_REASONING_EXCLUSIONS)
     def test_audited_call_keeps_its_positional_result_and_definition_when_mixed(
         self, name: str
     ) -> None:
@@ -2395,7 +2398,7 @@ class TestStripTools:
             ],
         )
 
-        assert _strip_tools(s, True, False) == (True, True, False)
+        assert _legacy_tool_projection(s, True, False) == (True, True, False)
         assert s.messages[0]["content"] == "visible assistant content"
         assert [
             tool_call["function"]["name"] for tool_call in s.messages[0]["tool_calls"]
@@ -2415,12 +2418,12 @@ class TestStripTools:
 
     def test_all_uncalled_audited_definitions_are_preserved(self) -> None:
         s = conv(
-            tools=[func(name) for name in EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES],
+            tools=[func(name) for name in EXPECTED_LEGACY_REASONING_EXCLUSIONS],
             messages=[user("u"), assistant(content="done")],
         )
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.tools == original_tools
 
     def test_undefined_fuzzy_reasoning_call_is_left_for_validation(self) -> None:
@@ -2435,7 +2438,7 @@ class TestStripTools:
 
         # The broad legacy name predicate recognizes this spelling, but an
         # undefined call must not be deleted before defined-function validation.
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.messages == original_messages
 
     @pytest.mark.parametrize(
@@ -2463,9 +2466,13 @@ class TestStripTools:
             ],
         )
 
-        assert name not in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
-        assert _is_reasoning_tool(name) is True
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert name not in _LEGACY_REASONING_EXCLUSIONS
+        assert _legacy_reasoning_candidate(name) is True
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2485,8 +2492,12 @@ class TestStripTools:
         )
         original_messages = copy.deepcopy(sample.messages)
 
-        assert _is_reasoning_tool(name) is False
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_reasoning_candidate(name) is False
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert has_undefined_function_calls(sample) is True
 
@@ -2513,7 +2524,11 @@ class TestStripTools:
         )
 
         assert name not in _METACOGNITIVE_MONITORING_TOOL_NAMES
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2541,7 +2556,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(sample.messages)
         original_tools = copy.deepcopy(sample.tools)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2568,7 +2587,11 @@ class TestStripTools:
         )
         original_messages = copy.deepcopy(sample.messages)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
 
     @pytest.mark.parametrize(
@@ -2592,7 +2615,11 @@ class TestStripTools:
 
         assert name not in _DEBUGGING_APPROACH_TOOL_NAMES
         assert name not in _DESIGN_PATTERN_TOOL_NAMES
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2617,7 +2644,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(sample.messages)
         original_tools = copy.deepcopy(sample.tools)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2645,7 +2676,11 @@ class TestStripTools:
         )
 
         assert name not in _MENTAL_MODEL_TOOL_NAMES
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2662,8 +2697,12 @@ class TestStripTools:
         original_tools = copy.deepcopy(sample.tools)
 
         assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
-        assert _is_reasoning_tool(name) is False
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_reasoning_candidate(name) is False
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2689,7 +2728,11 @@ class TestStripTools:
         )
 
         assert name not in _DECISION_FRAMEWORK_TOOL_NAMES
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2707,7 +2750,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(sample.messages)
         original_tools = copy.deepcopy(sample.tools)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2733,7 +2780,11 @@ class TestStripTools:
         )
 
         assert name not in _SCIENTIFIC_METHOD_TOOL_NAMES
-        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            True,
+            True,
+            False,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2761,7 +2812,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(sample.messages)
         original_tools = copy.deepcopy(sample.tools)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2783,7 +2838,11 @@ class TestStripTools:
         original_messages = copy.deepcopy(sample.messages)
         original_tools = copy.deepcopy(sample.tools)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample.messages == original_messages
         assert sample.tools == original_tools
 
@@ -2800,7 +2859,7 @@ class TestStripTools:
         original_messages = copy.deepcopy(s.messages)
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.messages == original_messages
         assert s.tools == original_tools
 
@@ -2819,7 +2878,7 @@ class TestStripTools:
                 tool_response(content="sunny", tool_call_id="w"),
             ],
         )
-        changed, rem_r, rem_s = _strip_tools(s, True, False)
+        changed, rem_r, rem_s = _legacy_tool_projection(s, True, False)
         assert (changed, rem_r, rem_s) == (True, True, False)
         asst = s.messages[0]
         assert [tc["function"]["name"] for tc in asst["tool_calls"]] == ["get_weather"]
@@ -2837,7 +2896,7 @@ class TestStripTools:
                 tool_response(content=""),
             ],
         )
-        assert _strip_tools(s, True, False)[0] is True
+        assert _legacy_tool_projection(s, True, False)[0] is True
         assert s.messages == [{"role": "assistant", "content": "visible"}]
 
     def test_reasoning_only_turn_without_content_is_dropped(self) -> None:
@@ -2848,7 +2907,7 @@ class TestStripTools:
                 tool_response(content=""),
             ],
         )
-        assert _strip_tools(s, True, False)[0] is True
+        assert _legacy_tool_projection(s, True, False)[0] is True
         assert s.messages == []
 
     def test_unbalanced_turn_left_untouched(self) -> None:
@@ -2866,7 +2925,7 @@ class TestStripTools:
             ],
         )
         before = [dict(m) for m in s.messages]
-        changed, rem_r, _ = _strip_tools(s, True, False)
+        changed, rem_r, _ = _legacy_tool_projection(s, True, False)
         # The whole unbalanced name is protected, including its definition.
         assert [m for m in s.messages] == before
         assert [t["function"]["name"] for t in s.tools] == [
@@ -2882,14 +2941,14 @@ class TestStripTools:
         )
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.tools == original_tools
 
     @pytest.mark.parametrize("name", UNCALLED_LEGACY_REASONING_DEFINITION_NAMES)
     def test_preserves_every_uncalled_legacy_reasoning_definition_rule(
         self, name: str
     ) -> None:
-        assert _is_reasoning_tool(name) is True
+        assert _legacy_reasoning_candidate(name) is True
         s = conv(
             tools=[func(name), func("get_weather")],
             messages=[user("u"), assistant(content="hi")],
@@ -2897,7 +2956,7 @@ class TestStripTools:
         original_messages = copy.deepcopy(s.messages)
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.messages == original_messages
         assert s.tools == original_tools
 
@@ -2910,7 +2969,7 @@ class TestStripTools:
                 tool_response(content="file contents"),
             ],
         )
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert len(s.messages) == 2
 
     def test_scaffold_stripped_when_flag_on(self) -> None:
@@ -2924,7 +2983,7 @@ class TestStripTools:
                 tool_response(content="sunny", tool_call_id="w"),
             ],
         )
-        changed, rem_r, rem_s = _strip_tools(s, True, True)
+        changed, rem_r, rem_s = _legacy_tool_projection(s, True, True)
         assert (changed, rem_r, rem_s) == (True, False, True)
         assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
 
@@ -2944,9 +3003,17 @@ class TestStripTools:
         )
         original = copy.deepcopy(sample)
 
-        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert _legacy_tool_projection(sample, True, False) == (
+            False,
+            False,
+            False,
+        )
         assert sample == original
-        assert _strip_tools(sample, False, True) == (True, False, True)
+        assert _legacy_tool_projection(sample, False, True) == (
+            True,
+            False,
+            True,
+        )
         assert sample.messages == []
         assert sample.tools == []
 
@@ -2970,7 +3037,7 @@ class TestStripTools:
                 tool_response(content="sunny", tool_call_id="w"),
             ],
         )
-        changed, rem_r, rem_s = _strip_tools(s, True, True)
+        changed, rem_r, rem_s = _legacy_tool_projection(s, True, True)
         assert (changed, rem_r, rem_s) == (True, True, True)
         assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
 
@@ -2984,7 +3051,7 @@ class TestStripTools:
         original_messages = copy.deepcopy(s.messages)
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, True) == (False, False, False)
+        assert _legacy_tool_projection(s, True, True) == (False, False, False)
         assert s.messages == original_messages
         assert s.tools == original_tools
 
@@ -3013,7 +3080,7 @@ class TestStripTools:
             ],
         )
 
-        assert _strip_tools(s, True, True) == (True, True, True)
+        assert _legacy_tool_projection(s, True, True) == (True, True, True)
         assert [
             tool_call["function"]["name"] for tool_call in s.messages[0]["tool_calls"]
         ] == ["get_weather"]
@@ -3043,7 +3110,7 @@ class TestStripTools:
         original_messages = copy.deepcopy(s.messages)
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.messages == original_messages
         assert s.tools == original_tools
 
@@ -3059,7 +3126,7 @@ class TestStripTools:
             ],
         )
 
-        assert _strip_tools(s, True, False) == (True, True, False)
+        assert _legacy_tool_projection(s, True, False) == (True, True, False)
         assert s.messages == []
         assert s.tools == []
 
@@ -3075,7 +3142,7 @@ class TestStripTools:
         )
         original_tools = copy.deepcopy(s.tools)
 
-        assert _strip_tools(s, True, False) == (False, False, False)
+        assert _legacy_tool_projection(s, True, False) == (False, False, False)
         assert s.tools == original_tools
 
 
@@ -3091,19 +3158,23 @@ class TestApplyDatasetConfig:
         return conv(messages=[system("s"), user("u"), assistant(content="a")], raw=raw)
 
     def test_default_config_no_tools_is_noop(self) -> None:
-        # Samples with no tools/tool_calls: default config drops nothing and the
-        # (default-ON) reasoning transform finds nothing to strip.
+        # Samples with no tools/tool_calls: default config drops and transforms
+        # nothing.
         samples = [self._sample("single-turn-original"), self._sample("multi-turn")]
         kept, drops, transforms = _apply_dataset_config(samples, ToucanConfig())
         assert len(kept) == 2
         assert drops == {}
         assert transforms == {}
 
-    def test_default_config_strips_reasoning(self) -> None:
-        # strip_reasoning_tools defaults True: ToucanConfig() with NO args strips a
-        # reasoning call + its response and prunes the tool, while keeping scaffold
-        # (strip_scaffold_tools default False). Pins the default-ON contract that a
-        # weaker no-tools test would miss.
+    def test_reasoning_strip_switch_is_not_part_of_the_config(self) -> None:
+        assert "strip_reasoning_tools" not in {
+            field.name for field in fields(ToucanConfig)
+        }
+
+    def test_default_config_preserves_unaudited_reasoning_like_tools(self) -> None:
+        # Production has no reasoning-tool rewrite. A future defined and balanced
+        # name that matches the retired broad heuristic remains intact pending an
+        # exact audit.
         s = conv(
             tools=[
                 func("chain-of-draft"),
@@ -3125,11 +3196,14 @@ class TestApplyDatasetConfig:
             ],
             raw=qrow(),
         )
+        original_messages = copy.deepcopy(s.messages)
+        original_tools = copy.deepcopy(s.tools)
         kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
-        # Legacy reasoning stripped; scaffold kept (read_resource survives).
-        assert transforms == {"stripped_reasoning_tools": 1}
+        assert transforms == {}
         kept_names = [t["function"]["name"] for t in kept[0].tools]
-        assert kept_names == ["srv-read_resource", "get_weather"]
+        assert kept_names == ["chain-of-draft", "srv-read_resource", "get_weather"]
+        assert kept[0].messages == original_messages
+        assert kept[0].tools == original_tools
 
     def test_subset_filter(self) -> None:
         samples = [
@@ -3311,27 +3385,26 @@ class TestApplyDatasetConfig:
         assert drops == {"conflicting_duplicate_tools": 1}
         assert transforms == {}
 
-    def test_strip_reasoning_tools_is_a_transform_on_survivors(self) -> None:
+    def test_scaffold_projection_is_a_transform_on_survivors(self) -> None:
         s = conv(
-            tools=[func("chain-of-draft"), func("get_weather")],
+            tools=[func("srv-read_resource"), func("get_weather")],
             messages=[
                 assistant(
                     tool_calls=[
-                        call(name="chain-of-draft"),
+                        call(name="srv-read_resource"),
                         call(name="get_weather"),
                     ]
                 ),
-                tool_response(content="", tool_call_id="t"),
+                tool_response(content="resource", tool_call_id="r"),
                 tool_response(content="sunny", tool_call_id="w"),
                 assistant(content="done"),
             ],
             raw=qrow(),
         )
-        cfg = ToucanConfig(strip_reasoning_tools=True)  # the default
+        cfg = ToucanConfig(strip_scaffold_tools=True)
         kept, drops, transforms = _apply_dataset_config([s], cfg)
         assert len(kept) == 1
-        assert transforms["stripped_reasoning_tools"] == 1
-        assert "stripped_scaffold_tools" not in transforms
+        assert transforms == {"stripped_scaffold_tools": 1}
         assert [t["function"]["name"] for t in kept[0].tools] == ["get_weather"]
 
     @pytest.mark.parametrize(
@@ -6496,7 +6569,7 @@ class TestApplyDatasetConfig:
         assert sample.messages == original_messages
         assert has_invalid_arguments(sample) is True
 
-    def test_exact_chain_is_kept_while_unaudited_bare_chain_is_stripped(
+    def test_exact_and_unaudited_bare_chain_are_both_preserved(
         self,
     ) -> None:
         exact = "chain-of-draft-server-chain-of-draft"
@@ -6513,13 +6586,13 @@ class TestApplyDatasetConfig:
 
         assert kept == [sample]
         assert drops == {}
-        assert transforms == {"stripped_reasoning_tools": 1}
+        assert transforms == {}
         assert [
             call["function"]["name"]
             for message in sample.messages
             for call in message.get("tool_calls") or []
-        ] == [exact]
-        assert [tool["function"]["name"] for tool in sample.tools] == [exact]
+        ] == [exact, fuzzy]
+        assert [tool["function"]["name"] for tool in sample.tools] == [exact, fuzzy]
         assert sample.annotations == {
             REASONING_TOOL_FAMILIES_ANNOTATION: [CHAIN_OF_DRAFT_TOOL_FAMILY]
         }
@@ -6611,7 +6684,9 @@ class TestApplyDatasetConfig:
             "think-tool-server-get_thoughts",
         ]
 
-    def test_arbitrary_matching_suffix_does_not_create_a_state_family(self) -> None:
+    def test_arbitrary_matching_suffix_neither_creates_a_family_nor_gets_rewritten(
+        self,
+    ) -> None:
         # The raw snapshot contains an undefined mcpollinations-get_thoughts
         # hallucination. A shared arbitrary prefix is not evidence that it and a
         # hypothetical *-think call share the audited Clear Thought state.
@@ -6631,15 +6706,17 @@ class TestApplyDatasetConfig:
 
         kept, _, transforms = _apply_dataset_config([s], ToucanConfig())
 
-        assert transforms == {"stripped_reasoning_tools": 1}
+        assert transforms == {}
         assert [t["function"]["name"] for t in kept[0].tools] == [
-            "mcpollinations-get_thoughts"
+            "mcpollinations-think",
+            "mcpollinations-get_thoughts",
         ]
         assert [
             c["function"]["name"]
             for m in kept[0].messages
             for c in m.get("tool_calls") or []
-        ] == ["mcpollinations-get_thoughts"]
+        ] == ["mcpollinations-think", "mcpollinations-get_thoughts"]
+        assert kept[0].annotations == {}
 
     def test_scaffold_strip_reported_separately(self) -> None:
         # strip_scaffold_tools (off by default) is reported under its own key.
@@ -6657,14 +6734,49 @@ class TestApplyDatasetConfig:
             ],
             raw=qrow(),
         )
-        cfg = ToucanConfig(strip_reasoning_tools=False, strip_scaffold_tools=True)
+        cfg = ToucanConfig(strip_scaffold_tools=True)
         kept, _, transforms = _apply_dataset_config([s], cfg)
         assert transforms == {"stripped_scaffold_tools": 1}
         assert [t["function"]["name"] for t in kept[0].tools] == ["get_weather"]
 
+    def test_scaffold_projection_cannot_remove_reasoning_candidate(self) -> None:
+        s = conv(
+            tools=[
+                func("future-reasoning-thinking"),
+                func("srv-read_resource"),
+            ],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(name="future-reasoning-thinking", call_id="reasoning"),
+                        call(name="srv-read_resource", call_id="resource"),
+                    ]
+                ),
+                tool_response(content="thought", tool_call_id="reasoning"),
+                tool_response(content="resource", tool_call_id="resource"),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+
+        kept, drops, transforms = _apply_dataset_config(
+            [s], ToucanConfig(strip_scaffold_tools=True)
+        )
+
+        assert drops == {}
+        assert transforms == {"stripped_scaffold_tools": 1}
+        assert [
+            call["function"]["name"]
+            for message in kept[0].messages
+            for call in message.get("tool_calls") or []
+        ] == ["future-reasoning-thinking"]
+        assert [tool["function"]["name"] for tool in kept[0].tools] == [
+            "future-reasoning-thinking"
+        ]
+
     def test_dropped_rows_are_not_transformed(self) -> None:
-        # A row dropped by subset selection must not be counted as stripped,
-        # even if it contains reasoning tools (transform runs on survivors only).
+        # A row dropped by subset selection must not reach any optional
+        # post-drop projection.
         dropped = conv(
             tools=[func("chain-of-draft")],
             messages=[
@@ -6673,9 +6785,7 @@ class TestApplyDatasetConfig:
             ],
             raw=qrow(subset="irrelevant"),
         )
-        cfg = ToucanConfig(
-            subsets=("multi-turn",)
-        )  # strip_reasoning_tools default True
+        cfg = ToucanConfig(subsets=("multi-turn",))
         kept, drops, transforms = _apply_dataset_config([dropped], cfg)
         assert kept == []
         assert drops["subset_not_selected"] == 1
@@ -6713,11 +6823,10 @@ class TestApplyDatasetConfig:
             "incomplete_termination": 1,
         }
 
-    def test_incomplete_termination_evaluated_before_strip(self) -> None:
+    def test_incomplete_termination_evaluated_before_optional_projection(self) -> None:
         # Drop decisions use PRE-transform messages: a row ending in a
-        # reasoning-only tool turn is judged incomplete (ends on a tool response)
-        # and dropped, so strip_reasoning_tools never runs to "rescue" it. Pins
-        # the drop/transform ordering.
+        # tool turn is judged incomplete (ends on a tool response) and dropped.
+        # The optional scaffold projection cannot "rescue" it.
         s = conv(
             tools=[func("chain-of-draft")],
             messages=[
@@ -6727,7 +6836,10 @@ class TestApplyDatasetConfig:
             ],
             raw=qrow(),
         )
-        cfg = ToucanConfig(drop_incomplete_termination=True)  # strip_reasoning default
+        cfg = ToucanConfig(
+            drop_incomplete_termination=True,
+            strip_scaffold_tools=True,
+        )
         kept, drops, transforms = _apply_dataset_config([s], cfg)
         assert kept == []
         assert drops["incomplete_termination"] == 1
@@ -6740,6 +6852,14 @@ class TestApplyDatasetConfig:
 
 
 class TestLoadConfigValidation:
+    def test_fixture_matrix_has_no_reasoning_strip_axis(self) -> None:
+        from tests.matrix import specs_for_loader
+
+        fixture_ids = [spec.fixture_id for spec in specs_for_loader("toucan")]
+
+        assert len(fixture_ids) == 14
+        assert "toucan/no-strip_reasoning_tools" not in fixture_ids
+
     def test_sft_config_rejected(self) -> None:
         # SFT is a Kimi-K2 derivative, not a teacher config; load() rejects it
         # up front (before any shard resolution / download).
