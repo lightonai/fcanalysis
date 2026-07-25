@@ -14,7 +14,10 @@ from fcanalysis.format import ConversationSample
 from fcanalysis.validation import has_invalid_arguments, has_undefined_function_calls
 from fcanalysis.loaders.toucan import (
     ANALOGICAL_REASONING_TOOL_FAMILY,
+    CHAIN_OF_DRAFT_TOOL_FAMILY,
+    CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY,
     COLLABORATIVE_REASONING_TOOL_FAMILY,
+    CREATIVE_THINKING_TOOL_FAMILY,
     DECISION_FRAMEWORK_TOOL_FAMILY,
     DEBUGGING_APPROACH_TOOL_FAMILY,
     DESIGN_PATTERN_TOOL_FAMILY,
@@ -23,21 +26,31 @@ from fcanalysis.loaders.toucan import (
     MENTAL_MODEL_TOOL_FAMILY,
     METACOGNITIVE_MONITORING_TOOL_FAMILY,
     PENTEST_THINKING_TOOL_FAMILY,
+    PROGRAMMING_PARADIGM_TOOL_FAMILY,
     REASONING_TOOL_FAMILIES_ANNOTATION,
     SCIENTIFIC_METHOD_TOOL_FAMILY,
     SEQUENTIAL_THINKING_TOOL_FAMILY,
     SKIA_ANIMATION_THINKING_TOOL_FAMILY,
+    SOCRATIC_METHOD_TOOL_FAMILY,
     STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
     THINK_TOOL_FAMILY,
+    SYSTEMS_THINKING_TOOL_FAMILY,
     VISUAL_REASONING_TOOL_FAMILY,
     ToucanConfig,
     _apply_dataset_config,
+    _AUDITED_NON_STRIPPABLE_TOOL_NAMES,
     _ANALOGICAL_REASONING_TOOL_NAMES,
     _COLLABORATIVE_REASONING_TOOL_NAMES,
+    _CHAIN_OF_DRAFT_TOOL_NAMES,
+    _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES,
+    _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES,
+    _CLEAR_THOUGHT_SESSION_TOOL_NAMES,
+    _CREATIVE_THINKING_TOOL_NAMES,
     _DECISION_FRAMEWORK_TOOL_NAMES,
     _DEBUGGING_APPROACH_TOOL_NAMES,
     _DESIGN_PATTERN_TOOL_NAMES,
     _convert_messages,
+    _convert_messages_with_tool_context,
     _convert_sample,
     _ends_incomplete,
     _has_conflicting_duplicate_tools,
@@ -50,13 +63,17 @@ from fcanalysis.loaders.toucan import (
     _METACOGNITIVE_MONITORING_TOOL_NAMES,
     _PENTEST_THINKING_TOOL_NAMES,
     _PRESERVED_REASONING_TOOL_NAMES,
+    _PROGRAMMING_PARADIGM_TOOL_NAMES,
     _SCIENTIFIC_METHOD_TOOL_NAMES,
     _SEQUENTIAL_THINKING_TOOL_NAMES,
     _SKIA_ANIMATION_THINKING_TOOL_NAMES,
+    _SOCRATIC_METHOD_TOOL_NAMES,
     _STRUCTURED_ARGUMENTATION_TOOL_NAMES,
     _strip_embedded_tool_system_content,
+    _extract_embedded_tool_system_content,
     _passes_quality,
     _THINK_TOOL_NAMES,
+    _SYSTEMS_THINKING_TOOL_NAMES,
     _VISUAL_REASONING_TOOL_NAMES,
     _stage1_issues,
     _strip_tools,
@@ -79,6 +96,8 @@ EXPECTED_THINK_TOOL_NAMES = (
     "think-tool-server-get_thoughts",
     "think-tool-server-get_thought_stats",
     "think-tool-server-clear_thoughts",
+    "think-mcp-server-think",
+    "think-tank-think",
 )
 
 EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES = (
@@ -184,6 +203,47 @@ EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES = (
     "clear-thought-metacognitivemonitoring",
 )
 
+EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES = (
+    "clear-thought-server-programmingparadigm",
+    "programmingparadigm",
+)
+
+EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES = ("chain-of-draft-server-chain-of-draft",)
+
+EXPECTED_CREATIVE_THINKING_TOOL_NAMES = (
+    "clear-thought-creativethinking",
+    "creativethinking",
+)
+
+EXPECTED_SYSTEMS_THINKING_TOOL_NAMES = (
+    "clear-thought-systemsthinking",
+    "systemsthinking",
+)
+
+EXPECTED_SOCRATIC_METHOD_TOOL_NAMES = (
+    "clear-thought-socraticmethod",
+    "socraticmethod",
+)
+
+EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES = (
+    "clear-thought-clear_thought",
+    "clear_thought",
+)
+
+EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES = (
+    "clear-thought-session_export",
+    "session_export",
+    "clear-thought-session_import",
+    "session_import",
+    "clear-thought-session_info",
+    "session_info",
+)
+
+EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES = (
+    "clear-thought-list_resources",
+    "clear-thought-read_resource",
+)
+
 EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     EXPECTED_THINK_TOOL_NAMES
     + EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES
@@ -201,6 +261,18 @@ EXPECTED_PRESERVED_REASONING_TOOL_NAMES = (
     + EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES
     + EXPECTED_VISUAL_REASONING_TOOL_NAMES
     + EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
+    + EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES
+    + EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES
+    + EXPECTED_CREATIVE_THINKING_TOOL_NAMES
+    + EXPECTED_SYSTEMS_THINKING_TOOL_NAMES
+    + EXPECTED_SOCRATIC_METHOD_TOOL_NAMES
+    + EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
+)
+
+EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES = (
+    EXPECTED_PRESERVED_REASONING_TOOL_NAMES
+    + EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES
+    + EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
 )
 
 # One non-protected witness for every broad legacy reasoning-name rule. These
@@ -302,6 +374,30 @@ AUDITED_REASONING_TOOL_CASES = (
         pytest.param(name, METACOGNITIVE_MONITORING_TOOL_FAMILY, id=name)
         for name in EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
     ),
+    *(
+        pytest.param(name, PROGRAMMING_PARADIGM_TOOL_FAMILY, id=name)
+        for name in EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, CHAIN_OF_DRAFT_TOOL_FAMILY, id=name)
+        for name in EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, CREATIVE_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_CREATIVE_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, SYSTEMS_THINKING_TOOL_FAMILY, id=name)
+        for name in EXPECTED_SYSTEMS_THINKING_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, SOCRATIC_METHOD_TOOL_FAMILY, id=name)
+        for name in EXPECTED_SOCRATIC_METHOD_TOOL_NAMES
+    ),
+    *(
+        pytest.param(name, CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY, id=name)
+        for name in EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
+    ),
 )
 
 
@@ -340,13 +436,16 @@ def conv(messages=None, tools=None, raw=None):
 
 
 def kimi_tool_system(tools=None):
-    serialized = orjson.dumps(tools or [{"type": "function"}]).decode()
+    serialized = orjson.dumps(
+        [func("template-tool")] if tools is None else tools
+    ).decode()
     return f"<|im_system|>tool_declare<|im_middle|>{serialized}<|im_end|>"
 
 
 def xml_tool_system(tools=None):
     serialized = "\n".join(
-        orjson.dumps(tool).decode() for tool in (tools or [{"type": "function"}])
+        orjson.dumps(tool).decode()
+        for tool in ([func("template-tool")] if tools is None else tools)
     )
     return (
         "# Tools\n\n"
@@ -425,7 +524,7 @@ class TestIsReasoningTool:
         """Pin the curation contract independently of loader construction."""
 
         assert (
-            len(EXPECTED_THINK_TOOL_NAMES) == len(set(EXPECTED_THINK_TOOL_NAMES)) == 12
+            len(EXPECTED_THINK_TOOL_NAMES) == len(set(EXPECTED_THINK_TOOL_NAMES)) == 14
         )
         assert (
             len(EXPECTED_SEQUENTIAL_THINKING_TOOL_NAMES)
@@ -449,9 +548,15 @@ class TestIsReasoningTool:
             EXPECTED_COLLABORATIVE_REASONING_TOOL_NAMES,
             EXPECTED_VISUAL_REASONING_TOOL_NAMES,
             EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES,
+            EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES,
+            EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES,
+            EXPECTED_CREATIVE_THINKING_TOOL_NAMES,
+            EXPECTED_SYSTEMS_THINKING_TOOL_NAMES,
+            EXPECTED_SOCRATIC_METHOD_TOOL_NAMES,
+            EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES,
         )
         assert [len(names) for names in exact_families] == [
-            12,
+            14,
             8,
             2,
             2,
@@ -467,6 +572,12 @@ class TestIsReasoningTool:
             5,
             5,
             5,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
         ]
         assert sum(len(names) for names in exact_families) == len(
             set().union(*map(set, exact_families))
@@ -513,8 +624,42 @@ class TestIsReasoningTool:
         assert _METACOGNITIVE_MONITORING_TOOL_NAMES == frozenset(
             EXPECTED_METACOGNITIVE_MONITORING_TOOL_NAMES
         )
+        assert _PROGRAMMING_PARADIGM_TOOL_NAMES == frozenset(
+            EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES
+        )
+        assert _CHAIN_OF_DRAFT_TOOL_NAMES == frozenset(
+            EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES
+        )
+        assert _CREATIVE_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_CREATIVE_THINKING_TOOL_NAMES
+        )
+        assert _SYSTEMS_THINKING_TOOL_NAMES == frozenset(
+            EXPECTED_SYSTEMS_THINKING_TOOL_NAMES
+        )
+        assert _SOCRATIC_METHOD_TOOL_NAMES == frozenset(
+            EXPECTED_SOCRATIC_METHOD_TOOL_NAMES
+        )
+        assert _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES == frozenset(
+            EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
+        )
+        assert _CLEAR_THOUGHT_SESSION_TOOL_NAMES == frozenset(
+            EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES
+        )
+        assert _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES == frozenset(
+            EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
+        )
         assert _PRESERVED_REASONING_TOOL_NAMES == frozenset(
             EXPECTED_PRESERVED_REASONING_TOOL_NAMES
+        )
+        assert _AUDITED_NON_STRIPPABLE_TOOL_NAMES == frozenset(
+            EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES
+        )
+        assert not (_PRESERVED_REASONING_TOOL_NAMES & _CLEAR_THOUGHT_SESSION_TOOL_NAMES)
+        assert not (
+            _PRESERVED_REASONING_TOOL_NAMES & _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
+        )
+        assert not (
+            _CLEAR_THOUGHT_SESSION_TOOL_NAMES & _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
         )
 
     @pytest.mark.parametrize(
@@ -531,10 +676,13 @@ class TestIsReasoningTool:
         assert _is_reasoning_tool("think") is False
         assert _is_reasoning_tool("think-tool-think") is False
         assert _is_reasoning_tool("think-tool-server-think") is False
+        assert _is_reasoning_tool("think-mcp-server-think") is False
+        assert _is_reasoning_tool("think-tank-think") is False
         # Tool names are case-sensitive; an unaudited variant does not inherit
         # an audited identity merely through case folding.
         assert _is_reasoning_tool("THINK") is True
         assert _is_reasoning_tool("server-think") is True
+        assert _is_reasoning_tool("think-mcp-think") is True
 
     @pytest.mark.parametrize(
         "name",
@@ -554,7 +702,8 @@ class TestIsReasoningTool:
 
     def test_core_families(self) -> None:
         assert _is_reasoning_tool("mcp-sequentialthinking-tools") is True
-        assert _is_reasoning_tool("clear_thought") is True
+        assert _is_reasoning_tool("clear_thought") is False
+        assert _is_reasoning_tool("clear-thought-clear_thought") is False
         assert _is_reasoning_tool("clear-thought") is True
         assert _is_reasoning_tool("think-tool") is True
 
@@ -761,14 +910,15 @@ class TestIsReasoningTool:
             assert _is_reasoning_tool(f"{prefix}get_thought_stats") is False
             assert _is_reasoning_tool(f"{prefix}clear_thoughts") is False
 
-    def test_full_clear_thought_op_set(self) -> None:
-        # the whole reasoning-server op vocabulary, incl. standalone prefixes
-        # and bare names that the upstream loader missed.
+    def test_newly_audited_clear_thought_and_chain_operations(self) -> None:
         for n in (
             "socraticmethod",
             "chain-of-draft-server-chain-of-draft",
+            "programmingparadigm",
+            "creativethinking",
+            "systemsthinking",
         ):
-            assert _is_reasoning_tool(n) is True, n
+            assert _is_reasoning_tool(n) is False, n
         assert _is_reasoning_tool("metacognitiveMonitoring") is False
 
     @pytest.mark.parametrize("name", EXPECTED_LOTUS_WISDOM_TOOL_NAMES)
@@ -828,9 +978,64 @@ class TestIsReasoningTool:
         assert name not in _STRUCTURED_ARGUMENTATION_TOOL_NAMES
         assert _is_reasoning_tool(name) is False
 
-    def test_unaudited_thinking_scaffolds(self) -> None:
-        assert _is_reasoning_tool("systemsthinking") is True
-        assert _is_reasoning_tool("creativethinking") is True
+    def test_exact_compact_thinking_methods_are_preserved(self) -> None:
+        assert _is_reasoning_tool("systemsthinking") is False
+        assert _is_reasoning_tool("creativethinking") is False
+        assert _is_reasoning_tool("socraticmethod") is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-programmingparadigm",
+            "clear_thought-server-programmingparadigm",
+            "ProgrammingParadigm",
+            "programming-paradigm",
+            "chain-of-draft",
+            "chain_of_draft",
+            "Chain-of-Draft-Server-chain-of-draft",
+            "clear-thought-server-creativethinking",
+            "clear-thought-server-systemsthinking",
+            "clear-thought-server-socraticmethod",
+            "creativeThinking",
+            "systems_thinking",
+            "socratic_method",
+        ],
+    )
+    def test_completion_batch_lookalikes_do_not_inherit_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _PRESERVED_REASONING_TOOL_NAMES
+
+    @pytest.mark.parametrize("name", EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES)
+    def test_exact_clear_thought_session_operations_are_ordinary_state_tools(
+        self, name: str
+    ) -> None:
+        assert name not in _PRESERVED_REASONING_TOOL_NAMES
+        assert name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "clear-thought-server-session_info",
+            "clear_thought-session_info",
+            "clear-thought-session-export",
+            "Session_info",
+        ],
+    )
+    def test_session_lookalikes_do_not_inherit_ordinary_state_identity(
+        self, name: str
+    ) -> None:
+        assert name not in _CLEAR_THOUGHT_SESSION_TOOL_NAMES
+
+    @pytest.mark.parametrize("name", EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES)
+    def test_exact_clear_thought_resource_primitives_are_not_reasoning(
+        self, name: str
+    ) -> None:
+        assert name not in _PRESERVED_REASONING_TOOL_NAMES
+        assert name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
+        assert _is_reasoning_tool(name) is False
+        assert _is_scaffold_tool(name) is True
 
     @pytest.mark.parametrize(
         "name",
@@ -922,15 +1127,80 @@ class TestConvertMessages:
         )
         assert out == [{"role": "user", "content": "u"}]
 
+    @pytest.mark.parametrize("template_builder", [kimi_tool_system, xml_tool_system])
+    def test_verified_template_tools_are_extracted_exactly(
+        self, template_builder
+    ) -> None:
+        tools = [
+            func(
+                "visible-tool",
+                parameters={
+                    "type": "object",
+                    "properties": {"x": {"type": "integer"}},
+                    "required": ["x"],
+                },
+            )
+        ]
+        content = f"Instruction A.\n\n{template_builder(tools)}\n\nInstruction B."
+
+        remaining, extracted, removed, invalid = _extract_embedded_tool_system_content(
+            content
+        )
+        assert remaining == "Instruction A.\n\n\n\nInstruction B."
+        assert extracted == tools
+        assert removed is True
+        assert invalid == 0
+
+        messages, issues, extracted_again, has_template = (
+            _convert_messages_with_tool_context(
+                [{"role": "system", "content": content}]
+            )
+        )
+        assert messages == [
+            {
+                "role": "system",
+                "content": "Instruction A.\n\n\n\nInstruction B.",
+            }
+        ]
+        assert issues == {}
+        assert extracted_again == tools
+        assert has_template is True
+
+    def test_multiple_verified_templates_preserve_order_and_custom_text(self) -> None:
+        first = func("first")
+        second = func("second")
+        content = (
+            f"Before\n\n{kimi_tool_system([first])}\n\nBetween\n\n"
+            f"{xml_tool_system([second])}\n\nAfter"
+        )
+        messages, issues, tools, has_template = _convert_messages_with_tool_context(
+            [{"role": "system", "content": content}]
+        )
+        assert messages == [
+            {
+                "role": "system",
+                "content": "Before\n\n\n\nBetween\n\n\n\nAfter",
+            }
+        ]
+        assert issues == {}
+        assert tools == [first, second]
+        assert has_template is True
+
     @pytest.mark.parametrize("template", [kimi_tool_system(), xml_tool_system()])
     @pytest.mark.parametrize(
         ("content_factory", "expected"),
         [
-            (lambda template: f"{template}\n\nFollow policy P.", "Follow policy P."),
-            (lambda template: f"Follow policy P.\n\n{template}", "Follow policy P."),
+            (
+                lambda template: f"{template}\n\nFollow policy P.",
+                "\n\nFollow policy P.",
+            ),
+            (
+                lambda template: f"Follow policy P.\n\n{template}",
+                "Follow policy P.\n\n",
+            ),
             (
                 lambda template: f"Instruction A.\n\n{template}\n\nInstruction B.",
-                "Instruction A.\n\nInstruction B.",
+                "Instruction A.\n\n\n\nInstruction B.",
             ),
         ],
     )
@@ -946,11 +1216,56 @@ class TestConvertMessages:
         assert out == [{"role": "system", "content": expected}]
 
     def test_malformed_xml_template_is_preserved_whole(self) -> None:
-        content = xml_tool_system().replace('{"type":"function"}', "custom instruction")
+        content = xml_tool_system().replace(
+            '"type":"function"', '"type": custom instruction'
+        )
         remaining, removed = _strip_embedded_tool_system_content(content)
         assert (remaining, removed) == (content, False)
-        out, _ = _convert_messages([{"role": "system", "content": content}])
+        out, issues = _convert_messages([{"role": "system", "content": content}])
         assert out == [{"role": "system", "content": content}]
+        assert issues == {"malformed_embedded_tool_template": 1}
+
+    def test_custom_system_bytes_are_not_trimmed_or_reindented(self) -> None:
+        template = kimi_tool_system([func("a")])
+        content = f"  Keep leading spaces.\n{template}\nKeep trailing spaces.  "
+
+        remaining, extracted, removed, invalid = _extract_embedded_tool_system_content(
+            content
+        )
+
+        assert remaining == "  Keep leading spaces.\n\nKeep trailing spaces.  "
+        assert extracted == [func("a")]
+        assert removed is True
+        assert invalid == 0
+
+    @pytest.mark.parametrize(
+        "invalid_definition",
+        [
+            {"type": "function"},
+            {"type": "function", "function": {}},
+            {
+                "type": "function",
+                "function": {"name": "a", "parameters": "not-an-object"},
+            },
+            {
+                "type": "not-function",
+                "function": {"name": "a", "parameters": {}},
+            },
+        ],
+    )
+    def test_exact_framing_with_non_tool_body_fails_closed(
+        self, invalid_definition: dict
+    ) -> None:
+        content = kimi_tool_system([invalid_definition])
+
+        remaining, extracted, removed, invalid = _extract_embedded_tool_system_content(
+            content
+        )
+
+        assert remaining == content
+        assert extracted == []
+        assert removed is False
+        assert invalid == 1
 
     def test_unexpected_system_is_not_heuristically_edited(self) -> None:
         content = "Follow the user's instructions. The word <tools> is incidental."
@@ -1092,6 +1407,80 @@ class TestReasoningToolFamilyAnnotations:
         ] == [name]
         assert [tool["function"]["name"] for tool in sample.tools] == [name]
 
+    @pytest.mark.parametrize(
+        ("operation", "operation_family"),
+        [
+            ("sequential_thinking", SEQUENTIAL_THINKING_TOOL_FAMILY),
+            ("mental_model", MENTAL_MODEL_TOOL_FAMILY),
+            ("debugging_approach", DEBUGGING_APPROACH_TOOL_FAMILY),
+            ("creative_thinking", CREATIVE_THINKING_TOOL_FAMILY),
+            ("visual_reasoning", VISUAL_REASONING_TOOL_FAMILY),
+            (
+                "metacognitive_monitoring",
+                METACOGNITIVE_MONITORING_TOOL_FAMILY,
+            ),
+            ("scientific_method", SCIENTIFIC_METHOD_TOOL_FAMILY),
+            ("collaborative_reasoning", COLLABORATIVE_REASONING_TOOL_FAMILY),
+            ("decision_framework", DECISION_FRAMEWORK_TOOL_FAMILY),
+            ("socratic_method", SOCRATIC_METHOD_TOOL_FAMILY),
+            (
+                "structured_argumentation",
+                STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
+            ),
+            ("systems_thinking", SYSTEMS_THINKING_TOOL_FAMILY),
+            ("analogical_reasoning", ANALOGICAL_REASONING_TOOL_FAMILY),
+        ],
+    )
+    def test_dispatcher_adds_exact_operation_and_dispatcher_markers(
+        self, operation: str, operation_family: str
+    ) -> None:
+        name = "clear_thought"
+        row = conversion_row(called_names=(name,), defined_names=(name,))
+        messages = orjson.loads(row["messages"])
+        call_message = next(
+            message for message in messages if message.get("function_call")
+        )
+        call_message["function_call"]["arguments"] = orjson.dumps(
+            {"operation": operation, "prompt": "p"}
+        ).decode()
+        row["messages"] = orjson.dumps(messages).decode()
+
+        sample, _ = _convert_sample(row, "OSS")
+
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [
+                operation_family,
+                CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY,
+            ]
+        }
+
+    @pytest.mark.parametrize(
+        "arguments",
+        [
+            "{not-json",
+            "{}",
+            '{"operation": 3, "prompt": "p"}',
+            '{"operation": "not_an_advertised_operation", "prompt": "p"}',
+        ],
+    )
+    def test_dispatcher_marker_does_not_guess_an_operation_family(
+        self, arguments: str
+    ) -> None:
+        name = "clear_thought"
+        row = conversion_row(called_names=(name,), defined_names=(name,))
+        messages = orjson.loads(row["messages"])
+        call_message = next(
+            message for message in messages if message.get("function_call")
+        )
+        call_message["function_call"]["arguments"] = arguments
+        row["messages"] = orjson.dumps(messages).decode()
+
+        sample, _ = _convert_sample(row, "OSS")
+
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY]
+        }
+
     def test_marks_only_families_with_actual_exact_calls(self) -> None:
         sample, _ = _convert_sample(
             conversion_row(
@@ -1112,6 +1501,12 @@ class TestReasoningToolFamilyAnnotations:
                     "collaborativeReasoning",
                     "visualReasoning",
                     "metacognitiveMonitoring",
+                    "programmingparadigm",
+                    "chain-of-draft-server-chain-of-draft",
+                    "creativethinking",
+                    "systemsthinking",
+                    "socraticmethod",
+                    "clear_thought",
                 ),
                 defined_names=(
                     "think",
@@ -1130,6 +1525,12 @@ class TestReasoningToolFamilyAnnotations:
                     "collaborativeReasoning",
                     "visualReasoning",
                     "metacognitiveMonitoring",
+                    "programmingparadigm",
+                    "chain-of-draft-server-chain-of-draft",
+                    "creativethinking",
+                    "systemsthinking",
+                    "socraticmethod",
+                    "clear_thought",
                     "get_weather",
                 ),
             ),
@@ -1154,6 +1555,12 @@ class TestReasoningToolFamilyAnnotations:
                 COLLABORATIVE_REASONING_TOOL_FAMILY,
                 VISUAL_REASONING_TOOL_FAMILY,
                 METACOGNITIVE_MONITORING_TOOL_FAMILY,
+                PROGRAMMING_PARADIGM_TOOL_FAMILY,
+                CHAIN_OF_DRAFT_TOOL_FAMILY,
+                CREATIVE_THINKING_TOOL_FAMILY,
+                SYSTEMS_THINKING_TOOL_FAMILY,
+                SOCRATIC_METHOD_TOOL_FAMILY,
+                CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY,
             ]
         }
 
@@ -1179,12 +1586,60 @@ class TestReasoningToolFamilyAnnotations:
                     "clear-thought-collaborativereasoning",
                     "clear-thought-visualreasoning",
                     "clear-thought-metacognitivemonitoring",
+                    *EXPECTED_PROGRAMMING_PARADIGM_TOOL_NAMES,
+                    *EXPECTED_CHAIN_OF_DRAFT_TOOL_NAMES,
+                    *EXPECTED_CREATIVE_THINKING_TOOL_NAMES,
+                    *EXPECTED_SYSTEMS_THINKING_TOOL_NAMES,
+                    *EXPECTED_SOCRATIC_METHOD_TOOL_NAMES,
+                    *EXPECTED_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES,
+                    *EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES,
+                    *EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES,
                 ),
             ),
             "Kimi-K2",
         )
 
         assert sample.annotations == {}
+
+    @pytest.mark.parametrize("name", EXPECTED_CLEAR_THOUGHT_SESSION_TOOL_NAMES)
+    def test_called_session_state_operation_is_preserved_without_action_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)),
+            "Qwen3",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.annotations == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    @pytest.mark.parametrize("name", EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES)
+    def test_called_clear_thought_resource_is_preserved_without_action_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)),
+            "Kimi-K2",
+        )
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.annotations == {}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
 
     def test_uncalled_legacy_definitions_are_preserved_without_marking(self) -> None:
         defined_names = (
@@ -1229,6 +1684,35 @@ class TestReasoningToolFamilyAnnotations:
     def test_fuzzy_structured_variant_does_not_receive_a_marker(self) -> None:
         sample, _ = _convert_sample(
             conversion_row(called_names=("clear-thought-structured_argumentation",)),
+            "Qwen3",
+        )
+
+        assert sample.annotations == {}
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "think-mcp-think",
+            "clear-thought-programmingparadigm",
+            "ProgrammingParadigm",
+            "chain-of-draft",
+            "chain_of_draft",
+            "clear-thought-server-creativethinking",
+            "creativeThinking",
+            "systems_thinking",
+            "socratic_method",
+            "clear-thought-server-session_info",
+            "clear_thought-clear_thought",
+            "clear-thought-clear-thought",
+            "Clear_Thought",
+            "clear-thought-server-clear_thought",
+        ],
+    )
+    def test_completion_batch_lookalike_does_not_receive_a_marker(
+        self, name: str
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,)),
             "Qwen3",
         )
 
@@ -1455,6 +1939,98 @@ class TestConvertSample:
             "assistant",
         ]
         assert sample_obj.raw is row
+
+    @pytest.mark.parametrize("template_builder", [kimi_tool_system, xml_tool_system])
+    def test_model_visible_system_tools_override_divergent_available_metadata(
+        self, template_builder
+    ) -> None:
+        visible = func("server-qualified-tool", description="teacher saw this")
+        metadata = func("bare-tool", description="stale generation metadata")
+        row = {
+            "uuid": "context-mismatch",
+            "messages": orjson.dumps(
+                [
+                    {
+                        "role": "system",
+                        "content": template_builder([visible]),
+                    },
+                    {"role": "user", "content": "u"},
+                    raw_asst(function_call=fcall("server-qualified-tool", "{}")),
+                    raw_fn("ok"),
+                    raw_asst(content="done"),
+                ]
+            ).decode(),
+            "available_tools": orjson.dumps([metadata]).decode(),
+        }
+
+        sample_obj, issues = _convert_sample(row, "Qwen3")
+
+        assert sample_obj.tools == [visible]
+        assert not any(message["role"] == "system" for message in sample_obj.messages)
+        assert issues["system_available_tool_context_mismatch"] == 1
+        assert has_undefined_function_calls(sample_obj) is False
+
+    def test_matching_system_and_available_context_has_no_mismatch_issue(
+        self,
+    ) -> None:
+        definition = func("same-tool")
+        row = {
+            "uuid": "same-context",
+            "messages": orjson.dumps(
+                [
+                    {"role": "system", "content": kimi_tool_system([definition])},
+                    {"role": "user", "content": "u"},
+                ]
+            ).decode(),
+            "available_tools": orjson.dumps([definition]).decode(),
+        }
+
+        sample_obj, issues = _convert_sample(row, "Kimi-K2")
+
+        assert sample_obj.tools == [definition]
+        assert "system_available_tool_context_mismatch" not in issues
+
+    def test_empty_verified_system_context_is_authoritative(self) -> None:
+        row = {
+            "uuid": "empty-visible-context",
+            "messages": orjson.dumps(
+                [
+                    {"role": "system", "content": kimi_tool_system([])},
+                    {"role": "user", "content": "u"},
+                ]
+            ).decode(),
+            "available_tools": orjson.dumps([func("metadata-only")]).decode(),
+        }
+
+        sample_obj, issues = _convert_sample(row, "Kimi-K2")
+
+        assert sample_obj.tools == []
+        assert issues["system_available_tool_context_mismatch"] == 1
+
+    def test_malformed_template_is_retained_and_available_context_is_fallback(
+        self,
+    ) -> None:
+        malformed = kimi_tool_system([func("visible")]).replace("<|im_end|>", "")
+        fallback = func("fallback")
+        row = {
+            "uuid": "malformed-template",
+            "messages": orjson.dumps(
+                [
+                    {"role": "system", "content": malformed},
+                    {"role": "user", "content": "u"},
+                ]
+            ).decode(),
+            "available_tools": orjson.dumps([fallback]).decode(),
+        }
+
+        sample_obj, issues = _convert_sample(row, "Kimi-K2")
+
+        assert sample_obj.tools == [fallback]
+        assert sample_obj.messages[0] == {
+            "role": "system",
+            "content": malformed,
+        }
+        assert issues["malformed_embedded_tool_template"] == 1
 
     def test_missing_uuid_becomes_empty_string(self) -> None:
         row = {"messages": orjson.dumps([{"role": "user", "content": "u"}]).decode()}
@@ -1776,8 +2352,8 @@ class TestStripTools:
         )
         assert _strip_tools(s, True, False) == (False, False, False)
 
-    @pytest.mark.parametrize("name", EXPECTED_PRESERVED_REASONING_TOOL_NAMES)
-    def test_audited_reasoning_tool_calls_are_always_preserved(self, name: str) -> None:
+    @pytest.mark.parametrize("name", EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES)
+    def test_audited_tool_calls_are_always_preserved(self, name: str) -> None:
         s = conv(
             tools=[func(name)],
             messages=[
@@ -1793,7 +2369,7 @@ class TestStripTools:
         assert s.messages == original_messages
         assert s.tools == original_tools
 
-    @pytest.mark.parametrize("name", EXPECTED_PRESERVED_REASONING_TOOL_NAMES)
+    @pytest.mark.parametrize("name", EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES)
     def test_audited_call_keeps_its_positional_result_and_definition_when_mixed(
         self, name: str
     ) -> None:
@@ -1839,7 +2415,7 @@ class TestStripTools:
 
     def test_all_uncalled_audited_definitions_are_preserved(self) -> None:
         s = conv(
-            tools=[func(name) for name in EXPECTED_PRESERVED_REASONING_TOOL_NAMES],
+            tools=[func(name) for name in EXPECTED_AUDITED_NON_STRIPPABLE_TOOL_NAMES],
             messages=[user("u"), assistant(content="done")],
         )
         original_tools = copy.deepcopy(s.tools)
@@ -1861,6 +2437,58 @@ class TestStripTools:
         # undefined call must not be deleted before defined-function validation.
         assert _strip_tools(s, True, False) == (False, False, False)
         assert s.messages == original_messages
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "think-mcp-think",
+            "clear-thought-programmingparadigm",
+            "clear_thought-server-programmingparadigm",
+            "chain-of-draft",
+            "chain_of_draft",
+            "clear-thought-server-creativethinking",
+            "clear-thought-server-systemsthinking",
+            "clear-thought-server-socraticmethod",
+            "clear-thought-server-session_info",
+        ],
+    )
+    def test_defined_completion_batch_lookalikes_remain_legacy_strippable(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="lookalike observation"),
+            ],
+        )
+
+        assert name not in _AUDITED_NON_STRIPPABLE_TOOL_NAMES
+        assert _is_reasoning_tool(name) is True
+        assert _strip_tools(sample, True, False) == (True, True, False)
+        assert sample.messages == []
+        assert sample.tools == []
+
+    @pytest.mark.parametrize(
+        "name",
+        ["clear-thought-clear_thought", "clear_thought"],
+    )
+    def test_high_volume_undefined_anomaly_calls_remain_visible(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func("get_weather")],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content=f"Tool {name} does not exist."),
+            ],
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        assert _is_reasoning_tool(name) is False
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample.messages == original_messages
+        assert has_undefined_function_calls(sample) is True
 
     @pytest.mark.parametrize(
         "name",
@@ -2300,6 +2928,28 @@ class TestStripTools:
         assert (changed, rem_r, rem_s) == (True, False, True)
         assert [t["function"]["name"] for t in s.tools] == ["get_weather"]
 
+    @pytest.mark.parametrize("name", EXPECTED_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES)
+    def test_clear_thought_resource_can_only_be_stripped_as_scaffold(
+        self, name: str
+    ) -> None:
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name, call_id="resource")]),
+                tool_response(
+                    content="server-provided resource",
+                    tool_call_id="resource",
+                ),
+            ],
+        )
+        original = copy.deepcopy(sample)
+
+        assert _strip_tools(sample, True, False) == (False, False, False)
+        assert sample == original
+        assert _strip_tools(sample, False, True) == (True, False, True)
+        assert sample.messages == []
+        assert sample.tools == []
+
     def test_both_families_reported_separately(self) -> None:
         s = conv(
             tools=[
@@ -2523,15 +3173,65 @@ class TestApplyDatasetConfig:
 
     def test_conflicting_duplicate_tools_drop(self) -> None:
         clean = conv(messages=[user("u")], raw=qrow())
+        conflicting_tools = [
+            func("a", description="x"),
+            func("a", description="y"),
+        ]
         conflicting_raw = qrow()
-        conflicting_raw["available_tools"] = orjson.dumps(
-            [func("a", description="x"), func("a", description="y")]
-        ).decode()
-        conflicting = conv(messages=[user("u")], raw=conflicting_raw)
+        conflicting_raw["available_tools"] = orjson.dumps(conflicting_tools).decode()
+        conflicting = conv(
+            messages=[user("u")],
+            tools=copy.deepcopy(conflicting_tools),
+            raw=conflicting_raw,
+        )
         cfg = ToucanConfig(drop_conflicting_duplicate_tools=True)
         kept, drops, _ = _apply_dataset_config([clean, conflicting], cfg)
         assert len(kept) == 1
         assert drops["conflicting_duplicate_tools"] == 1
+
+    def test_conflict_filter_uses_canonical_visible_context_not_stale_metadata(
+        self,
+    ) -> None:
+        raw = qrow()
+        raw["available_tools"] = orjson.dumps(
+            [func("a", description="metadata x"), func("a", description="metadata y")]
+        ).decode()
+        sample = conv(
+            messages=[user("u")],
+            tools=[func("a", description="one visible contract")],
+            raw=raw,
+        )
+
+        kept, drops, _ = _apply_dataset_config(
+            [sample], ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == [sample]
+        assert drops == {}
+
+    def test_visible_context_conflict_drops_even_if_metadata_has_one_definition(
+        self,
+    ) -> None:
+        raw = qrow()
+        raw["available_tools"] = orjson.dumps(
+            [func("a", description="metadata")]
+        ).decode()
+        sample = conv(
+            messages=[user("u")],
+            tools=[
+                func("a", description="visible x"),
+                func("a", description="visible y"),
+            ],
+            raw=raw,
+        )
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample], ToucanConfig(drop_conflicting_duplicate_tools=True)
+        )
+
+        assert kept == []
+        assert drops == {"conflicting_duplicate_tools": 1}
+        assert transforms == {}
 
     def test_same_name_definition_variation_across_rows_is_allowed(self) -> None:
         first_raw = qrow()
@@ -5660,6 +6360,226 @@ class TestApplyDatasetConfig:
         assert dropped == []
         assert drop_reasons == {"incomplete_termination": 1}
 
+    @pytest.mark.parametrize(
+        ("sample_id", "teacher", "name", "observation", "family"),
+        [
+            (
+                "aaa7ba5b-3b4e-5fcb-bb9e-32ede93f33e2",
+                "Kimi-K2",
+                "think-mcp-server-think",
+                "Great thinking.",
+                THINK_TOOL_FAMILY,
+            ),
+            (
+                "506130cb-7afd-5f42-8b99-d52369ab922f",
+                "Kimi-K2",
+                "think-tank-think",
+                "# Structured Reasoning (Step 2 of 10)\n\nreasoning\n\n(Step 2 of 10)",
+                THINK_TOOL_FAMILY,
+            ),
+            (
+                "0a72e13d-9ff5-56e0-a2de-da48fa856280",
+                "Qwen3",
+                "think-tank-think",
+                "# Structured Reasoning (Step 2 of 5)\n\nreasoning\n\n(Step 2 of 5)",
+                THINK_TOOL_FAMILY,
+            ),
+            (
+                "969b6fba-1688-5da6-8c59-276b65f0485c",
+                "Kimi-K2",
+                "clear-thought-server-programmingparadigm",
+                '{"content":[{"type":"text","text":"{\\"status\\":\\"success\\"}"}]}',
+                PROGRAMMING_PARADIGM_TOOL_FAMILY,
+            ),
+            (
+                "20d0aa87-4154-58f3-9236-4f8812372e4e",
+                "OSS",
+                "programmingparadigm",
+                '{"content":[{"type":"text","text":"{\\"status\\":\\"success\\"}"}]}',
+                PROGRAMMING_PARADIGM_TOOL_FAMILY,
+            ),
+            (
+                "f248ec17-069a-5b5d-baf4-048096e60994",
+                "Qwen3",
+                "chain-of-draft-server-chain-of-draft",
+                '{"content":[{"type":"text","text":"{\\"thoughtHistoryLength\\":1}"}]}',
+                CHAIN_OF_DRAFT_TOOL_FAMILY,
+            ),
+        ],
+    )
+    def test_completion_batch_production_success_witnesses_are_preserved(
+        self,
+        sample_id: str,
+        teacher: str,
+        name: str,
+        observation: str,
+        family: str,
+    ) -> None:
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=(name,)),
+            teacher,
+        )
+        sample.sample_id = sample_id
+        next(message for message in sample.messages if message["role"] == "tool")[
+            "content"
+        ] = observation
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.annotations == {REASONING_TOOL_FAMILIES_ANNOTATION: [family]}
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+
+    def test_undefined_exact_programming_call_is_marked_and_left_for_validation(
+        self,
+    ) -> None:
+        name = "programmingparadigm"
+        sample, _ = _convert_sample(
+            conversion_row(called_names=(name,), defined_names=("get_weather",)),
+            "Kimi-K2",
+        )
+        sample.sample_id = "ca6c22be-aa65-578b-aa67-ea56b5b208a7"
+        original_messages = copy.deepcopy(sample.messages)
+        original_tools = copy.deepcopy(sample.tools)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [PROGRAMMING_PARADIGM_TOOL_FAMILY]
+        }
+        assert sample.messages == original_messages
+        assert sample.tools == original_tools
+        assert has_undefined_function_calls(sample) is True
+
+    def test_preservation_exposes_invalid_programming_arguments(self) -> None:
+        name = "clear-thought-server-programmingparadigm"
+        parameters = {
+            "type": "object",
+            "properties": {
+                "paradigmName": {"type": "string"},
+                "problem": {"type": "string"},
+            },
+            "required": ["paradigmName", "problem"],
+            "additionalProperties": False,
+        }
+        sample = conv(
+            tools=[func(name, parameters=parameters)],
+            messages=[
+                assistant(
+                    tool_calls=[
+                        call(
+                            name=name,
+                            arguments={"paradigmName": "functional"},
+                        )
+                    ]
+                ),
+                tool_response(content='{"status":"failed"}'),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+        assert has_invalid_arguments(sample) is True
+
+    def test_exact_chain_is_kept_while_unaudited_bare_chain_is_stripped(
+        self,
+    ) -> None:
+        exact = "chain-of-draft-server-chain-of-draft"
+        fuzzy = "chain-of-draft"
+        sample, _ = _convert_sample(
+            conversion_row(
+                called_names=(exact, fuzzy),
+                defined_names=(exact, fuzzy),
+            ),
+            "Qwen3",
+        )
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {"stripped_reasoning_tools": 1}
+        assert [
+            call["function"]["name"]
+            for message in sample.messages
+            for call in message.get("tool_calls") or []
+        ] == [exact]
+        assert [tool["function"]["name"] for tool in sample.tools] == [exact]
+        assert sample.annotations == {
+            REASONING_TOOL_FAMILIES_ANNOTATION: [CHAIN_OF_DRAFT_TOOL_FAMILY]
+        }
+
+    def test_conflicting_exact_programming_definitions_drop_before_transform(
+        self,
+    ) -> None:
+        name = "programmingparadigm"
+        sample = conv(
+            tools=[
+                func(name, description="contract A"),
+                func(name, description="contract B"),
+            ],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content="observation"),
+                assistant(content="done"),
+            ],
+            raw=qrow(),
+        )
+        sample.raw["available_tools"] = orjson.dumps(sample.tools).decode()
+
+        kept, drops, transforms = _apply_dataset_config(
+            [sample],
+            ToucanConfig(drop_conflicting_duplicate_tools=True),
+        )
+
+        assert kept == []
+        assert drops == {"conflicting_duplicate_tools": 1}
+        assert transforms == {}
+
+    def test_terminal_exact_chain_is_preserved_then_incomplete_gate_drops(
+        self,
+    ) -> None:
+        name = "chain-of-draft-server-chain-of-draft"
+        sample = conv(
+            tools=[func(name)],
+            messages=[
+                assistant(tool_calls=[call(name=name)]),
+                tool_response(content='{"thoughtHistoryLength":1}'),
+            ],
+            raw=qrow(),
+        )
+        original_messages = copy.deepcopy(sample.messages)
+
+        kept, drops, transforms = _apply_dataset_config([sample], ToucanConfig())
+
+        assert kept == [sample]
+        assert drops == {}
+        assert transforms == {}
+        assert sample.messages == original_messages
+
+        dropped, drop_reasons, drop_transforms = _apply_dataset_config(
+            [copy.deepcopy(sample)],
+            ToucanConfig(drop_incomplete_termination=True),
+        )
+        assert dropped == []
+        assert drop_reasons == {"incomplete_termination": 1}
+        assert drop_transforms == {}
+
     def test_all_audited_think_writes_are_preserved_without_state_reads(self) -> None:
         s = conv(
             tools=[
@@ -5769,8 +6689,13 @@ class TestApplyDatasetConfig:
         bad_raw["available_tools"] = orjson.dumps(
             [func("a", description="x"), func("a", description="y")]
         ).decode()
+        conflicting_tools = [
+            func("a", description="x"),
+            func("a", description="y"),
+        ]
         s = conv(
             messages=[assistant(tool_calls=[call()]), tool_response()],
+            tools=conflicting_tools,
             raw=bad_raw,
         )
         cfg = ToucanConfig(

@@ -1,14 +1,12 @@
 {
   "dataset": "Agent-Ark/Toucan-1.5M [Kimi-K2+OSS+Qwen3]",
-  "dataset_config_count": 170361,
+  "dataset_config_count": 170368,
   "dataset_config_drop_reasons": {
-    "conflicting_duplicate_tools": 317,
+    "conflicting_duplicate_tools": 8,
     "incomplete_termination": 9404,
     "low_quality": 1356891
   },
-  "dataset_config_transform_counts": {
-    "stripped_reasoning_tools": 18
-  },
+  "dataset_config_transform_counts": {},
   "filter_config": {
     "require_balanced_cardinality": true,
     "require_defined_functions": true,
@@ -17,11 +15,11 @@
     "strip_thinking": true
   },
   "filter_drop_reasons": {
-    "invalid_arguments": 189,
-    "undefined_function_calls": 52,
+    "invalid_arguments": 176,
+    "undefined_function_calls": 48,
     "unparseable_arguments": 37
   },
-  "filtered_count": 170087,
+  "filtered_count": 170111,
   "raw_count": 1527259,
   "stage1_count": 1527259,
   "stage1_drop_reasons": {},
@@ -29,6 +27,7 @@
     "ends_on_empty_assistant": 3702,
     "ends_on_tool_response": 5702,
     "no_system_message": 20953,
+    "system_available_tool_context_mismatch": 1017937,
     "unparseable_tool_call_arguments": 8844
   },
   "strip_thinking_applied": false

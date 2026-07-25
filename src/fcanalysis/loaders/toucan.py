@@ -34,18 +34,24 @@ messages additionally carry a ``reasoning_content`` field (the GPT-OSS harmony
 channel, 1.9M messages); Kimi-K2/Qwen3 do not.
 
 Mapping to OpenAI format (collapses the split messages; validated by the
-round-trip census toucan/census/c10_roundtrip.py):
-    - ``available_tools`` is parsed directly into ``sample.tools`` (already OpenAI
-      ``{type: function, function: {name, description, parameters}}``).
-    - The verified framework-generated tool-declaration span is removed from each
-      ``system`` message. A full-snapshot census found that every source system
-      message consists entirely of one of the two teacher-framework templates and
-      contains no independent instructions, so no system message remains in the
-      pinned snapshot. The recognizer nevertheless preserves any text before or
-      after a verified template span for forward compatibility and fails closed
-      on malformed/unknown shapes. ``available_tools`` is the single authoritative
-      tool source; the target chat template renders its canonical tool context.
-      The original system dump remains available in ``sample.raw`` for audits.
+round-trip and system-context censuses):
+    - The two exact teacher-framework tool templates are parsed from raw system
+      messages. Their complete definitions are authoritative because that is the
+      context serialized to the teacher model. The verified template span is
+      removed and the target chat template renders the extracted definitions once
+      from ``sample.tools``.
+    - ``available_tools`` is generation metadata, not always the model-visible
+      contract. In the pinned snapshot, 1,017,937 rows have non-empty but different
+      system/metadata definition multisets; 488,369 match exactly. The 20,953 rows
+      without a recognized system template fall back to ``available_tools``.
+      Sources are never unioned, because that would expose tools the model did not
+      see and make unsupported calls appear defined.
+    - All 1,506,306 captured system messages are exactly one valid known template
+      and contain no independent instructions. The recognizer nevertheless handles
+      future templates embedded at the beginning, middle, or end: it removes only
+      exact structurally valid tool spans, retains all other bytes, and fails
+      closed on malformed or unfamiliar candidates. The original row remains in
+      ``sample.raw`` for audit reconstruction.
     - A maximal run of consecutive assistant messages becomes ONE OpenAI
       assistant message: ``content`` = the joined non-empty text contents;
       ``reasoning_content`` = the joined reasoning fields (OSS only, so
@@ -77,9 +83,10 @@ Dataset-specific config (Stage 2, before universal filters):
       and scenario_realism), never dropped for missing response scores.
     - ``drop_incomplete_termination``: drop rows whose last message is a tool
       response or an empty assistant message (no final answer; <1% of rows).
-    - ``drop_conflicting_duplicate_tools``: drop rows whose ``available_tools``
-      defines the same exact visible name with more than one distinct complete
-      tool definition (317 rows; name-based lookup would be order-dependent).
+    - ``drop_conflicting_duplicate_tools``: drop rows whose canonical
+      model-visible ``sample.tools`` defines the same exact visible name with more
+      than one distinct complete tool definition (name-based lookup would be
+      order-dependent).
       Object-key order is canonicalized, but no schema or description is
       heuristically normalized. Same-name variation across different rows is
       allowed; byte-equivalent duplicates within one row are not conflicts.
@@ -93,15 +100,19 @@ Dataset-specific config (Stage 2, before universal filters):
         * ``strip_reasoning_tools`` removes REASONING scaffolds -- tools whose
           only purpose is to structure/record the model's reasoning (the result
           echoes the thought back; no external info). This is reasoning-as-tool-
-          calls, the structural analog of <think>/reasoning_content. Eleven audited
-          families are unconditional preservation exceptions: all twelve exact
-          audited ``think``/thought-state names, all eight exact sequential-
+          calls, the structural analog of <think>/reasoning_content. Twenty-two
+          audited families are unconditional preservation exceptions: all
+          fourteen exact audited ``think``/thought-state names, all eight exact
+          sequential-
           thinking names, and the two exact names in each of the pentest, game-
           design, and Skia-animation thinking families, plus the four exact Lotus
           Wisdom names, five exact Structured Argumentation names, and two exact
           Analogical Reasoning names, three exact Clear Thought mental-model
-          names, five exact Decision Framework names, and five exact Scientific
-          Method names. Their calls, paired
+          names, five exact Decision Framework names, five exact Scientific
+          Method names, and the exact Programming Paradigm, Chain of Draft,
+          Creative Thinking, Systems Thinking, Socratic Method, and unified
+          Clear Thought dispatcher identities.
+          Their calls, paired
           observations, and definitions remain intact
           even when this transform is enabled. Lotus
           writes maintain a turn-local journey read by the summary operation.
@@ -116,11 +127,15 @@ Dataset-specific config (Stage 2, before universal filters):
           implementation, and a Clear Thought session-store implementation.
           Scientific Method spans deterministic-status Clear Thought, stateful
           standalone, and Clear Thought session-store implementations.
+          Six exact Clear Thought session-info/export/import operations are
+          also non-strippable ordinary state tools, but do not add reasoning
+          action markers.
+          Two exact Clear Thought MCP resource primitives are protected from
+          reasoning stripping as ordinary scaffold tools; they add no marker
+          and remain controlled by the separate scaffold flag.
           Undefined calls and calls under a
           conflicting or unbalanced name are also retained so downstream
-          validators see the source defect. Other legacy name families cover
-          chain-of-draft and
-          metacognitive/scientific/decision methods.
+          validators see the source defect.
         * ``strip_scaffold_tools`` removes non-reasoning framework PLUMBING:
           server-unlock handshakes ``__unlock*`` / ``__get_instructions``, MCP
           resource primitives ``list_resources`` / ``read_resource`` /
@@ -128,8 +143,9 @@ Dataset-specific config (Stage 2, before universal filters):
           research tool. These are real, often information-bearing tool calls
           (deep_researcher returns cited reports ~57% of the time; read_resource
           returns file/doc content) -- removing them is lossy -- so they are KEPT
-          BY DEFAULT. Caveat: these families are undefined in available_tools, so
-          require_defined_functions (if enabled) drops their whole trajectory.
+          BY DEFAULT. Defined-function validation uses the canonical
+          teacher-visible context extracted from the system template, with
+          ``available_tools`` only as the no-template fallback.
           Turning on strip_scaffold_tools can rescue the surrounding domain calls,
           but it can also hide undefined framework calls and remove observations
           the final answer used; treat it as an explicit analysis variant, not the
@@ -185,8 +201,11 @@ class ToucanConfig:
     # audited think/thought-state, sequential-thinking, pentest-thinking, game-
     # design-thinking, Skia-animation-thinking, Lotus Wisdom, Structured
     # Argumentation, Analogical Reasoning, Clear Thought mental-model, Decision
-    # Framework, and Scientific Method families, which are always preserved and
-    # marked for downstream row-level selection.
+    # Framework, Scientific Method, Programming Paradigm, Chain of Draft,
+    # Creative Thinking, Systems Thinking, and Socratic Method families, which
+    # are always preserved and marked for downstream row-level selection. Exact
+    # Clear Thought session operations are also retained as ordinary state
+    # tools, without adding a reasoning action marker.
     # Framework SCAFFOLD plumbing
     # (server-unlock handshakes, MCP resource primitives, the degenerate
     # deep_researcher async poller) is kept by default -- it is real (often
@@ -280,9 +299,25 @@ DESIGN_PATTERN_TOOL_FAMILY = "design_pattern"
 COLLABORATIVE_REASONING_TOOL_FAMILY = "collaborative_reasoning"
 VISUAL_REASONING_TOOL_FAMILY = "visual_reasoning"
 METACOGNITIVE_MONITORING_TOOL_FAMILY = "metacognitive_monitoring"
+PROGRAMMING_PARADIGM_TOOL_FAMILY = "programming_paradigm"
+CHAIN_OF_DRAFT_TOOL_FAMILY = "chain_of_draft"
+CREATIVE_THINKING_TOOL_FAMILY = "creative_thinking"
+SYSTEMS_THINKING_TOOL_FAMILY = "systems_thinking"
+SOCRATIC_METHOD_TOOL_FAMILY = "socratic_method"
+CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY = "clear_thought_dispatcher"
 
-_THINK_TOOL_NAMES = frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME) | frozenset(
-    _THOUGHT_WRITE_NAMESPACE_BY_NAME
+_THINK_TOOL_NAMES = (
+    frozenset(_THOUGHT_STATE_NAMESPACE_BY_NAME)
+    | frozenset(_THOUGHT_WRITE_NAMESPACE_BY_NAME)
+    | frozenset(
+        {
+            # Independent audited deployments. Marcopesani returns one of three
+            # random encouragements; Think Tank returns structured step metadata.
+            # Neither is the state namespace used by the twelve names above.
+            "think-mcp-server-think",
+            "think-tank-think",
+        }
+    )
 )
 
 _SEQUENTIAL_THINKING_TOOL_NAMES = frozenset(
@@ -557,6 +592,102 @@ _METACOGNITIVE_MONITORING_TOOL_NAMES = frozenset(
     }
 )
 
+# Programming Paradigm is an explicit Clear Thought operation. The
+# Chirag/ThinkFar request handler validates truthy string paradigm/problem
+# fields, normalizes optional arrays, and returns deterministic current-call
+# status metadata. The complete snapshot contains 1,591 definition-backed calls
+# across the qualified and bare aliases, plus one separate undefined bare call.
+# Preservation keeps successful, malformed, and undefined evidence visible to
+# the ordinary validators.
+_PROGRAMMING_PARADIGM_TOOL_NAMES = frozenset(
+    {
+        "clear-thought-server-programmingparadigm",
+        "programmingparadigm",
+    }
+)
+
+# Chain of Draft is a stateful MCP protocol. The server retains per-session
+# thought history and branches; results expose cumulative branch identifiers
+# and history length that are not a function of the current call alone. The
+# pinned snapshot has one exact qualified identity and nine rows. Preserve its
+# successful, schema-error, and argument-decode episodes intact.
+_CHAIN_OF_DRAFT_TOOL_NAMES = frozenset({"chain-of-draft-server-chain-of-draft"})
+
+# These three compact Waldzell Clear Thought methods are definition-only in the
+# pinned snapshot, but their captured implementations are genuine stateful
+# operations: they mutate session stores and can return hidden cumulative
+# context. Exact classification prevents the legacy broad name predicate from
+# deleting a future call. Definitions alone do not create action markers.
+_CREATIVE_THINKING_TOOL_NAMES = frozenset(
+    {"clear-thought-creativethinking", "creativethinking"}
+)
+
+_SYSTEMS_THINKING_TOOL_NAMES = frozenset(
+    {"clear-thought-systemsthinking", "systemsthinking"}
+)
+
+_SOCRATIC_METHOD_TOOL_NAMES = frozenset(
+    {"clear-thought-socraticmethod", "socraticmethod"}
+)
+
+# Clear Thought 1.5 consolidates reasoning, state, research, code execution,
+# notebook, and orchestration operations behind one explicit dispatcher. Its
+# observations can contain server-generated IDs, cumulative session state,
+# stored notebook state, code output, and auto-seeded sequential-thinking
+# results. The two names are the exact bare and server-shuffled identities
+# declared in Toucan's model-visible system context. Because one dispatcher
+# mixes reasoning and ordinary state/I/O operations, it is protected as a
+# whole. An actual call receives a dispatcher marker; mere availability does
+# not.
+_CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES = frozenset(
+    {"clear-thought-clear_thought", "clear_thought"}
+)
+
+_CLEAR_THOUGHT_DISPATCHER_OPERATION_FAMILIES = {
+    "sequential_thinking": SEQUENTIAL_THINKING_TOOL_FAMILY,
+    "mental_model": MENTAL_MODEL_TOOL_FAMILY,
+    "debugging_approach": DEBUGGING_APPROACH_TOOL_FAMILY,
+    "creative_thinking": CREATIVE_THINKING_TOOL_FAMILY,
+    "visual_reasoning": VISUAL_REASONING_TOOL_FAMILY,
+    "metacognitive_monitoring": METACOGNITIVE_MONITORING_TOOL_FAMILY,
+    "scientific_method": SCIENTIFIC_METHOD_TOOL_FAMILY,
+    "collaborative_reasoning": COLLABORATIVE_REASONING_TOOL_FAMILY,
+    "decision_framework": DECISION_FRAMEWORK_TOOL_FAMILY,
+    "socratic_method": SOCRATIC_METHOD_TOOL_FAMILY,
+    "structured_argumentation": STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
+    "systems_thinking": SYSTEMS_THINKING_TOOL_FAMILY,
+    "analogical_reasoning": ANALOGICAL_REASONING_TOOL_FAMILY,
+}
+
+# Clear Thought session operations are ordinary state tools, not reasoning
+# traces. session_info/export read hidden server state; session_import mutates
+# it and can clear existing data first. They are exact non-strippable identities
+# but intentionally do not belong to a reasoning action-marker family.
+_CLEAR_THOUGHT_SESSION_TOOL_NAMES = frozenset(
+    {
+        "clear-thought-session_export",
+        "session_export",
+        "clear-thought-session_import",
+        "session_import",
+        "clear-thought-session_info",
+        "session_info",
+    }
+)
+
+# These two exact names are MCP resource primitives exposed by the unified
+# Clear Thought server. They are caught by both the broad ``clear-thought``
+# reasoning substring and the ordinary resource-scaffold classifier. The full
+# snapshot audit found 66 teacher-visible, positionally paired calls whose
+# results can contain server resources not present in the model's arguments.
+# Exempt them from reasoning stripping; the separately configured scaffold
+# transform may still remove their complete call/result episodes.
+_CLEAR_THOUGHT_RESOURCE_TOOL_NAMES = frozenset(
+    {
+        "clear-thought-list_resources",
+        "clear-thought-read_resource",
+    }
+)
+
 _PRESERVED_REASONING_TOOL_NAMES = (
     _THINK_TOOL_NAMES
     | _SEQUENTIAL_THINKING_TOOL_NAMES
@@ -574,6 +705,18 @@ _PRESERVED_REASONING_TOOL_NAMES = (
     | _COLLABORATIVE_REASONING_TOOL_NAMES
     | _VISUAL_REASONING_TOOL_NAMES
     | _METACOGNITIVE_MONITORING_TOOL_NAMES
+    | _PROGRAMMING_PARADIGM_TOOL_NAMES
+    | _CHAIN_OF_DRAFT_TOOL_NAMES
+    | _CREATIVE_THINKING_TOOL_NAMES
+    | _SYSTEMS_THINKING_TOOL_NAMES
+    | _SOCRATIC_METHOD_TOOL_NAMES
+    | _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES
+)
+
+_AUDITED_NON_STRIPPABLE_TOOL_NAMES = (
+    _PRESERVED_REASONING_TOOL_NAMES
+    | _CLEAR_THOUGHT_SESSION_TOOL_NAMES
+    | _CLEAR_THOUGHT_RESOURCE_TOOL_NAMES
 )
 
 
@@ -584,15 +727,42 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
     action. The result is stable and ordered for deterministic serialization.
     """
 
-    called_names = {
-        (call.get("function") or {}).get("name")
-        for message in messages
-        for call in message.get("tool_calls") or []
+    called_names: set[str] = set()
+    dispatcher_operations: set[str] = set()
+    for message in messages:
+        for call in message.get("tool_calls") or []:
+            function = call.get("function") or {}
+            name = function.get("name")
+            if isinstance(name, str):
+                called_names.add(name)
+            if name not in _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES:
+                continue
+            arguments = function.get("arguments")
+            if isinstance(arguments, str):
+                try:
+                    arguments = orjson.loads(arguments)
+                except orjson.JSONDecodeError:
+                    continue
+            if isinstance(arguments, dict):
+                operation = arguments.get("operation")
+                if isinstance(operation, str):
+                    dispatcher_operations.add(operation)
+
+    dispatched_families = {
+        family
+        for operation in dispatcher_operations
+        if (family := _CLEAR_THOUGHT_DISPATCHER_OPERATION_FAMILIES.get(operation))
     }
+
+    def called_or_dispatched(names: frozenset[str], family: str) -> bool:
+        return bool(called_names & names or family in dispatched_families)
+
     families = []
     if called_names & _THINK_TOOL_NAMES:
         families.append(THINK_TOOL_FAMILY)
-    if called_names & _SEQUENTIAL_THINKING_TOOL_NAMES:
+    if called_or_dispatched(
+        _SEQUENTIAL_THINKING_TOOL_NAMES, SEQUENTIAL_THINKING_TOOL_FAMILY
+    ):
         families.append(SEQUENTIAL_THINKING_TOOL_FAMILY)
     if called_names & _PENTEST_THINKING_TOOL_NAMES:
         families.append(PENTEST_THINKING_TOOL_FAMILY)
@@ -602,26 +772,57 @@ def _reasoning_tool_families(messages: list[dict[str, Any]]) -> list[str]:
         families.append(SKIA_ANIMATION_THINKING_TOOL_FAMILY)
     if called_names & _LOTUS_WISDOM_TOOL_NAMES:
         families.append(LOTUS_WISDOM_TOOL_FAMILY)
-    if called_names & _STRUCTURED_ARGUMENTATION_TOOL_NAMES:
+    if called_or_dispatched(
+        _STRUCTURED_ARGUMENTATION_TOOL_NAMES,
+        STRUCTURED_ARGUMENTATION_TOOL_FAMILY,
+    ):
         families.append(STRUCTURED_ARGUMENTATION_TOOL_FAMILY)
-    if called_names & _ANALOGICAL_REASONING_TOOL_NAMES:
+    if called_or_dispatched(
+        _ANALOGICAL_REASONING_TOOL_NAMES, ANALOGICAL_REASONING_TOOL_FAMILY
+    ):
         families.append(ANALOGICAL_REASONING_TOOL_FAMILY)
-    if called_names & _MENTAL_MODEL_TOOL_NAMES:
+    if called_or_dispatched(_MENTAL_MODEL_TOOL_NAMES, MENTAL_MODEL_TOOL_FAMILY):
         families.append(MENTAL_MODEL_TOOL_FAMILY)
-    if called_names & _DECISION_FRAMEWORK_TOOL_NAMES:
+    if called_or_dispatched(
+        _DECISION_FRAMEWORK_TOOL_NAMES, DECISION_FRAMEWORK_TOOL_FAMILY
+    ):
         families.append(DECISION_FRAMEWORK_TOOL_FAMILY)
-    if called_names & _SCIENTIFIC_METHOD_TOOL_NAMES:
+    if called_or_dispatched(
+        _SCIENTIFIC_METHOD_TOOL_NAMES, SCIENTIFIC_METHOD_TOOL_FAMILY
+    ):
         families.append(SCIENTIFIC_METHOD_TOOL_FAMILY)
-    if called_names & _DEBUGGING_APPROACH_TOOL_NAMES:
+    if called_or_dispatched(
+        _DEBUGGING_APPROACH_TOOL_NAMES, DEBUGGING_APPROACH_TOOL_FAMILY
+    ):
         families.append(DEBUGGING_APPROACH_TOOL_FAMILY)
     if called_names & _DESIGN_PATTERN_TOOL_NAMES:
         families.append(DESIGN_PATTERN_TOOL_FAMILY)
-    if called_names & _COLLABORATIVE_REASONING_TOOL_NAMES:
+    if called_or_dispatched(
+        _COLLABORATIVE_REASONING_TOOL_NAMES,
+        COLLABORATIVE_REASONING_TOOL_FAMILY,
+    ):
         families.append(COLLABORATIVE_REASONING_TOOL_FAMILY)
-    if called_names & _VISUAL_REASONING_TOOL_NAMES:
+    if called_or_dispatched(_VISUAL_REASONING_TOOL_NAMES, VISUAL_REASONING_TOOL_FAMILY):
         families.append(VISUAL_REASONING_TOOL_FAMILY)
-    if called_names & _METACOGNITIVE_MONITORING_TOOL_NAMES:
+    if called_or_dispatched(
+        _METACOGNITIVE_MONITORING_TOOL_NAMES,
+        METACOGNITIVE_MONITORING_TOOL_FAMILY,
+    ):
         families.append(METACOGNITIVE_MONITORING_TOOL_FAMILY)
+    if called_names & _PROGRAMMING_PARADIGM_TOOL_NAMES:
+        families.append(PROGRAMMING_PARADIGM_TOOL_FAMILY)
+    if called_names & _CHAIN_OF_DRAFT_TOOL_NAMES:
+        families.append(CHAIN_OF_DRAFT_TOOL_FAMILY)
+    if called_or_dispatched(
+        _CREATIVE_THINKING_TOOL_NAMES, CREATIVE_THINKING_TOOL_FAMILY
+    ):
+        families.append(CREATIVE_THINKING_TOOL_FAMILY)
+    if called_or_dispatched(_SYSTEMS_THINKING_TOOL_NAMES, SYSTEMS_THINKING_TOOL_FAMILY):
+        families.append(SYSTEMS_THINKING_TOOL_FAMILY)
+    if called_or_dispatched(_SOCRATIC_METHOD_TOOL_NAMES, SOCRATIC_METHOD_TOOL_FAMILY):
+        families.append(SOCRATIC_METHOD_TOOL_FAMILY)
+    if called_names & _CLEAR_THOUGHT_DISPATCHER_TOOL_NAMES:
+        families.append(CLEAR_THOUGHT_DISPATCHER_TOOL_FAMILY)
     return families
 
 
@@ -641,7 +842,7 @@ _SCAFFOLD_TOOL_SUBSTRINGS = (
 def _is_reasoning_tool(name: str) -> bool:
     # These exact, audited families are explicit tool actions. They are retained
     # intact and can later be selected out at row granularity via annotations.
-    if name in _PRESERVED_REASONING_TOOL_NAMES:
+    if name in _AUDITED_NON_STRIPPABLE_TOOL_NAMES:
         return False
     low = name.lower()
     # bare or namespaced "think" tool, plus the reasoning substring families
@@ -676,86 +877,113 @@ _XML_TOOL_TEMPLATE_SUFFIX = (
 )
 
 
-def _valid_kimi_tool_body(body: str) -> bool:
+def _valid_embedded_tool_definition(tool: Any) -> bool:
+    if not isinstance(tool, dict) or tool.get("type") != "function":
+        return False
+    function = tool.get("function")
+    return (
+        isinstance(function, dict)
+        and isinstance(function.get("name"), str)
+        and bool(function["name"])
+        and isinstance(function.get("parameters"), dict)
+    )
+
+
+def _parse_kimi_tool_body(body: str) -> list[dict[str, Any]] | None:
     try:
         tools = orjson.loads(body)
     except orjson.JSONDecodeError:
-        return False
-    return isinstance(tools, list) and all(isinstance(tool, dict) for tool in tools)
+        return None
+    if not isinstance(tools, list) or not all(
+        _valid_embedded_tool_definition(tool) for tool in tools
+    ):
+        return None
+    return tools
 
 
-def _valid_xml_tool_body(body: str) -> bool:
-    """Validate the observed one-JSON-object-per-line XML template body."""
+def _parse_xml_tool_body(body: str) -> list[dict[str, Any]] | None:
+    """Parse the observed one-JSON-object-per-line XML template body."""
 
     lines = [line for line in body.splitlines() if line.strip()]
     try:
         tools = [orjson.loads(line) for line in lines]
     except orjson.JSONDecodeError:
-        return False
-    return all(isinstance(tool, dict) for tool in tools)
+        return None
+    if not all(_valid_embedded_tool_definition(tool) for tool in tools):
+        return None
+    return tools
 
 
-def _find_valid_template_end(
+def _find_valid_template(
     content: str,
     start: int,
     prefix: str,
     suffix: str,
-    body_validator: Any,
-) -> int | None:
-    """Return the end of a verified template starting at ``start``."""
+    body_parser: Any,
+) -> tuple[int, list[dict[str, Any]]] | None:
+    """Return the end and tools of a verified template at ``start``."""
 
     body_start = start + len(prefix)
     suffix_start = content.find(suffix, body_start)
     while suffix_start >= 0:
-        if body_validator(content[body_start:suffix_start]):
-            return suffix_start + len(suffix)
+        tools = body_parser(content[body_start:suffix_start])
+        if tools is not None:
+            return suffix_start + len(suffix), tools
         suffix_start = content.find(suffix, suffix_start + 1)
     return None
 
 
-def _strip_embedded_tool_system_content(content: str) -> tuple[str, bool]:
-    """Remove only verified tool-template spans and preserve surrounding text.
+def _extract_embedded_tool_system_content(
+    content: str,
+) -> tuple[str, list[dict[str, Any]], bool, int]:
+    """Extract verified tool-template spans and preserve surrounding text.
 
     Both framework templates may occur at the beginning, middle, or end of a
-    future system message. A candidate is removed only when its exact fixed
-    framing and its serialized tool body validate. Malformed and unfamiliar
-    candidates are retained byte-for-byte rather than heuristically truncated.
+    future system message. A candidate is extracted only when its exact fixed
+    framing and serialized tool body validate. Malformed and unfamiliar
+    candidates remain byte-for-byte rather than being heuristically truncated.
+    Returns ``(remaining_content, extracted_tools, removed, invalid_candidates)``.
     """
 
     templates = (
         (
             _KIMI_TOOL_TEMPLATE_PREFIX,
             _KIMI_TOOL_TEMPLATE_SUFFIX,
-            _valid_kimi_tool_body,
+            _parse_kimi_tool_body,
         ),
-        (_XML_TOOL_TEMPLATE_PREFIX, _XML_TOOL_TEMPLATE_SUFFIX, _valid_xml_tool_body),
+        (_XML_TOOL_TEMPLATE_PREFIX, _XML_TOOL_TEMPLATE_SUFFIX, _parse_xml_tool_body),
     )
     kept: list[str] = []
+    extracted_tools: list[dict[str, Any]] = []
     cursor = 0
     removed = False
+    invalid_candidates = 0
 
     while cursor < len(content):
         candidates = [
-            (position, prefix, suffix, validator)
-            for prefix, suffix, validator in templates
+            (position, prefix, suffix, parser)
+            for prefix, suffix, parser in templates
             if (position := content.find(prefix, cursor)) >= 0
         ]
         if not candidates:
             kept.append(content[cursor:])
             break
 
-        start, prefix, suffix, validator = min(candidates, key=lambda item: item[0])
-        end = _find_valid_template_end(content, start, prefix, suffix, validator)
-        if end is None:
+        start, prefix, suffix, parser = min(candidates, key=lambda item: item[0])
+        match = _find_valid_template(content, start, prefix, suffix, parser)
+        if match is None:
             # Keep the unmatched prefix and continue looking after it. This
             # preserves the content exactly while still allowing a later valid
             # template in the same message to be normalized.
+            invalid_candidates += 1
             prefix_end = start + len(prefix)
             kept.append(content[cursor:prefix_end])
             cursor = prefix_end
             continue
 
+        end, tools = match
         kept.append(content[cursor:start])
+        extracted_tools.extend(tools)
         cursor = end
         removed = True
     else:
@@ -763,9 +991,25 @@ def _strip_embedded_tool_system_content(content: str) -> tuple[str, bool]:
         pass
 
     if not removed:
-        return content, False
-    custom_segments = [segment.strip() for segment in kept if segment.strip()]
-    return "\n\n".join(custom_segments), True
+        return content, [], False, invalid_candidates
+    remaining = "".join(kept)
+    if not remaining.strip():
+        remaining = ""
+    return (
+        remaining,
+        extracted_tools,
+        True,
+        invalid_candidates,
+    )
+
+
+def _strip_embedded_tool_system_content(content: str) -> tuple[str, bool]:
+    """Compatibility wrapper returning only retained text and removal status."""
+
+    remaining, _tools, removed, _invalid = _extract_embedded_tool_system_content(
+        content
+    )
+    return remaining, removed
 
 
 def _is_embedded_tool_system_message(content: str) -> bool:
@@ -780,12 +1024,20 @@ def _is_embedded_tool_system_message(content: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def _convert_messages(
+def _convert_messages_with_tool_context(
     raw_msgs: list[dict[str, Any]],
-) -> tuple[list[dict[str, Any]], dict[str, int]]:
-    """Collapse split messages and normalize embedded tool-system templates."""
+) -> tuple[
+    list[dict[str, Any]],
+    dict[str, int],
+    list[dict[str, Any]],
+    bool,
+]:
+    """Collapse messages and extract the exact model-visible tool context."""
+
     out: list[dict[str, Any]] = []
     issues: dict[str, int] = {}
+    system_tools: list[dict[str, Any]] = []
+    has_valid_tool_template = False
     content_buf: list[str] = []
     reasoning_buf: list[str] = []
     calls: list[dict[str, Any]] = []
@@ -831,19 +1083,39 @@ def _convert_messages(
         elif role == "system":
             flush()
             original_content = m.get("content") or ""
-            normalized_content, removed = _strip_embedded_tool_system_content(
-                original_content
-            )
-            # Tool definitions are represented authoritatively by sample.tools
-            # and will be rendered by the target chat template. Preserve any
-            # independent system instructions surrounding that verified span.
+            (
+                normalized_content,
+                extracted_tools,
+                removed,
+                invalid_candidates,
+            ) = _extract_embedded_tool_system_content(original_content)
+            if invalid_candidates:
+                issues["malformed_embedded_tool_template"] = 1
+            if removed:
+                has_valid_tool_template = True
+                system_tools.extend(extracted_tools)
+            # The extracted definitions are the contract the teacher model
+            # actually saw. The target chat template will render that same
+            # contract from sample.tools. Preserve every independent system
+            # instruction surrounding a verified template span.
             if normalized_content or not removed:
                 out.append({"role": role, "content": normalized_content})
-        else:  # user, unexpected system, or any unexpected role: preserve
+        else:  # user or any unexpected role: preserve
             flush()
             out.append({"role": role, "content": m.get("content") or ""})
     flush()
-    return out, issues
+    return out, issues, system_tools, has_valid_tool_template
+
+
+def _convert_messages(
+    raw_msgs: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Compatibility wrapper for message-only conversion callers."""
+
+    messages, issues, _system_tools, _has_template = (
+        _convert_messages_with_tool_context(raw_msgs)
+    )
+    return messages, issues
 
 
 def _stage1_issues(messages: list[dict[str, Any]]) -> dict[str, int]:
@@ -896,12 +1168,26 @@ def _convert_sample(
 ) -> tuple[ConversationSample, dict[str, int]]:
     raw_msgs = orjson.loads(row["messages"])
     try:
-        tools = (
+        available_tools = (
             orjson.loads(row["available_tools"]) if row.get("available_tools") else []
         )
     except orjson.JSONDecodeError:
-        tools = []
-    messages, issues = _convert_messages(raw_msgs)
+        available_tools = []
+    messages, issues, system_tools, has_tool_template = (
+        _convert_messages_with_tool_context(raw_msgs)
+    )
+    if has_tool_template:
+        tools = system_tools
+        available_fingerprints = sorted(
+            orjson.dumps(tool, option=orjson.OPT_SORT_KEYS) for tool in available_tools
+        )
+        system_fingerprints = sorted(
+            orjson.dumps(tool, option=orjson.OPT_SORT_KEYS) for tool in system_tools
+        )
+        if available_fingerprints != system_fingerprints:
+            issues["system_available_tool_context_mismatch"] = 1
+    else:
+        tools = available_tools
     # This remains a source-data census flag.  Normalized output intentionally
     # omits the framework tool-system templates, so checking converted messages
     # would incorrectly flag every row.
@@ -1003,13 +1289,23 @@ def _conflicting_duplicate_tool_names(tools: Any) -> set[str]:
     return {name for name, definitions in by_name.items() if len(definitions) > 1}
 
 
-def _has_conflicting_duplicate_tools(raw: dict[str, Any]) -> bool:
-    """Whether one row gives an exact visible name multiple definitions."""
+def _has_conflicting_duplicate_tools(value: Any) -> bool:
+    """Whether the canonical model-visible context conflicts by exact name.
 
-    try:
-        tools = orjson.loads(raw.get("available_tools") or "[]")
-    except orjson.JSONDecodeError:
-        return False
+    Production passes a ``ConversationSample`` so this check uses the same
+    authoritative definitions rendered during training. Raw-row support remains
+    for focused backward-compatible unit tests and reads ``available_tools``.
+    """
+
+    if isinstance(value, ConversationSample):
+        tools = value.tools
+    elif isinstance(value, dict):
+        try:
+            tools = orjson.loads(value.get("available_tools") or "[]")
+        except orjson.JSONDecodeError:
+            return False
+    else:
+        tools = value
     return bool(_conflicting_duplicate_tool_names(tools))
 
 
@@ -1167,7 +1463,7 @@ def _apply_dataset_config(
             d_term += 1
             drop = True
         if config.drop_conflicting_duplicate_tools and _has_conflicting_duplicate_tools(
-            s.raw
+            s
         ):
             d_confdup += 1
             drop = True
