@@ -1,7 +1,7 @@
 # fcanalysis
 
 `fcanalysis` is a Python toolkit for loading, normalizing, validating, and
-analyzing public function-calling datasets. It provides eight source-specific
+analyzing public function-calling datasets. It provides seven source-specific
 loaders, a shared conversation model, structural and statistical analysis,
 schema-aware tool-call validation, deterministic overlap checks, and an
 optional LLM-based classifier for turns where no tool was called.
@@ -98,7 +98,6 @@ The registered loaders are:
 | `nemotron_agentic_v2` | `nvidia/Nemotron-SFT-Agentic-v2` |
 | `nemotron_terminal` | `nvidia/Nemotron-Terminal-Corpus` |
 | `toolmind` | `Nanbeige/ToolMind` |
-| `toucan` | `Agent-Ark/Toucan-1.5M` |
 | `txt360` | `LLM360/TxT360-3efforts` (now served as `IFM/TxT360-3efforts`) |
 
 Exact source revisions, source-declared licenses, attribution requirements, and
@@ -175,29 +174,9 @@ uv run python scripts/validate_invariant.py /path/to/results
 See [Semantic classification](docs/semantic-classification.md) for the endpoint
 contract, staged workflow, and evidence limitations.
 
-## TOUCAN processing
-
-The TOUCAN loader pins revision
-`0df3cf37f2abefb380370cfb02eabea2a35ae782` and supports source subsets,
-quality gates, termination checks, conflicting-definition checks, and an
-explicit scaffold-tool counterfactual.
-
-Broad reasoning-tool stripping was retired after adversarial review. TOUCAN
-contains stateful and evidence-bearing tools; deleting a call, its linked
-result, or its definition can change the meaning of the remaining trajectory
-and can make invalid rows pass later checks. The current loader therefore
-retains reasoning and state tools—including `get_thoughts`, `get_stats`, and
-`clear`—together with linked writes and observations. Audited tool families are
-recorded in non-model-visible annotations. Undefined, conflicting, unbalanced,
-unparseable, and invalid evidence remains visible to the independent configured
-validators.
-
-This is a preservation policy, not a claim that every retained TOUCAN episode
-is suitable for training or that reasoning content is exhaustively identified.
-
 ## Regression fixtures and reproducibility
 
-The repository registers 83 loader/configuration cases. Each tracked fixture
+The repository registers 69 loader/configuration cases. Each tracked fixture
 directory contains exactly three contract files:
 
 - `config.json`: canonical loader and filter configuration;
@@ -211,7 +190,7 @@ unit inputs:
 uv run pytest
 ```
 
-The 83 full-dataset E2E cases are intentionally separate because they download
+The 69 full-dataset E2E cases are intentionally separate because they download
 pinned source revisions and reconstruct complete outputs:
 
 ```sh
@@ -267,7 +246,8 @@ content remains under its source terms; see [docs/datasets.md](docs/datasets.md)
 This research was supported by the OpenEuroLLM project, co-funded by the
 Digital Europe Programme under GA no. 101195233.
 
-Computational work supporting this research used the LEONARDO supercomputer,
+Computational work supporting this research used the
+[LEONARDO supercomputer](https://www.hpc.cineca.it/systems/hardware/leonardo/),
 owned by the EuroHPC Joint Undertaking and hosted by CINECA (Italy).
 
 The contents presented herein reflects only the author's view, and the

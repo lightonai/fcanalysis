@@ -21,7 +21,6 @@ from fcanalysis.loaders.nemotron_agentic_v1 import NemotronAgenticV1Config
 from fcanalysis.loaders.nemotron_agentic_v2 import NemotronAgenticV2Config
 from fcanalysis.loaders.nemotron_terminal import NemotronTerminalConfig
 from fcanalysis.loaders.toolmind import ToolMindConfig
-from fcanalysis.loaders.toucan import ToucanConfig
 from fcanalysis.loaders.txt360 import TxT360Config
 
 
@@ -213,55 +212,6 @@ TOOLMIND_SPECS: list[FixtureSpec] = _build_specs(
 )
 
 
-# Reasoning-tool trajectories are preserved and marked. strip_scaffold_tools
-# defaults False; its registered variant is an explicit lossy counterfactual.
-_TOUCAN_PROD = ToucanConfig(
-    drop_low_quality=True,
-    require_full_tool_use=True,
-    drop_incomplete_termination=True,
-    drop_conflicting_duplicate_tools=True,
-)
-TOUCAN_SPECS: list[FixtureSpec] = _build_specs(
-    "toucan",
-    _TOUCAN_PROD,
-    dataset_flags=[
-        "drop_low_quality",
-        "require_full_tool_use",
-        "drop_incomplete_termination",
-        "drop_conflicting_duplicate_tools",
-    ],
-    extra_variants=[
-        (
-            "subsets-no-irrelevant",
-            replace(
-                _TOUCAN_PROD,
-                subsets=(
-                    "single-turn-original",
-                    "single-turn-diversify",
-                    "multi-turn",
-                ),
-            ),
-        ),
-        ("subsets-irrelevant-only", replace(_TOUCAN_PROD, subsets=("irrelevant",))),
-        (
-            # Scores are on a 1-5 scale; "strict" tightens the response gate to
-            # the top of the scale (completeness/conciseness == 5, vs the prod
-            # defaults of 4) while keeping the question gate at 5. This is a
-            # binding-but-satisfiable variant (conciseness==5 is rare), unlike a
-            # threshold above the ceiling which would drop every row.
-            "quality-strict",
-            replace(
-                _TOUCAN_PROD,
-                min_completeness=5,
-                min_conciseness=5,
-            ),
-        ),
-        # exercise the scaffold-strip transform (kept by default; on here)
-        ("strip-scaffold", replace(_TOUCAN_PROD, strip_scaffold_tools=True)),
-    ],
-)
-
-
 _TXT360_PROD = TxT360Config(
     seed_group_filter="latest_clean_prefix",
     require_non_empty_user=True,
@@ -290,7 +240,6 @@ ALL_SPECS: list[FixtureSpec] = [
     *NEMOTRON_V2_SPECS,
     *NEMOTRON_TERMINAL_SPECS,
     *TOOLMIND_SPECS,
-    *TOUCAN_SPECS,
     *TXT360_SPECS,
 ]
 
