@@ -253,9 +253,8 @@ distributing them.
   trajectory-tree deduplication.
 - Universal reasoning stripping covers specific structured fields and exact
   inline patterns; it is not exhaustive and can be lossy.
-- Semantic classifications are model-dependent research annotations. The
-  unfinished adjudication set is not a gold standard, and no benchmark or
-  causal performance claim is established by this package.
+- Semantic classifications are model-dependent research annotations; no
+  benchmark or causal performance claim is established by this package.
 - Source datasets can contain synthetic errors, tool failures, stale responses,
   bias, unsafe content, or additional upstream-license obligations.
 
@@ -267,8 +266,10 @@ content remains under its source terms; see [docs/datasets.md](docs/datasets.md)
 This research was supported by the OpenEuroLLM project, co-funded by the
 Digital Europe Programme under GA no. 101195233.
 
-Computational work supporting this research used the LEONARDO supercomputer,
-owned by the EuroHPC Joint Undertaking and hosted by CINECA (Italy).
+We acknowledge the EuroHPC Joint Undertaking for awarding this project access
+to the EuroHPC supercomputer
+[LEONARDO](https://www.hpc.cineca.it/systems/hardware/leonardo/), hosted by
+CINECA (Italy) and the LEONARDO consortium through a EuroHPC Access call.
 
 The contents presented herein reflects only the author's view, and the
 Commission is not responsible for any use that may be made of the information

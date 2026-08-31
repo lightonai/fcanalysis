@@ -13,7 +13,7 @@ retried with the OpenAI SDK's exponential backoff.
 
 Two coupled correctness changes shaped the current prompt + flow:
 
-* **Canonical stage-1 prompt.** The semantic judge is v3-only. The prompt has a
+* **Canonical ensemble-classification prompt.** The prompt has a
   justified slot for policy-mandated prerequisites (auth / consent /
   verification), a sharper ``ANTI_MANUAL_SOLVE`` vs ``S6_NEAR_MISS`` boundary,
   and explicit fabricated/hallucinated tool-use routing to
@@ -118,8 +118,9 @@ ANTI_PATTERN_CATEGORIES = frozenset(
 
 # --- Stage-1 system prompt --------------------------------------------------
 #
-# v3 is the only supported semantic-judge prompt. Earlier prompt drafts were
-# archived outside this repo and intentionally removed from the runtime surface.
+# This is the only supported semantic-judge prompt. Historical development
+# names remain in a few Python identifiers for compatibility, but there is no
+# user-selectable prompt-version surface.
 
 SYSTEM_PROMPT_V3 = """\
 You classify no-FC (no function call) turns in function calling training data.
@@ -1023,8 +1024,7 @@ async def classify_sample(
             if cls["category"] not in ANTI_PATTERN_CATEGORIES:
                 continue
             # Stage 2 runs `verify_votes` independent samples per flagged turn and
-            # applies an AGREEMENT GATE (validated on the full v3 run, where two
-            # independent stage-2 passes agreed on only 87.3% of overturns):
+            # applies a precision-first AGREEMENT GATE:
             #   - all valid votes anti      -> confirm (anti + correction)
             #   - all valid votes justified -> overturn (justified)
             #   - split                     -> the verifier is self-inconsistent on
@@ -1543,11 +1543,11 @@ def main() -> None:
         default="all",
         choices=FILTER_MODES,
         help=(
-            "Which Stage 2 drop filters to apply. "
+            "Which loader drop filters to apply. "
             "'all' (default): dataset-specific + universal. "
             "'dataset': dataset-specific only. "
             "'universal': universal only. "
-            "'none': raw Stage 1 output."
+            "'none': source-converted output before those drops."
         ),
     )
     parser.add_argument(
