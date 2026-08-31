@@ -8,7 +8,7 @@
 #        SPLIT=medium ./scripts/run_judge.sh semantic_results_txt360_med txt360
 #
 # What it runs (the validated recipe):
-#   stage 1: v3 prompt, 3 generations, majority vote        (recall-tuned)
+#   stage 1: canonical classification, 3 generations, majority vote
 #   stage 2: strengthened prompt (fabricated-claims rule), VOTES=2 independent
 #            samples per flagged turn, agreement gate:
 #              all anti -> confirmed (+ correction)

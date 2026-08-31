@@ -1,9 +1,9 @@
-"""Validate the semantic correction invariant.
+"""Validate semantic correction consistency.
 
-Invariant: a turn's final label is anti  <=>  a usable correction lives at
-verification.correction. The only allowed exceptions are legacy old-stage-2
-failures (anti with no correction). A justified turn must NEVER carry a
-correction. Prints PASS/FAIL; exit code 1 on violation so a chain can gate on it.
+A justified turn must never carry a correction. A confirmed anti-pattern should
+carry a usable correction under ``verification.correction``; anti-pattern rows
+without one are reported as unverified so callers can investigate them before
+filtering. Prints PASS/FAIL; exit code 1 on a justified/correction contradiction.
 
 Pass either one semantic-result JSONL file or a directory containing JSONL
 files. An empty input is an error rather than a vacuous pass.
@@ -102,7 +102,7 @@ def main() -> int:
 
     print(
         f"anti={anti}  anti_with_corr={anti_corr}  "
-        f"anti_without_corr={anti_nocorr} (legacy)"
+        f"anti_without_corr={anti_nocorr} (unverified)"
     )
     print(f"justified={just}  justified_with_corr={just_corr} (MUST be 0)")
     print(f"contested={contested}")
