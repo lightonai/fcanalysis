@@ -100,6 +100,10 @@ The registered loaders are:
 | `toolmind` | `Nanbeige/ToolMind` |
 | `txt360` | `LLM360/TxT360-3efforts` (now served as `IFM/TxT360-3efforts`) |
 
+An experimental TOUCAN loader is under development on the
+[`toucan-wip`](https://github.com/lightonai/fcanalysis/tree/toucan-wip) branch.
+It is not part of v0.1.0's supported loader registry or its 69 fixture cases.
+
 Exact source revisions, source-declared licenses, attribution requirements, and
 source-specific limitations are documented in [Dataset sources and
 licenses](docs/datasets.md). The MIT license for `fcanalysis` does not relicense
