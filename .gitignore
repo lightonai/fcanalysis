@@ -16,12 +16,29 @@ wheels/
 .ruff_cache/
 .mypy_cache/
 .ty_cache/
+.coverage
+htmlcov/
 .claude/
+.idea/
+.vscode/
 
-# Generated artifacts
+# Local datasets and generated artifacts
+data/
+legacy_imports/
+outputs/
+reports/
+examples/out/
 semantic_results/
 semantic_results_mixture/
 working_notes/
+*.arrow
+*.ckpt
+*.jsonl
+*.jsonl.gz
+*.parquet
+*.pt
+*.pth
+*.safetensors
 
 # Regression fixture local-only artifacts (hashes + reports + configs are committed)
 tests/fixtures/loaders/*/*/output.jsonl.gz

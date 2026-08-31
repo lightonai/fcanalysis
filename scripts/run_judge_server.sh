@@ -28,11 +28,9 @@ set -euo pipefail
 #   ./scripts/run_judge_server.sh --model Qwen/Qwen3.5-122B-A10B-FP8 --gpus 4,5,6,7
 #   ./scripts/run_judge_server.sh --no-wait             # don't block on readiness
 #
-# NOTE: the 397B-FP8 weights (~406 GB) are NOT cached. Pre-download once to
-# avoid the readiness wait timing out:
-#   HF_HOME=/mnt/nfs/ytahtah/hf_home \
-#     huggingface-cli download Qwen/Qwen3.5-397B-A17B-FP8
-# (The 122B-A10B-FP8 variant IS already cached and runs on 4 GPUs.)
+# NOTE: the default model is very large. Set HF_HOME to an existing model cache
+# or pre-download it before starting the server. Smaller compatible judge models
+# can be selected with --model, but their prompts require separate validation.
 # ==============================================================================
 
 GPUS="0,1,2,3,4,5,6,7"
@@ -40,7 +38,7 @@ PORT=8003
 CONTAINER_NAME="vllm-judge"
 VLLM_IMAGE="vllm/vllm-openai:v0.19.0"
 MODEL="Qwen/Qwen3.5-397B-A17B-FP8"
-SERVE_NAME="Qwen/Qwen3.5-397B-A17B-FP8"
+SERVE_NAME=""
 SHM_SIZE="32g"   # TP=8 NCCL/IPC needs more shared memory than TP=4
 TP_SIZE=""
 # Measured on nemotron_agentic_v2 (199,115 samples): prompt p50 ~4.8K, p99
@@ -67,10 +65,11 @@ BATCH_INVARIANT=false
 MAX_WAIT=3600
 NO_WAIT=false
 
-HF_HOME="/mnt/nfs/ytahtah/hf_home"
-VLLM_CACHE="/mnt/nfs/ytahtah/.cache/vllm_compile/judge"
-TMP_DIR="/mnt/nfs/ytahtah/tmp_compile/judge"
-TRITON_CACHE="/mnt/nfs/ytahtah/.triton_cache/judge"
+CACHE_ROOT="${XDG_CACHE_HOME:-${HOME:?HOME must be set}/.cache}"
+HF_HOME="${HF_HOME:-$CACHE_ROOT/huggingface}"
+VLLM_CACHE="${VLLM_CACHE_DIR:-$CACHE_ROOT/vllm/fcanalysis-judge}"
+TMP_DIR="${JUDGE_TMP_DIR:-${TMPDIR:-/tmp}/fcanalysis-judge}"
+TRITON_CACHE="${TRITON_CACHE_DIR:-$CACHE_ROOT/triton/fcanalysis-judge}"
 
 usage() {
     cat <<'USAGE'
@@ -90,9 +89,9 @@ Options:
   --container-name <name>  Docker container name (default: vllm-judge)
   --vllm-image <image>     vLLM Docker image (default: vllm/vllm-openai:v0.19.0)
   --shm-size <size>        Shared memory size (default: 32g)
-  --vllm-cache-dir <dir>   Mounted as /root/.cache/vllm (default: .../vllm_compile/judge)
-  --tmp-dir <dir>          Mounted as /tmp (default: .../tmp_compile/judge)
-  --triton-cache-dir <dir> Mounted as /root/.triton (default: .../.triton_cache/judge)
+  --vllm-cache-dir <dir>   Mounted as /root/.cache/vllm (default: XDG cache)
+  --tmp-dir <dir>          Mounted as /tmp (default: TMPDIR/fcanalysis-judge)
+  --triton-cache-dir <dir> Mounted as /root/.triton (default: XDG cache)
   --max-wait <seconds>     Max seconds to wait for readiness (default: 3600)
   --no-wait                Don't wait for the server to be ready
   -h, --help               Show this help
@@ -127,6 +126,12 @@ done
 
 NUM_GPUS=$(echo "$GPUS" | tr ',' '\n' | wc -l)
 TP_SIZE="${TP_SIZE:-$NUM_GPUS}"
+SERVE_NAME="${SERVE_NAME:-$MODEL}"
+
+command -v docker >/dev/null 2>&1 || {
+    echo "ERROR: docker is required to launch the judge server." >&2
+    exit 1
+}
 
 echo "============================================================"
 echo "vLLM fcanalysis Judge Server (Qwen3.5, non-thinking)"
@@ -148,57 +153,62 @@ echo "tmp dir:          $TMP_DIR"
 echo "Triton cache:     $TRITON_CACHE"
 echo "============================================================"
 
-mkdir -p "$VLLM_CACHE" "$TMP_DIR" "$TRITON_CACHE"
+mkdir -p "$HF_HOME" "$VLLM_CACHE" "$TMP_DIR" "$TRITON_CACHE"
 
 echo ""
 echo "Stopping existing container '$CONTAINER_NAME' if any..."
 docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
 
-# Build the docker command as a string (required for the --gpus literal-quote
-# trick: --gpus '"device=..."').
-DOCKER_CMD="docker run -d"
-DOCKER_CMD+=" --name ${CONTAINER_NAME}"
-DOCKER_CMD+=" --gpus '\"device=${GPUS}\"'"
-DOCKER_CMD+=" --shm-size ${SHM_SIZE}"
-DOCKER_CMD+=" -p ${PORT}:8000"
-DOCKER_CMD+=" -v ${HF_HOME}:/hf_home"
-DOCKER_CMD+=" -v ${VLLM_CACHE}:/root/.cache/vllm"
-DOCKER_CMD+=" -v ${TMP_DIR}:/tmp"
-DOCKER_CMD+=" -v ${TRITON_CACHE}:/root/.triton"
-DOCKER_CMD+=" -e HF_HOME=/hf_home"
+DOCKER_ARGS=(
+    run -d
+    --name "$CONTAINER_NAME"
+    --gpus "\"device=$GPUS\""
+    --shm-size "$SHM_SIZE"
+    -p "${PORT}:8000"
+    -v "${HF_HOME}:/hf_home"
+    -v "${VLLM_CACHE}:/root/.cache/vllm"
+    -v "${TMP_DIR}:/tmp"
+    -v "${TRITON_CACHE}:/root/.triton"
+    -e HF_HOME=/hf_home
+)
 
 if [[ -n "${HF_TOKEN:-}" ]]; then
-    DOCKER_CMD+=" -e HF_TOKEN=${HF_TOKEN}"
+    # Pass the host variable by name so its value is not printed in the command.
+    DOCKER_ARGS+=(--env HF_TOKEN)
 fi
 
 if [[ "$BATCH_INVARIANT" == "true" ]]; then
-    DOCKER_CMD+=" -e VLLM_BATCH_INVARIANT=1"
+    DOCKER_ARGS+=(-e VLLM_BATCH_INVARIANT=1)
 fi
 
-DOCKER_CMD+=" ${VLLM_IMAGE}"
-DOCKER_CMD+=" --model ${MODEL}"
-DOCKER_CMD+=" --served-model-name ${SERVE_NAME}"
-DOCKER_CMD+=" --tensor-parallel-size ${TP_SIZE}"
-DOCKER_CMD+=" --port 8000"
-DOCKER_CMD+=" --trust-remote-code"
-DOCKER_CMD+=" --language-model-only"
-DOCKER_CMD+=" --max-model-len ${MAX_MODEL_LEN}"
-DOCKER_CMD+=" --gpu-memory-utilization ${GPU_MEM_UTIL}"
+DOCKER_ARGS+=(
+    "$VLLM_IMAGE"
+    --model "$MODEL"
+    --served-model-name "$SERVE_NAME"
+    --tensor-parallel-size "$TP_SIZE"
+    --port 8000
+    --trust-remote-code
+    --language-model-only
+    --max-model-len "$MAX_MODEL_LEN"
+    --gpu-memory-utilization "$GPU_MEM_UTIL"
+)
 if [[ -n "$MAX_NUM_BATCHED_TOKENS" ]]; then
-    DOCKER_CMD+=" --max-num-batched-tokens ${MAX_NUM_BATCHED_TOKENS}"
+    DOCKER_ARGS+=(--max-num-batched-tokens "$MAX_NUM_BATCHED_TOKENS")
 fi
 if [[ -n "$MAX_NUM_SEQS" ]]; then
-    DOCKER_CMD+=" --max-num-seqs ${MAX_NUM_SEQS}"
+    DOCKER_ARGS+=(--max-num-seqs "$MAX_NUM_SEQS")
 fi
 # FLASH_ATTN is a solid default and is required if --batch-invariant is enabled.
-DOCKER_CMD+=" --attention-backend FLASH_ATTN"
+DOCKER_ARGS+=(--attention-backend FLASH_ATTN)
 # Judge runs non-thinking: preserves stage-1 temperature/vote diversity and
 # needs no pipeline code change. Remove this (and add --reasoning-parser qwen3)
 # only if you later want per-request thinking on stage-2.
-DOCKER_CMD+=" --default-chat-template-kwargs '{\"enable_thinking\": false}'"
+DOCKER_ARGS+=(--default-chat-template-kwargs '{"enable_thinking": false}')
 
-echo "Running: ${DOCKER_CMD}"
-eval "${DOCKER_CMD}"
+printf "Running: docker"
+printf " %q" "${DOCKER_ARGS[@]}"
+printf "\n"
+docker "${DOCKER_ARGS[@]}"
 
 if [[ "$NO_WAIT" == "true" ]]; then
     echo ""
@@ -226,7 +236,7 @@ done
 echo ""
 echo "Server is ready on port ${PORT}."
 echo "Point the fcanalysis judge at it (no code change needed):"
-echo "  VLLM_KEY=EMPTY .venv/bin/python -m fcanalysis.semantic \\"
+echo "  VLLM_KEY=EMPTY uv run --locked python -m fcanalysis.semantic \\"
 echo "    --datasets nemotron_agentic_v2 --limit 150 \\"
 echo "    --base-url http://localhost:${PORT}/v1 \\"
 echo "    --model ${SERVE_NAME} --api-key-env VLLM_KEY \\"

@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+
+      - name: Install the locked environment
+        run: uv sync --locked
+      - name: Check formatting and lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Check types
+        run: uv run ty check
+      - name: Check shell syntax
+        run: bash -n scripts/*.sh
+      - name: Run unit tests
+        run: uv run pytest
+      - name: Run the public smoke example
+        run: uv run python examples/00_smoke.py
+      - name: Build distributions
+        run: uv build --clear

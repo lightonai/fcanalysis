@@ -1,20 +1,69 @@
 # fcanalysis
 
-Systematic analysis of function-calling datasets for training and evaluating tool-using language models.
+`fcanalysis` is a Python toolkit for loading, normalizing, validating, and
+analyzing public function-calling datasets. It provides eight source-specific
+loaders, a shared conversation model, structural and statistical analysis,
+schema-aware tool-call validation, deterministic overlap checks, and an
+optional LLM-based classifier for turns where no tool was called.
 
-`fcanalysis` ships format-aware loaders for seven public function-calling datasets, each producing a unified `ConversationSample` with configurable per-dataset transforms and universal filters. On top of the loaders sit structural and statistical analyzers (turn classification, calling-pattern distributions, FC coverage, tool-call validation against schemas, bias-detection metrics), an LLM-driven semantic classifier for no-FC turns (vLLM endpoint), and a cross-dataset deduplicator keyed by canonical seed. Every loader's output is pinned byte-for-byte by a regression-test suite against committed fixtures.
+The repository contains source code and small regression metadata. It does not
+contain the source datasets, generated dataset samples, semantic-judge outputs,
+model checkpoints, or benchmark results. It does not train or evaluate models.
+
+Version 0.1.0 is an alpha release and requires Python 3.14 or newer. The package
+uses Python 3.14 syntax deliberately. It is not published on PyPI.
 
 ## Installation
 
+Install the tagged source directly from GitHub:
+
 ```sh
-uv add fcanalysis
+uv add "fcanalysis @ git+https://github.com/lightonai/fcanalysis.git@v0.1.0"
 ```
 
-Requires Python 3.14+.
+For development:
 
-## Quickstart
+```sh
+git clone https://github.com/lightonai/fcanalysis.git
+cd fcanalysis
+uv sync --locked
+```
 
-### Load a dataset
+## Minimal example
+
+The zero-network smoke example constructs one normalized sample, analyzes its
+tool-calling pattern, and validates its arguments:
+
+```sh
+uv run python examples/00_smoke.py
+```
+
+Equivalent library use:
+
+```python
+from fcanalysis import ConversationSample
+from fcanalysis.core import analyze_sample
+
+sample = ConversationSample(
+    dataset="example",
+    sample_id="1",
+    tools=[],
+    messages=[
+        {"role": "user", "content": "Say hello."},
+        {"role": "assistant", "content": "Hello!"},
+    ],
+)
+
+analysis = analyze_sample(sample.messages)
+print(analysis.turn_patterns[0].value)  # no_calls
+```
+
+## Loading a dataset
+
+Each loader module exposes a source-specific configuration dataclass and a
+`load(...) -> tuple[list[ConversationSample], LoadReport]` function. Loaders
+read pinned Hugging Face revisions unless the loader explicitly supports a
+local `path` override.
 
 ```python
 from fcanalysis.loaders.base import FilterConfig
@@ -34,84 +83,190 @@ samples, report = load(
         require_valid_arguments=True,
     ),
 )
+
 print(report.summary())
 print(f"{len(samples)} samples after filtering")
 ```
 
-Each loader returns a `list[ConversationSample]` and a `LoadReport` documenting the conversion, dataset-specific config, and universal-filter pipeline.
+The registered loaders are:
 
-### Compute statistics
-
-```python
-from fcanalysis.core import analyze_sample
-from fcanalysis.statistics import aggregate_statistics
-
-analyses = [analyze_sample(s.messages, extract_function_names=True) for s in samples]
-stats = aggregate_statistics(
-    analyses=analyses,
-    messages_list=[s.messages for s in samples],
-    tools_list=[s.tools for s in samples],
-)
-```
-
-### Render a report
-
-```python
-from fcanalysis.reporter import print_full_report
-
-print_full_report(stats)
-```
-
-### Deduplicate within and across datasets
-
-```python
-from fcanalysis.overlap import dedup_within, dedup_cross
-
-unique_samples, within_report = dedup_within(samples)
-secondary_kept, cross_report = dedup_cross(
-    primary=unique_samples,
-    secondary=other_dataset,
-)
-```
-
-## Supported loaders
-
-| Loader | HuggingFace ID |
-|---|---|
+| Loader | Source dataset |
+| --- | --- |
 | `apigen_mt` | `Salesforce/APIGen-MT-5k` |
 | `dolci` | `allenai/Dolci-Instruct-SFT-Tool-Use` |
 | `nemotron_agentic_v1` | `nvidia/Nemotron-Agentic-v1` |
 | `nemotron_agentic_v2` | `nvidia/Nemotron-SFT-Agentic-v2` |
 | `nemotron_terminal` | `nvidia/Nemotron-Terminal-Corpus` |
 | `toolmind` | `Nanbeige/ToolMind` |
-| `txt360` | `LLM360/TxT360-3efforts` |
+| `toucan` | `Agent-Ark/Toucan-1.5M` |
+| `txt360` | `LLM360/TxT360-3efforts` (now served as `IFM/TxT360-3efforts`) |
 
-## Architecture
+Exact source revisions, source-declared licenses, attribution requirements, and
+source-specific limitations are documented in [Dataset sources and
+licenses](docs/datasets.md). The MIT license for `fcanalysis` does not relicense
+any source dataset.
 
-- `fcanalysis.format.ConversationSample`: the universal data type. Six fields (`messages`, `tools`, `dataset`, `sample_id`, `annotations`, `raw`); slotted dataclass with `raw` repr-hidden. `annotations` carries normalized curation metadata that downstream selectors may serialize. It must remain outside model input: chat templates and training formatters must consume only `messages` and `tools`.
-- `fcanalysis.loaders.base`: `FilterConfig`, `LoadReport`, `apply_filters`. Universal Stage-3 filter logic.
-- `fcanalysis.loaders.{name}`: per-dataset Stage-1 conversion plus Stage-2 dataset-specific config.
-- `fcanalysis.core`: turn classification (`identify_real_turns`, `classify_turn_pattern`).
-- `fcanalysis.validation`: JSON Schema subset for argument validation.
-- `fcanalysis.statistics`: per-aspect aggregators (function diversity, calling patterns, turn structure, FC coverage, abstention, termination, single-vs-multi-turn breakdowns).
-- `fcanalysis.behavioral`: structural facts per turn and per sample, plus bias-detection aggregates.
-- `fcanalysis.semantic`: vLLM-driven LLM classification of no-FC turns.
-- `fcanalysis.cross_tabulation`: join semantic results with behavioral analyses.
-- `fcanalysis.semantic_filter`: drop samples whose no-FC turns match excluded semantic categories.
-- `fcanalysis.overlap`: within- and cross-dataset deduplication by canonical seed key.
-- `fcanalysis.reporter`: text and markdown report rendering.
+## Normalized data model
 
-## Regression-test contract
+`fcanalysis.format.ConversationSample` is a slotted dataclass with six fields:
 
-Every loader×config pair has a committed fixture under [`tests/fixtures/loaders/{loader}/{config_id}/`](tests/fixtures/loaders/). Each fixture pins:
+- `messages: list[dict[str, object]]`: normalized OpenAI-style conversation;
+- `tools: list[dict[str, object]]`: normalized function definitions;
+- `dataset: str`: source identity, sometimes including a split or teacher;
+- `sample_id: str | int`: source-local row identity;
+- `annotations: dict[str, object]`: non-model-visible curation metadata; and
+- `raw: object`: optional source payload retained for inspection.
 
-- The `LoadReport` (`report.json`).
-- The SHA-256 hash of the full canonicalized sample list (`output.hash`).
-- A deterministic 100-sample subset (`sample.jsonl`).
-- The exact loader configuration (`config.json`).
+Only `messages` and `tools` are model inputs. Callers must keep `annotations`
+and `raw` out of chat templates and training serialization.
 
-The end-to-end test (`tests/e2e/test_loaders.py`) re-runs each loader and asserts byte-equivalence against its fixture. Any divergence is a behavioral regression.
+Normalization occurs in three ordered stages:
 
-## License
+1. source conversion into `ConversationSample`;
+2. explicitly selected source-specific transforms and drops; and
+3. explicitly selected universal filters from `FilterConfig`.
 
-MIT. See [LICENSE](LICENSE).
+Defaults are intentionally conservative: callers choose filtering policy. A
+`LoadReport` records input counts, transformations, drop reasons, and the
+configuration applied.
+
+## Analysis and validation
+
+The main library surfaces are:
+
+- `fcanalysis.core`: real-turn extraction and tool-calling patterns;
+- `fcanalysis.validation`: defined-function and JSON Schema subset checks;
+- `fcanalysis.statistics`: aggregate dataset statistics;
+- `fcanalysis.behavioral`: per-turn facts and bias-detection summaries;
+- `fcanalysis.overlap`: deterministic within- and cross-dataset deduplication;
+- `fcanalysis.reporter`: terminal, Markdown, and JSON reports;
+- `fcanalysis.semantic`: optional semantic classification; and
+- `fcanalysis.semantic_filter`: category-based filtering of classified turns.
+
+Repository examples exercise the larger workflows:
+
+```sh
+uv run python examples/01_load.py
+uv run python examples/02_analyze.py
+uv run python examples/03_dedup.py
+uv run python examples/04_semantic_pipeline.py
+```
+
+These examples load full public datasets and can require substantial network,
+memory, and disk resources. Read [examples/README.md](examples/README.md) before
+running them.
+
+To inspect the semantic command without contacting a model endpoint:
+
+```sh
+uv run python -m fcanalysis.semantic --help
+```
+
+To check the correction invariant in existing semantic output:
+
+```sh
+uv run python scripts/validate_invariant.py /path/to/results
+```
+
+See [Semantic classification](docs/semantic-classification.md) for the endpoint
+contract, staged workflow, and evidence limitations.
+
+## TOUCAN processing
+
+The TOUCAN loader pins revision
+`0df3cf37f2abefb380370cfb02eabea2a35ae782` and supports source subsets,
+quality gates, termination checks, conflicting-definition checks, and an
+explicit scaffold-tool counterfactual.
+
+Broad reasoning-tool stripping was retired after adversarial review. TOUCAN
+contains stateful and evidence-bearing tools; deleting a call, its linked
+result, or its definition can change the meaning of the remaining trajectory
+and can make invalid rows pass later checks. The current loader therefore
+retains reasoning and state tools—including `get_thoughts`, `get_stats`, and
+`clear`—together with linked writes and observations. Audited tool families are
+recorded in non-model-visible annotations. Undefined, conflicting, unbalanced,
+unparseable, and invalid evidence remains visible to the independent configured
+validators.
+
+This is a preservation policy, not a claim that every retained TOUCAN episode
+is suitable for training or that reasoning content is exhaustively identified.
+
+## Regression fixtures and reproducibility
+
+The repository registers 83 loader/configuration cases. Each tracked fixture
+directory contains exactly three contract files:
+
+- `config.json`: canonical loader and filter configuration;
+- `report.json`: serialized `LoadReport`; and
+- `output.hash`: SHA-256 of the complete canonical uncompressed JSONL output.
+
+`sample.jsonl` and `output.jsonl.gz` are local debugging artifacts generated by
+`tests.tools.generate_fixtures`; they are ignored and are not part of the
+repository or release.
+
+The default test suite is fully runnable from a clean clone and uses synthetic
+unit inputs:
+
+```sh
+uv run pytest
+```
+
+The 83 full-dataset E2E cases are intentionally separate because they download
+pinned source revisions and reconstruct complete outputs:
+
+```sh
+uv run pytest -m e2e
+uv run pytest -m e2e -k dolci
+```
+
+Reproducibility means deterministic processing of the same pinned source bytes,
+configuration, dependency lock, and iteration order. It does not guarantee
+that an upstream host will retain a revision forever, that stochastic semantic
+inference can be recreated without its full serving configuration, or that a
+fixture hash proves scientific validity.
+
+## Development checks
+
+```sh
+uv lock --check
+uv run ruff check .
+uv run ruff format --check .
+uv run ty check
+uv run pytest
+uv run prek run --all-files
+bash -n scripts/*.sh
+git diff --check
+uv build --clear
+```
+
+The project does not publish to PyPI. Inspect built artifacts locally before
+distributing them.
+
+## Known limitations
+
+- Python 3.14 is the only declared and tested interpreter line.
+- Loaders materialize large datasets in memory; they are analysis tools, not a
+  streaming ingestion service.
+- Loader fixtures establish implementation stability, not dataset quality,
+  contamination freedom, or downstream model performance.
+- Deduplication uses a canonical seed key and is not complete semantic or
+  trajectory-tree deduplication.
+- Universal reasoning stripping covers specific structured fields and exact
+  inline patterns; it is not exhaustive and can be lossy.
+- Semantic classifications are model-dependent research annotations. The
+  unfinished adjudication set is not a gold standard, and no benchmark or
+  causal performance claim is established by this package.
+- Source datasets can contain synthetic errors, tool failures, stale responses,
+  bias, unsafe content, or additional upstream-license obligations.
+
+## License and acknowledgment
+
+The `fcanalysis` source is licensed under the [MIT License](LICENSE). Dataset
+content remains under its source terms; see [docs/datasets.md](docs/datasets.md).
+
+This research was supported by the OpenEuroLLM project, co-funded by the
+Digital Europe Programme under GA no. 101195233.
+
+The contents presented herein reflects only the author's view, and the
+Commission is not responsible for any use that may be made of the information
+it contains.

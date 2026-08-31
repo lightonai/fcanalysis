@@ -25,17 +25,23 @@
 #      (prompts are not portable across models or datasets).
 #
 # Env overrides: CONCURRENCY (128), MAX_PASSES (3), SPLIT (high, txt360 only),
-#                VOTES (2), BASE_URL, MODEL.
+#                VOTES (2), BASE_URL, MODEL, VLLM_KEY, UV.
 # Resume-safe: re-running skips classified samples. Never overwrites other dirs.
 # ==============================================================================
 
-set -uo pipefail
+set -euo pipefail
 
-REPO="/mnt/nfs/ytahtah/fcanalysis-clean"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+CALLER_DIR="$PWD"
 OUTPUT_DIR="${1:?usage: run_judge.sh <output_dir> <dataset> [dataset ...]}"
 shift
 [ "$#" -ge 1 ] || { echo "usage: run_judge.sh <output_dir> <dataset> [dataset ...]" >&2; exit 1; }
 DATASETS=("$@")
+
+if [[ "$OUTPUT_DIR" != /* ]]; then
+    OUTPUT_DIR="$CALLER_DIR/$OUTPUT_DIR"
+fi
 
 CONCURRENCY="${CONCURRENCY:-128}"
 MAX_PASSES="${MAX_PASSES:-3}"
@@ -43,6 +49,8 @@ SPLIT="${SPLIT:-high}"
 VOTES="${VOTES:-2}"
 BASE_URL="${BASE_URL:-http://localhost:8003/v1}"
 MODEL="${MODEL:-Qwen/Qwen3.5-397B-A17B-FP8}"
+UV="${UV:-uv}"
+export VLLM_KEY="${VLLM_KEY:-EMPTY}"
 
 cd "$REPO"
 mkdir -p "$OUTPUT_DIR"
@@ -64,23 +72,26 @@ fi
 echo "Server OK."
 
 count_errors() {
-    .venv/bin/python -c "import json,glob
-n=0
-for f in glob.glob('$OUTPUT_DIR/*.jsonl'):
-    for line in open(f):
-        line=line.strip()
-        if not line: continue
-        try:
-            if 'error' in json.loads(line): n+=1
-        except Exception: pass
-print(n)"
+    JUDGE_OUTPUT_DIR="$OUTPUT_DIR" "$UV" run --locked python -c '
+import glob
+import json
+import os
+
+count = 0
+for filename in glob.glob(os.path.join(os.environ["JUDGE_OUTPUT_DIR"], "*.jsonl")):
+    with open(filename, encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip() and "error" in json.loads(line):
+                count += 1
+print(count)
+'
 }
 
 prev=-1
 for pass in $(seq 1 "$MAX_PASSES"); do
     echo ""
     echo "===== PASS $pass / $MAX_PASSES   ($(date -Is)) ====="
-    VLLM_KEY=EMPTY .venv/bin/python -m fcanalysis.semantic \
+    "$UV" run --locked python -m fcanalysis.semantic \
         --datasets "${DATASETS[@]}" --split "$SPLIT" \
         --base-url "$BASE_URL" --model "$MODEL" --api-key-env VLLM_KEY \
         --verify-and-correct-flags --verify-votes "$VOTES" \
@@ -97,23 +108,40 @@ done
 
 echo ""
 echo "===== FINAL SUMMARY   ($(date -Is)) ====="
-.venv/bin/python -c "
-import json, glob
-ANTI={'ANTI_MANUAL_SOLVE','ANTI_UNJUSTIFIED_REFUSAL','ANTI_PRESSURE_CAVE','OTHER_UNJUSTIFIED'}
-for f in sorted(glob.glob('$OUTPUT_DIR/*.jsonl')):
-    rows=ok=err=turns=anti=contested=0
-    for line in open(f):
-        line=line.strip()
-        if not line: continue
-        rows+=1
-        try: d=json.loads(line)
-        except Exception: continue
-        if 'error' in d: err+=1; continue
-        ok+=1
-        for c in d.get('classifications',[]):
-            turns+=1
-            if c.get('category') in ANTI: anti+=1
-            if c.get('contested'): contested+=1
-    print(f'  {f.split(chr(47))[-1]}: rows={rows} ok={ok} errors={err} turns={turns} anti={anti} contested={contested}')
-"
+JUDGE_OUTPUT_DIR="$OUTPUT_DIR" "$UV" run --locked python -c '
+import glob
+import json
+import os
+
+anti_categories = {
+    "ANTI_MANUAL_SOLVE",
+    "ANTI_UNJUSTIFIED_REFUSAL",
+    "ANTI_PRESSURE_CAVE",
+    "OTHER_UNJUSTIFIED",
+}
+for filename in sorted(
+    glob.glob(os.path.join(os.environ["JUDGE_OUTPUT_DIR"], "*.jsonl"))
+):
+    rows = ok = errors = turns = anti = contested = 0
+    with open(filename, encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            rows += 1
+            result = json.loads(line)
+            if "error" in result:
+                errors += 1
+                continue
+            ok += 1
+            for classification in result.get("classifications", []):
+                turns += 1
+                if classification.get("category") in anti_categories:
+                    anti += 1
+                if classification.get("contested"):
+                    contested += 1
+    print(
+        f"  {os.path.basename(filename)}: rows={rows} ok={ok} errors={errors} "
+        f"turns={turns} anti={anti} contested={contested}"
+    )
+'
 echo "ALL PASSES DONE"
