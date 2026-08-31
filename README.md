@@ -1,17 +1,24 @@
 # fcanalysis
 
+> [!WARNING]
+> This branch contains work-in-progress TOUCAN support. It is not part of the
+> tagged v0.1.0 release or its supported loader and fixture surface.
+
 `fcanalysis` is a Python toolkit for loading, normalizing, validating, and
-analyzing public function-calling datasets. It provides eight source-specific
-loaders, a shared conversation model, structural and statistical analysis,
-schema-aware tool-call validation, deterministic overlap checks, and an
-optional LLM-based classifier for turns where no tool was called.
+analyzing public function-calling datasets. This branch provides seven
+supported source-specific loaders plus one experimental TOUCAN loader, a shared
+conversation model, structural and statistical analysis, schema-aware
+tool-call validation, deterministic overlap checks, and an optional LLM-based
+classifier for turns where no tool was called.
 
 The repository contains source code and small regression metadata. It does not
 contain the source datasets, generated dataset samples, semantic-judge outputs,
 model checkpoints, or benchmark results. It does not train or evaluate models.
 
-Version 0.1.0 is an alpha release and requires Python 3.14 or newer. The package
-uses Python 3.14 syntax deliberately. It is not published on PyPI.
+Version 0.1.0 is an alpha release with seven loaders and 69 fixture cases; the
+additional TOUCAN implementation and its 14 fixture cases exist only on this
+WIP branch. The package requires Python 3.14 or newer, uses Python 3.14 syntax
+deliberately, and is not published on PyPI.
 
 ## Installation
 
@@ -98,7 +105,7 @@ The registered loaders are:
 | `nemotron_agentic_v2` | `nvidia/Nemotron-SFT-Agentic-v2` |
 | `nemotron_terminal` | `nvidia/Nemotron-Terminal-Corpus` |
 | `toolmind` | `Nanbeige/ToolMind` |
-| `toucan` | `Agent-Ark/Toucan-1.5M` |
+| `toucan` | `Agent-Ark/Toucan-1.5M` (experimental on this branch) |
 | `txt360` | `LLM360/TxT360-3efforts` (now served as `IFM/TxT360-3efforts`) |
 
 Exact source revisions, source-declared licenses, attribution requirements, and
@@ -177,7 +184,7 @@ contract, staged workflow, and evidence limitations.
 
 ## TOUCAN processing
 
-The TOUCAN loader pins revision
+The experimental TOUCAN loader pins revision
 `0df3cf37f2abefb380370cfb02eabea2a35ae782` and supports source subsets,
 quality gates, termination checks, conflicting-definition checks, and an
 explicit scaffold-tool counterfactual.
@@ -197,8 +204,9 @@ is suitable for training or that reasoning content is exhaustively identified.
 
 ## Regression fixtures and reproducibility
 
-The repository registers 83 loader/configuration cases. Each tracked fixture
-directory contains exactly three contract files:
+This branch registers 83 loader/configuration cases: the 69 cases in v0.1.0
+plus 14 experimental TOUCAN cases. Each tracked fixture directory contains
+exactly three contract files:
 
 - `config.json`: canonical loader and filter configuration;
 - `report.json`: serialized `LoadReport`; and
