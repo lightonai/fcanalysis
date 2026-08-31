@@ -9,6 +9,9 @@ optional LLM-based classifier for turns where no tool was called.
 The repository contains source code and small regression metadata. It does not
 contain the source datasets, generated dataset samples, semantic-judge outputs,
 model checkpoints, or benchmark results. It does not train or evaluate models.
+The frozen semantic annotations used by the associated curation campaign are
+available separately as opt-in release assets; see
+[Semantic-label release](docs/semantic-labels.md).
 
 Version 0.1.0 is an alpha release and requires Python 3.14 or newer. The package
 uses Python 3.14 syntax deliberately. It is not published on PyPI.
@@ -177,6 +180,12 @@ uv run python scripts/validate_invariant.py /path/to/results
 
 See [Semantic classification](docs/semantic-classification.md) for the endpoint
 contract, staged workflow, and evidence limitations.
+
+To reuse the frozen annotations from the associated training-data curation
+campaign without downloading them during clone or installation, see
+[Semantic-label release](docs/semantic-labels.md). The compressed JSONL files
+are attached to the GitHub release and are fetched only by an explicit download
+command.
 
 ## Regression fixtures and reproducibility
 

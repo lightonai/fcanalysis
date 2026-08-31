@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "artifact_collection": "https://github.com/lightonai/fcanalysis/releases/tag/v0.1.0",
+  "artifact_version": "1.0.0",
+  "source_release": "v0.1.0",
+  "release_date": "2026-08-31",
+  "license": "CC-BY-4.0",
+  "source_content_included": false,
+  "annotation_scope": "No-tool-call turns in the three annotated source components used by the frozen function-calling training-data curation campaign.",
+  "campaign": {
+    "internal_identifier": "centerpiece-v2",
+    "join_key": "source_local_sample_id",
+    "error_rows": "account_and_skip",
+    "component_rows_without_semantic_result": "keep",
+    "orphan_semantic_rows": "account_and_do_not_remap",
+    "downstream_label": "final category"
+  },
+  "method": {
+    "first_pass": "Three independent structured classifications followed by per-turn majority selection.",
+    "targeted_verification": "Turns initially classified as anti-patterns are verified separately and may be confirmed, overturned, marked contested, or corrected.",
+    "implementation_reference": "https://github.com/lightonai/fcanalysis/blob/v0.1.0/docs/semantic-classification.md",
+    "exact_stochastic_inference_reproducible": false
+  },
+  "provenance_limitations": [
+    "Rows do not embed the judge model or revision.",
+    "Rows do not embed a prompt hash or producer source commit.",
+    "Rows do not embed serving-software and decoding settings or a run identifier.",
+    "Lineage to the documented method is supported by schema and campaign records rather than complete self-describing inference metadata."
+  ],
+  "files": [
+    {
+      "asset": "semantic-labels-nemotron-agentic-v1.jsonl.gz",
+      "source_dataset": "nvidia/Nemotron-Agentic-v1",
+      "source_revision": "650d590978ca35c8f1ecea2faf136e5fac421b62",
+      "source_split": "tool_calling",
+      "loader_id": "nemotron_agentic_v1",
+      "sample_id_type": "string",
+      "rows": 105280,
+      "successful_rows": 104659,
+      "error_rows": 621,
+      "turn_classifications": 133116,
+      "final_anti_pattern_classifications": 3668,
+      "classifications_with_verification": 9448,
+      "classifications_with_correction": 3654,
+      "contested_classifications": 1058,
+      "uncompressed_bytes": 77255380,
+      "uncompressed_sha256": "3d3012327258823c6e36922f4f77bc0d0283773441c29a1926ab22eac5711de8",
+      "compressed_bytes": 13550596,
+      "compressed_sha256": "0044bea236e55fb3b954d8e95643d58412850096ff267bcd72420b733438da0c"
+    },
+    {
+      "asset": "semantic-labels-nemotron-agentic-v2-interactive-agent.jsonl.gz",
+      "source_dataset": "nvidia/Nemotron-SFT-Agentic-v2",
+      "source_revision": "49e79a3be5ab8cf7511a12958b95cfd6408cd8db",
+      "source_split": "interactive_agent",
+      "loader_id": "nemotron_agentic_v2",
+      "sample_id_type": "string",
+      "rows": 199115,
+      "successful_rows": 198898,
+      "error_rows": 217,
+      "turn_classifications": 318359,
+      "final_anti_pattern_classifications": 245,
+      "classifications_with_verification": 548,
+      "classifications_with_correction": 243,
+      "contested_classifications": 85,
+      "uncompressed_bytes": 128819017,
+      "uncompressed_sha256": "a55ef7b43ed277f4d8c1e925d5825c203dfeb8b87102cc360cb04cbdcbcf6365",
+      "compressed_bytes": 20764375,
+      "compressed_sha256": "7982f4b075ea5c533ace958921f80a1fde701f4477975500befe47e9ec3417a5"
+    },
+    {
+      "asset": "semantic-labels-txt360-high.jsonl.gz",
+      "source_dataset": "LLM360/TxT360-3efforts",
+      "source_repository_now_resolves_as": "IFM/TxT360-3efforts",
+      "source_revision": "bfc4a082d11967cd7810fe0b773be87bf54fb32e",
+      "source_config": "agent",
+      "source_split": "high",
+      "loader_id": "txt360",
+      "sample_id_type": "integer",
+      "rows": 100294,
+      "successful_rows": 100063,
+      "error_rows": 231,
+      "turn_classifications": 143638,
+      "final_anti_pattern_classifications": 6417,
+      "classifications_with_verification": 19790,
+      "classifications_with_correction": 6352,
+      "contested_classifications": 2258,
+      "uncompressed_bytes": 108969204,
+      "uncompressed_sha256": "c0174c1924c7e32071d4788a02cebdeef5b2c5a80c64cdbd596f42db2acd5ee6",
+      "compressed_bytes": 17890749,
+      "compressed_sha256": "6ed8a1574e093dc4633d9397b1c534f95b55e3a6755a622d88a7b4cee8a431a0"
+    }
+  ],
+  "totals": {
+    "rows": 404689,
+    "successful_rows": 403620,
+    "error_rows": 1069,
+    "turn_classifications": 595113,
+    "final_anti_pattern_classifications": 10330,
+    "classifications_with_verification": 29786,
+    "classifications_with_correction": 10249,
+    "contested_classifications": 3401,
+    "uncompressed_bytes": 315043601,
+    "compressed_bytes": 52205720
+  },
+  "excluded_artifacts": [
+    {
+      "name": "ToolMind semantic annotations",
+      "reason": "Not used as a semantic input by the frozen campaign."
+    }
+  ]
+}
