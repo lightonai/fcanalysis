@@ -12,6 +12,7 @@ to understand what the output means.
 | Install the package and run a first example | [Getting started](getting-started.md) |
 | Understand the conversation format and its relationship to SFT | [How conversations are loaded](conversations.md) |
 | Choose a loader, configure it, and understand its report | [Using loaders](loading.md) |
+| Export the selected dataset sources as JSONL | [Export retained conversations](loading.md#export-retained-conversations) |
 | Support your own source format | [Adding a loader](adding-loaders.md) |
 | Measure tool use, inspect supervision, or combine loaded data | [Analyzing conversations](analysis.md) |
 

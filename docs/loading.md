@@ -3,7 +3,8 @@
 [Documentation](README.md) · Prerequisite: [How conversations are loaded](conversations.md)
 
 Choose the adapter for your released source format. Start with
-[loading](#load-and-iterate), [reasoning settings](#reasoning-and-system-settings),
+[loading](#load-and-iterate), [exporting](#export-retained-conversations),
+[reasoning settings](#reasoning-and-system-settings),
 [curation](#curation-settings), and [reports](#read-the-report).
 [Prefix reconstruction](#assistant-target-prefixes) and
 [Terminal](#terminal-conversations) apply only to those sources.
@@ -88,6 +89,60 @@ revision; other loaders resolve their pinned upstream files.
 For normalized JSONL, use [`iter_samples_jsonl()`](analysis.md#save-and-read-canonical-conversations).
 It checks serialized containers without rerunning loader validation.
 For your own raw format, follow [Adding a loader](adding-loaders.md).
+
+## Export retained conversations
+
+[`scripts/export_selected_source.py`](../scripts/export_selected_source.py)
+exports one of the 11 selected source configurations below. Run it from a
+checkout after `uv sync --locked`, with output and scratch paths outside Git:
+
+```sh
+mkdir -p /path/to/scratch
+uv run python scripts/export_selected_source.py \
+  --source nemotron_v2 \
+  --output /path/to/exports/nemotron_v2 \
+  --temporary-directory /path/to/scratch
+```
+
+The output directory must not already exist. The script preserves reasoning,
+selects sources before reconstruction/curation, and runs loader validation and
+Levels 1, 1.5, and 2 with aggregate audit enabled. Adapters pin upstream revisions.
+This recipe covers nine upstream datasets; TxT360 contributes three exports.
+
+| `--source` | Selected input |
+| --- | --- |
+| `dolci` | All five Dolci Tool-Use partitions |
+| `nemotron_v1` | Both Agentic v1 splits |
+| `nemotron_v2` | All three Agentic v2 splits; exclude raw `metadata.source` values `xlam`, `xlam_tools`, and `when2call` from `tool_calling` |
+| `terminal` | All four Nemotron-Terminal configurations |
+| `toolmind` | Only the BUTTONInstruct, ToolACE, Glaive, and tau-train files |
+| `toolmind_web` | ToolMind-Web-QA's `open-wiki-traj.jsonl` |
+| `toucan` | All three teachers and four subsets; the separate SFT derivative is not added |
+| `txt360_high`, `txt360_medium`, `txt360_low` | The corresponding TxT360 agent effort split |
+| `ultradata` | UltraData Tool-Use, excluding `toolmind_graphsyn` |
+
+The script writes:
+
+- `canonical.jsonl.gz`: full `ConversationSample` records, including `raw` and
+  annotations. Use `messages` and `tools` for model input.
+- `report.json`: the loader report, conversation and assistant-message counts
+  by dataset, elapsed time, and `complete: true`. It is written only after the
+  iterator finishes and its final count matches the export. An interrupted run
+  can leave a partial JSONL file; use a fresh directory for a rerun.
+
+The default `--min-free-gib 500` checks free space on the output filesystem every
+10,000 exported conversations; its minimum is 10 GiB. Configure it for your disk,
+and allow separate space for the source cache and curation scratch files.
+
+These are counts within each source, before mixture curation or model-specific
+training admission. [Mixture curation](analysis.md#curate-a-mixture-of-retained-streams)
+can combine the ten native exports; keep Terminal separate. Assistant-message
+counts are candidates for supervision, not supervised-token counts. See
+[token accounting](analysis.md#count-tokens).
+
+This selection recipe does not establish training or redistribution rights.
+Dataset terms still apply; mixed Dolci/TxT360 inputs and third-party tool results
+require their own review.
 
 ## Reasoning and system settings
 

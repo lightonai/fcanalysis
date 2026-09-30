@@ -171,6 +171,8 @@ The result owns temporary resources and should be used as a context manager.
 | Structural semantic-annotation contract | [supervision_semantics.py](../src/fcanalysis/supervision_semantics.py) | Draft record/quoted-evidence validation; performs no classification or accuracy certification. |
 | Qwen3.5 token accounting | [tokenization.py](../src/fcanalysis/tokenization.py), [token_analysis.py](../src/fcanalysis/token_analysis.py) | Optional, model-specific measurement view. |
 
+## Count tokens
+
 Token analysis requires the optional dependencies:
 
 ```sh
