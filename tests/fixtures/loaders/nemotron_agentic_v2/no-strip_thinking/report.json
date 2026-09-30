@@ -1,0 +1,416 @@
+{
+  "dataset": "nvidia/Nemotron-SFT-Agentic-v2",
+  "dataset_config_count": 991900,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation_by_subset": {
+      "interactive_agent": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 192668,
+              "extra_samples": 522,
+              "repeated_groups": 314,
+              "samples_in_repeated_groups": 836,
+              "unique_groups": 192146
+            },
+            "level_4": {
+              "eligible_samples": 210021,
+              "extra_samples": 166558,
+              "repeated_groups": 15244,
+              "samples_in_repeated_groups": 181802,
+              "unique_groups": 43463
+            },
+            "level_5": {
+              "eligible_samples": 210021,
+              "extra_samples": 209386,
+              "repeated_groups": 635,
+              "samples_in_repeated_groups": 210021,
+              "unique_groups": 635
+            }
+          },
+          "input_samples": 210022,
+          "output_samples": 210021,
+          "removed_samples": 1,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/interactive_agent",
+            "split": "interactive_agent",
+            "subset": "interactive_agent"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 0,
+              "input_samples": 210022,
+              "output_samples": 210022,
+              "removed_samples": 0
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 210022,
+              "output_samples": 210022,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 1,
+              "input_samples": 210022,
+              "output_samples": 210021,
+              "removed_samples": 1
+            }
+          }
+        }
+      ],
+      "search": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 5967,
+              "extra_samples": 0,
+              "repeated_groups": 0,
+              "samples_in_repeated_groups": 0,
+              "unique_groups": 5967
+            },
+            "level_4": {
+              "eligible_samples": 5967,
+              "extra_samples": 5947,
+              "repeated_groups": 19,
+              "samples_in_repeated_groups": 5966,
+              "unique_groups": 20
+            },
+            "level_5": {
+              "eligible_samples": 5967,
+              "extra_samples": 5966,
+              "repeated_groups": 1,
+              "samples_in_repeated_groups": 5967,
+              "unique_groups": 1
+            }
+          },
+          "input_samples": 5967,
+          "output_samples": 5967,
+          "removed_samples": 0,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/search",
+            "split": "search",
+            "subset": "search"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 0,
+              "input_samples": 5967,
+              "output_samples": 5967,
+              "removed_samples": 0
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 5967,
+              "output_samples": 5967,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 0,
+              "input_samples": 5967,
+              "output_samples": 5967,
+              "removed_samples": 0
+            }
+          }
+        }
+      ],
+      "tool_calling": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 463691,
+              "extra_samples": 11442,
+              "repeated_groups": 6809,
+              "samples_in_repeated_groups": 18251,
+              "unique_groups": 452249
+            },
+            "level_4": {
+              "eligible_samples": 480008,
+              "extra_samples": 378255,
+              "repeated_groups": 33295,
+              "samples_in_repeated_groups": 411550,
+              "unique_groups": 101753
+            },
+            "level_5": {
+              "eligible_samples": 480008,
+              "extra_samples": 446260,
+              "repeated_groups": 10899,
+              "samples_in_repeated_groups": 457159,
+              "unique_groups": 33748
+            }
+          },
+          "input_samples": 490002,
+          "output_samples": 480008,
+          "removed_samples": 9994,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/tool_calling",
+            "split": "tool_calling",
+            "subset": "tool_calling"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 0,
+              "input_samples": 490002,
+              "output_samples": 490002,
+              "removed_samples": 0
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 490002,
+              "output_samples": 490002,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 5826,
+              "input_samples": 490002,
+              "output_samples": 480008,
+              "removed_samples": 9994
+            }
+          }
+        }
+      ]
+    },
+    "pipeline_by_subset": {
+      "interactive_agent": {
+        "conversion_drops": {},
+        "drops": {
+          "invalid_arguments": 4,
+          "invalid_tool_schema": 284,
+          "ungrounded_credential": 671,
+          "ungrounded_temporal_reference": 19,
+          "unsupported_schema_format:ISO-8601": 163,
+          "unsupported_schema_format:YYYY-MM-DD": 1312,
+          "unsupported_schema_format:YYYY-MM-DD HH:MM": 179,
+          "unsupported_schema_format:base64": 400,
+          "unsupported_schema_format:currency": 597,
+          "unsupported_schema_format:date-range": 179,
+          "unsupported_schema_format:date-time": 52013,
+          "unsupported_schema_format:datetime": 1187,
+          "unsupported_schema_format:email": 1618,
+          "unsupported_schema_format:file": 474,
+          "unsupported_schema_format:float": 400,
+          "unsupported_schema_format:int32": 2827,
+          "unsupported_schema_format:percent": 157,
+          "unsupported_schema_format:time": 2576,
+          "unsupported_schema_format:uri": 473,
+          "unsupported_schema_keyword:consent_obtained": 122,
+          "unsupported_schema_keyword:exchange_items": 322,
+          "unsupported_schema_keyword:item_removals": 631,
+          "unsupported_schema_keyword:nullable": 888,
+          "unsupported_schema_keyword:optional": 563,
+          "unsupported_schema_keyword:returns": 473,
+          "unsupported_schema_keyword:then": 326
+        },
+        "passed": {
+          "async_lifecycle": 210022,
+          "capabilities": 210712,
+          "definitions": 278880,
+          "final_async_lifecycle": 210022,
+          "final_capabilities": 210022,
+          "final_linkage": 210022,
+          "final_structure": 210022,
+          "final_temporal_inputs": 210022,
+          "final_visible_inputs": 210022,
+          "linkage": 278880,
+          "structure": 278880,
+          "temporal_inputs": 210022,
+          "termination": 210022,
+          "visible_inputs": 210041
+        },
+        "stage_drops": {
+          "capabilities": 68168,
+          "temporal_inputs": 19,
+          "visible_inputs": 671
+        },
+        "transformations": {
+          "source_linkage_fields_removed": 1342284
+        }
+      },
+      "search": {
+        "conversion_drops": {},
+        "drops": {
+          "invalid_arguments": 1
+        },
+        "passed": {
+          "async_lifecycle": 5967,
+          "capabilities": 5967,
+          "definitions": 5968,
+          "final_async_lifecycle": 5967,
+          "final_capabilities": 5967,
+          "final_linkage": 5967,
+          "final_structure": 5967,
+          "final_temporal_inputs": 5967,
+          "final_visible_inputs": 5967,
+          "linkage": 5968,
+          "structure": 5968,
+          "temporal_inputs": 5967,
+          "termination": 5967,
+          "visible_inputs": 5967
+        },
+        "stage_drops": {
+          "capabilities": 1
+        },
+        "transformations": {
+          "null_legacy_function_call_fields_removed": 70210,
+          "source_linkage_fields_removed": 192726
+        }
+      },
+      "tool_calling": {
+        "conversion_drops": {},
+        "drops": {
+          "conflicting_duplicate_tool_names": 3986,
+          "duplicate_json_key": 395,
+          "empty_final_assistant": 2984,
+          "invalid_arguments": 19428,
+          "invalid_tool_description": 1007,
+          "invalid_tool_schema": 38,
+          "malformed_json": 5,
+          "non_object_arguments": 21,
+          "unbalanced_cardinality": 136600,
+          "undefined_function_calls": 5685,
+          "ungrounded_credential": 24312,
+          "ungrounded_temporal_reference": 1151,
+          "unresolved_async_state": 5,
+          "unsupported_schema_format:binary": 349,
+          "unsupported_schema_format:date-time": 6371,
+          "unsupported_schema_format:datetime": 113,
+          "unsupported_schema_format:email": 1008,
+          "unsupported_schema_format:integer": 102,
+          "unsupported_schema_format:pixel": 125,
+          "unsupported_schema_format:time": 672,
+          "unsupported_schema_format:uri": 1458,
+          "unsupported_schema_format:url": 2,
+          "unsupported_schema_keyword:contentMediaType": 49,
+          "unsupported_schema_keyword:dependencies": 10,
+          "unsupported_schema_keyword:example": 10800,
+          "unsupported_schema_keyword:nullable": 207,
+          "unsupported_schema_keyword:results": 167
+        },
+        "passed": {
+          "async_lifecycle": 492986,
+          "capabilities": 518454,
+          "definitions": 702059,
+          "final_async_lifecycle": 492986,
+          "final_capabilities": 492986,
+          "final_linkage": 492986,
+          "final_structure": 492986,
+          "final_temporal_inputs": 492986,
+          "final_visible_inputs": 492986,
+          "linkage": 565038,
+          "structure": 701638,
+          "temporal_inputs": 492991,
+          "termination": 490002,
+          "visible_inputs": 494142
+        },
+        "stage_drops": {
+          "async_lifecycle": 5,
+          "capabilities": 46584,
+          "definitions": 4993,
+          "linkage": 136600,
+          "structure": 421,
+          "temporal_inputs": 1151,
+          "termination": 2984,
+          "visible_inputs": 24312
+        },
+        "transformations": {
+          "duplicate_tool_definitions_removed": 1695,
+          "empty_legacy_function_required_removed": 15,
+          "legacy_function_required_lifted": 8,
+          "result_batches_reordered": 73,
+          "source_call_index_fields_removed": 167410,
+          "source_linkage_fields_removed": 3545232
+        }
+      }
+    },
+    "source": {
+      "config": "default",
+      "files": [
+        "data/interactive_agent.jsonl",
+        "data/search.jsonl",
+        "data/tool_calling.jsonl"
+      ],
+      "revision": "7c804833427f633ccd53b582dbf02525fd680f78",
+      "subsets": {
+        "interactive_agent": {
+          "converted": 278880,
+          "parseable": 278880,
+          "physical": 278880,
+          "validated": 210022
+        },
+        "search": {
+          "converted": 5968,
+          "parseable": 5968,
+          "physical": 5968,
+          "validated": 5967
+        },
+        "tool_calling": {
+          "converted": 707052,
+          "parseable": 707052,
+          "physical": 707052,
+          "validated": 490002
+        }
+      }
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "conflicting_duplicate_tool_names": 3986,
+    "duplicate_json_key": 395,
+    "empty_final_assistant": 2984,
+    "invalid_arguments": 19433,
+    "invalid_tool_description": 1007,
+    "invalid_tool_schema": 322,
+    "malformed_json": 5,
+    "non_object_arguments": 21,
+    "unbalanced_cardinality": 136600,
+    "undefined_function_calls": 5685,
+    "ungrounded_credential": 24983,
+    "ungrounded_temporal_reference": 1170,
+    "unresolved_async_state": 5,
+    "unsupported_schema_format:ISO-8601": 163,
+    "unsupported_schema_format:YYYY-MM-DD": 1312,
+    "unsupported_schema_format:YYYY-MM-DD HH:MM": 179,
+    "unsupported_schema_format:base64": 400,
+    "unsupported_schema_format:binary": 349,
+    "unsupported_schema_format:currency": 597,
+    "unsupported_schema_format:date-range": 179,
+    "unsupported_schema_format:date-time": 58384,
+    "unsupported_schema_format:datetime": 1300,
+    "unsupported_schema_format:email": 2626,
+    "unsupported_schema_format:file": 474,
+    "unsupported_schema_format:float": 400,
+    "unsupported_schema_format:int32": 2827,
+    "unsupported_schema_format:integer": 102,
+    "unsupported_schema_format:percent": 157,
+    "unsupported_schema_format:pixel": 125,
+    "unsupported_schema_format:time": 3248,
+    "unsupported_schema_format:uri": 1931,
+    "unsupported_schema_format:url": 2,
+    "unsupported_schema_keyword:consent_obtained": 122,
+    "unsupported_schema_keyword:contentMediaType": 49,
+    "unsupported_schema_keyword:dependencies": 10,
+    "unsupported_schema_keyword:example": 10800,
+    "unsupported_schema_keyword:exchange_items": 322,
+    "unsupported_schema_keyword:item_removals": 631,
+    "unsupported_schema_keyword:nullable": 1095,
+    "unsupported_schema_keyword:optional": 563,
+    "unsupported_schema_keyword:results": 167,
+    "unsupported_schema_keyword:returns": 473,
+    "unsupported_schema_keyword:then": 326
+  },
+  "filtered_count": 705991,
+  "final_count": 695996,
+  "raw_count": 991900,
+  "stage1_count": 991900,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": false
+}

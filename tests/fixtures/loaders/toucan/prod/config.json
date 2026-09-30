@@ -1,0 +1,41 @@
+{
+  "dataset_config": {
+    "drop_ambiguous_reasoning": true,
+    "drop_assistant_protocol_residue": true,
+    "drop_conflicting_duplicate_tools": true,
+    "drop_incomplete_deep_research": true,
+    "drop_incomplete_termination": true,
+    "drop_invalid_source_tool_linkage": true,
+    "drop_low_quality": false,
+    "drop_producer_error_targets": true,
+    "min_completeness": 4,
+    "min_conciseness": 4,
+    "min_question_quality": 5,
+    "min_scenario_realism": 5,
+    "require_full_tool_use": false,
+    "strip_scaffold_tools": false,
+    "subsets": [
+      "single-turn-original",
+      "single-turn-diversify",
+      "irrelevant",
+      "multi-turn"
+    ]
+  },
+  "extra_kwargs": {
+    "batch_size": 32,
+    "curation_config": {
+      "audit": true,
+      "max_level": "level_2",
+      "temporary_directory": null
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  }
+}

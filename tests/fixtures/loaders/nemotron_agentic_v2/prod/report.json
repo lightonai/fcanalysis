@@ -1,0 +1,429 @@
+{
+  "dataset": "nvidia/Nemotron-SFT-Agentic-v2",
+  "dataset_config_count": 991900,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation_by_subset": {
+      "interactive_agent": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 192664,
+              "extra_samples": 522,
+              "repeated_groups": 314,
+              "samples_in_repeated_groups": 836,
+              "unique_groups": 192142
+            },
+            "level_4": {
+              "eligible_samples": 210017,
+              "extra_samples": 166556,
+              "repeated_groups": 15243,
+              "samples_in_repeated_groups": 181799,
+              "unique_groups": 43461
+            },
+            "level_5": {
+              "eligible_samples": 210017,
+              "extra_samples": 209382,
+              "repeated_groups": 635,
+              "samples_in_repeated_groups": 210017,
+              "unique_groups": 635
+            }
+          },
+          "input_samples": 210018,
+          "output_samples": 210017,
+          "removed_samples": 1,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/interactive_agent",
+            "split": "interactive_agent",
+            "subset": "interactive_agent"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 0,
+              "input_samples": 210018,
+              "output_samples": 210018,
+              "removed_samples": 0
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 210018,
+              "output_samples": 210018,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 1,
+              "input_samples": 210018,
+              "output_samples": 210017,
+              "removed_samples": 1
+            }
+          }
+        }
+      ],
+      "search": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 5952,
+              "extra_samples": 0,
+              "repeated_groups": 0,
+              "samples_in_repeated_groups": 0,
+              "unique_groups": 5952
+            },
+            "level_4": {
+              "eligible_samples": 5952,
+              "extra_samples": 5932,
+              "repeated_groups": 19,
+              "samples_in_repeated_groups": 5951,
+              "unique_groups": 20
+            },
+            "level_5": {
+              "eligible_samples": 5952,
+              "extra_samples": 5951,
+              "repeated_groups": 1,
+              "samples_in_repeated_groups": 5952,
+              "unique_groups": 1
+            }
+          },
+          "input_samples": 5952,
+          "output_samples": 5952,
+          "removed_samples": 0,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/search",
+            "split": "search",
+            "subset": "search"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 0,
+              "input_samples": 5952,
+              "output_samples": 5952,
+              "removed_samples": 0
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 5952,
+              "output_samples": 5952,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 0,
+              "input_samples": 5952,
+              "output_samples": 5952,
+              "removed_samples": 0
+            }
+          }
+        }
+      ],
+      "tool_calling": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 461531,
+              "extra_samples": 11402,
+              "repeated_groups": 6769,
+              "samples_in_repeated_groups": 18171,
+              "unique_groups": 450129
+            },
+            "level_4": {
+              "eligible_samples": 477848,
+              "extra_samples": 377259,
+              "repeated_groups": 32973,
+              "samples_in_repeated_groups": 410232,
+              "unique_groups": 100589
+            },
+            "level_5": {
+              "eligible_samples": 477848,
+              "extra_samples": 444110,
+              "repeated_groups": 10859,
+              "samples_in_repeated_groups": 454969,
+              "unique_groups": 33738
+            }
+          },
+          "input_samples": 487842,
+          "output_samples": 477848,
+          "removed_samples": 9994,
+          "scope": {
+            "dataset": "nvidia/Nemotron-SFT-Agentic-v2/tool_calling",
+            "split": "tool_calling",
+            "subset": "tool_calling"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 14,
+              "input_samples": 487842,
+              "output_samples": 487826,
+              "removed_samples": 16
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 487826,
+              "output_samples": 487826,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 5823,
+              "input_samples": 487826,
+              "output_samples": 477848,
+              "removed_samples": 9978
+            }
+          }
+        }
+      ]
+    },
+    "pipeline_by_subset": {
+      "interactive_agent": {
+        "conversion_drops": {},
+        "drops": {
+          "ambiguous_reasoning": 4,
+          "invalid_arguments": 4,
+          "invalid_tool_schema": 284,
+          "ungrounded_credential": 671,
+          "ungrounded_temporal_reference": 19,
+          "unsupported_schema_format:ISO-8601": 163,
+          "unsupported_schema_format:YYYY-MM-DD": 1312,
+          "unsupported_schema_format:YYYY-MM-DD HH:MM": 179,
+          "unsupported_schema_format:base64": 400,
+          "unsupported_schema_format:currency": 597,
+          "unsupported_schema_format:date-range": 179,
+          "unsupported_schema_format:date-time": 52013,
+          "unsupported_schema_format:datetime": 1187,
+          "unsupported_schema_format:email": 1618,
+          "unsupported_schema_format:file": 474,
+          "unsupported_schema_format:float": 400,
+          "unsupported_schema_format:int32": 2827,
+          "unsupported_schema_format:percent": 157,
+          "unsupported_schema_format:time": 2576,
+          "unsupported_schema_format:uri": 473,
+          "unsupported_schema_keyword:consent_obtained": 122,
+          "unsupported_schema_keyword:exchange_items": 322,
+          "unsupported_schema_keyword:item_removals": 631,
+          "unsupported_schema_keyword:nullable": 888,
+          "unsupported_schema_keyword:optional": 563,
+          "unsupported_schema_keyword:returns": 473,
+          "unsupported_schema_keyword:then": 326
+        },
+        "passed": {
+          "async_lifecycle": 210022,
+          "capabilities": 210712,
+          "definitions": 278880,
+          "final_async_lifecycle": 210018,
+          "final_capabilities": 210018,
+          "final_linkage": 210018,
+          "final_structure": 210018,
+          "final_temporal_inputs": 210018,
+          "final_visible_inputs": 210018,
+          "linkage": 278880,
+          "reasoning": 210018,
+          "structure": 278880,
+          "temporal_inputs": 210022,
+          "termination": 210018,
+          "visible_inputs": 210041
+        },
+        "stage_drops": {
+          "capabilities": 68168,
+          "reasoning": 4,
+          "temporal_inputs": 19,
+          "visible_inputs": 671
+        },
+        "transformations": {
+          "reasoning_fields_removed": 1079208,
+          "source_linkage_fields_removed": 1342284
+        }
+      },
+      "search": {
+        "conversion_drops": {},
+        "drops": {
+          "ambiguous_reasoning": 15,
+          "invalid_arguments": 1
+        },
+        "passed": {
+          "async_lifecycle": 5967,
+          "capabilities": 5967,
+          "definitions": 5968,
+          "final_async_lifecycle": 5952,
+          "final_capabilities": 5952,
+          "final_linkage": 5952,
+          "final_structure": 5952,
+          "final_temporal_inputs": 5952,
+          "final_visible_inputs": 5952,
+          "linkage": 5968,
+          "reasoning": 5952,
+          "structure": 5968,
+          "temporal_inputs": 5967,
+          "termination": 5952,
+          "visible_inputs": 5967
+        },
+        "stage_drops": {
+          "capabilities": 1,
+          "reasoning": 15
+        },
+        "transformations": {
+          "null_legacy_function_call_fields_removed": 70210,
+          "reasoning_fields_removed": 70162,
+          "source_linkage_fields_removed": 192726
+        }
+      },
+      "tool_calling": {
+        "conversion_drops": {},
+        "drops": {
+          "conflicting_duplicate_tool_names": 3986,
+          "duplicate_json_key": 395,
+          "empty_assistant_target": 2160,
+          "empty_final_assistant": 2984,
+          "invalid_arguments": 19428,
+          "invalid_tool_description": 1007,
+          "invalid_tool_schema": 38,
+          "malformed_json": 5,
+          "non_object_arguments": 21,
+          "unbalanced_cardinality": 136600,
+          "undefined_function_calls": 5685,
+          "ungrounded_credential": 24312,
+          "ungrounded_temporal_reference": 1151,
+          "unresolved_async_state": 5,
+          "unsupported_schema_format:binary": 349,
+          "unsupported_schema_format:date-time": 6371,
+          "unsupported_schema_format:datetime": 113,
+          "unsupported_schema_format:email": 1008,
+          "unsupported_schema_format:integer": 102,
+          "unsupported_schema_format:pixel": 125,
+          "unsupported_schema_format:time": 672,
+          "unsupported_schema_format:uri": 1458,
+          "unsupported_schema_format:url": 2,
+          "unsupported_schema_keyword:contentMediaType": 49,
+          "unsupported_schema_keyword:dependencies": 10,
+          "unsupported_schema_keyword:example": 10800,
+          "unsupported_schema_keyword:nullable": 207,
+          "unsupported_schema_keyword:results": 167
+        },
+        "passed": {
+          "async_lifecycle": 492986,
+          "capabilities": 518454,
+          "definitions": 702059,
+          "final_async_lifecycle": 492986,
+          "final_capabilities": 492986,
+          "final_linkage": 492986,
+          "final_structure": 492986,
+          "final_temporal_inputs": 492986,
+          "final_visible_inputs": 492986,
+          "linkage": 565038,
+          "reasoning": 492986,
+          "structure": 701638,
+          "temporal_inputs": 492991,
+          "termination": 487842,
+          "visible_inputs": 494142
+        },
+        "stage_drops": {
+          "async_lifecycle": 5,
+          "capabilities": 46584,
+          "definitions": 4993,
+          "linkage": 136600,
+          "structure": 421,
+          "temporal_inputs": 1151,
+          "termination": 5144,
+          "visible_inputs": 24312
+        },
+        "transformations": {
+          "duplicate_tool_definitions_removed": 1695,
+          "empty_legacy_function_required_removed": 15,
+          "legacy_function_required_lifted": 8,
+          "reasoning_fields_removed": 2173173,
+          "result_batches_reordered": 73,
+          "source_call_index_fields_removed": 167410,
+          "source_linkage_fields_removed": 3545232
+        }
+      }
+    },
+    "source": {
+      "config": "default",
+      "files": [
+        "data/interactive_agent.jsonl",
+        "data/search.jsonl",
+        "data/tool_calling.jsonl"
+      ],
+      "revision": "7c804833427f633ccd53b582dbf02525fd680f78",
+      "subsets": {
+        "interactive_agent": {
+          "converted": 278880,
+          "parseable": 278880,
+          "physical": 278880,
+          "validated": 210018
+        },
+        "search": {
+          "converted": 5968,
+          "parseable": 5968,
+          "physical": 5968,
+          "validated": 5952
+        },
+        "tool_calling": {
+          "converted": 707052,
+          "parseable": 707052,
+          "physical": 707052,
+          "validated": 487842
+        }
+      }
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_reasoning": 19,
+    "conflicting_duplicate_tool_names": 3986,
+    "duplicate_json_key": 395,
+    "empty_assistant_target": 2160,
+    "empty_final_assistant": 2984,
+    "invalid_arguments": 19433,
+    "invalid_tool_description": 1007,
+    "invalid_tool_schema": 322,
+    "malformed_json": 5,
+    "non_object_arguments": 21,
+    "unbalanced_cardinality": 136600,
+    "undefined_function_calls": 5685,
+    "ungrounded_credential": 24983,
+    "ungrounded_temporal_reference": 1170,
+    "unresolved_async_state": 5,
+    "unsupported_schema_format:ISO-8601": 163,
+    "unsupported_schema_format:YYYY-MM-DD": 1312,
+    "unsupported_schema_format:YYYY-MM-DD HH:MM": 179,
+    "unsupported_schema_format:base64": 400,
+    "unsupported_schema_format:binary": 349,
+    "unsupported_schema_format:currency": 597,
+    "unsupported_schema_format:date-range": 179,
+    "unsupported_schema_format:date-time": 58384,
+    "unsupported_schema_format:datetime": 1300,
+    "unsupported_schema_format:email": 2626,
+    "unsupported_schema_format:file": 474,
+    "unsupported_schema_format:float": 400,
+    "unsupported_schema_format:int32": 2827,
+    "unsupported_schema_format:integer": 102,
+    "unsupported_schema_format:percent": 157,
+    "unsupported_schema_format:pixel": 125,
+    "unsupported_schema_format:time": 3248,
+    "unsupported_schema_format:uri": 1931,
+    "unsupported_schema_format:url": 2,
+    "unsupported_schema_keyword:consent_obtained": 122,
+    "unsupported_schema_keyword:contentMediaType": 49,
+    "unsupported_schema_keyword:dependencies": 10,
+    "unsupported_schema_keyword:example": 10800,
+    "unsupported_schema_keyword:exchange_items": 322,
+    "unsupported_schema_keyword:item_removals": 631,
+    "unsupported_schema_keyword:nullable": 1095,
+    "unsupported_schema_keyword:optional": 563,
+    "unsupported_schema_keyword:results": 167,
+    "unsupported_schema_keyword:returns": 473,
+    "unsupported_schema_keyword:then": 326
+  },
+  "filtered_count": 703812,
+  "final_count": 693817,
+  "raw_count": 991900,
+  "stage1_count": 991900,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

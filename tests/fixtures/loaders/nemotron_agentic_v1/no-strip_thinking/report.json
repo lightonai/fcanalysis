@@ -1,0 +1,287 @@
+{
+  "dataset": "nvidia/Nemotron-Agentic-v1",
+  "dataset_config_count": 335122,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation_by_subset": {
+      "interactive_agent": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 11620,
+              "extra_samples": 18,
+              "repeated_groups": 13,
+              "samples_in_repeated_groups": 31,
+              "unique_groups": 11602
+            },
+            "level_4": {
+              "eligible_samples": 13511,
+              "extra_samples": 12542,
+              "repeated_groups": 389,
+              "samples_in_repeated_groups": 12931,
+              "unique_groups": 969
+            },
+            "level_5": {
+              "eligible_samples": 13511,
+              "extra_samples": 13506,
+              "repeated_groups": 5,
+              "samples_in_repeated_groups": 13511,
+              "unique_groups": 5
+            }
+          },
+          "input_samples": 16925,
+          "output_samples": 13511,
+          "removed_samples": 3414,
+          "scope": {
+            "dataset": "nvidia/Nemotron-Agentic-v1/interactive_agent",
+            "split": "interactive_agent",
+            "subset": "interactive_agent"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 864,
+              "input_samples": 16925,
+              "output_samples": 13511,
+              "removed_samples": 3414
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 13511,
+              "output_samples": 13511,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 0,
+              "input_samples": 13511,
+              "output_samples": 13511,
+              "removed_samples": 0
+            }
+          }
+        }
+      ],
+      "tool_calling": [
+        {
+          "audit": {
+            "level_3": {
+              "eligible_samples": 142709,
+              "extra_samples": 278,
+              "repeated_groups": 99,
+              "samples_in_repeated_groups": 377,
+              "unique_groups": 142431
+            },
+            "level_4": {
+              "eligible_samples": 172542,
+              "extra_samples": 92826,
+              "repeated_groups": 12440,
+              "samples_in_repeated_groups": 105266,
+              "unique_groups": 79716
+            },
+            "level_5": {
+              "eligible_samples": 172542,
+              "extra_samples": 58473,
+              "repeated_groups": 7730,
+              "samples_in_repeated_groups": 66203,
+              "unique_groups": 114069
+            }
+          },
+          "input_samples": 230275,
+          "output_samples": 172542,
+          "removed_samples": 57733,
+          "scope": {
+            "dataset": "nvidia/Nemotron-Agentic-v1/tool_calling",
+            "split": "tool_calling",
+            "subset": "tool_calling"
+          },
+          "stages": {
+            "level_1": {
+              "duplicate_groups": 20246,
+              "input_samples": 230275,
+              "output_samples": 179409,
+              "removed_samples": 50866
+            },
+            "level_1_5": {
+              "duplicate_groups": 0,
+              "input_samples": 179409,
+              "output_samples": 179409,
+              "removed_samples": 0
+            },
+            "level_2": {
+              "duplicate_groups": 2179,
+              "input_samples": 179409,
+              "output_samples": 172542,
+              "removed_samples": 6867
+            }
+          }
+        }
+      ]
+    },
+    "pipeline_by_subset": {
+      "interactive_agent": {
+        "conversion_drops": {},
+        "drops": {
+          "ungrounded_credential": 577,
+          "ungrounded_temporal_reference": 9,
+          "unsupported_schema_format:int32": 1517
+        },
+        "passed": {
+          "async_lifecycle": 16925,
+          "capabilities": 17511,
+          "definitions": 19028,
+          "final_async_lifecycle": 16925,
+          "final_capabilities": 16925,
+          "final_linkage": 16925,
+          "final_structure": 16925,
+          "final_temporal_inputs": 16925,
+          "final_visible_inputs": 16925,
+          "linkage": 19028,
+          "structure": 19028,
+          "temporal_inputs": 16925,
+          "termination": 16925,
+          "visible_inputs": 16934
+        },
+        "stage_drops": {
+          "capabilities": 1517,
+          "temporal_inputs": 9,
+          "visible_inputs": 577
+        },
+        "transformations": {
+          "source_linkage_fields_removed": 60072
+        }
+      },
+      "tool_calling": {
+        "conversion_drops": {},
+        "drops": {
+          "ambiguous_source_tool_linkage": 48093,
+          "conflicting_duplicate_tool_names": 15104,
+          "empty_final_assistant": 1,
+          "incomplete_async_job": 16,
+          "invalid_arguments": 9050,
+          "invalid_tool_schema": 292,
+          "non_object_arguments": 7,
+          "reused_started_job_identifier": 1,
+          "unbalanced_cardinality": 3451,
+          "ungrounded_credential": 3428,
+          "ungrounded_job_identifier": 23,
+          "ungrounded_temporal_reference": 187,
+          "unsupported_schema_format:binary": 38,
+          "unsupported_schema_format:currency": 23,
+          "unsupported_schema_format:date-range": 44,
+          "unsupported_schema_format:date-time": 3318,
+          "unsupported_schema_format:email": 377,
+          "unsupported_schema_format:string": 40,
+          "unsupported_schema_format:time": 800,
+          "unsupported_schema_format:uri": 10,
+          "unsupported_schema_format:url": 4,
+          "unsupported_schema_keyword:dependencies": 4,
+          "unsupported_schema_keyword:documentation": 77,
+          "unsupported_schema_keyword:example": 1164,
+          "unsupported_schema_keyword:min_length": 61,
+          "unsupported_schema_keyword:note": 184,
+          "unsupported_schema_keyword:optional": 22
+        },
+        "passed": {
+          "async_lifecycle": 230276,
+          "capabilities": 233931,
+          "definitions": 300990,
+          "final_async_lifecycle": 230276,
+          "final_capabilities": 230276,
+          "final_linkage": 230276,
+          "final_structure": 230276,
+          "final_temporal_inputs": 230276,
+          "final_visible_inputs": 230276,
+          "linkage": 249439,
+          "structure": 300983,
+          "temporal_inputs": 230316,
+          "termination": 230275,
+          "visible_inputs": 230503
+        },
+        "stage_drops": {
+          "async_lifecycle": 40,
+          "capabilities": 15508,
+          "definitions": 15104,
+          "linkage": 51544,
+          "structure": 7,
+          "temporal_inputs": 187,
+          "termination": 1,
+          "visible_inputs": 3428
+        },
+        "transformations": {
+          "arguments_canonicalized": 629505,
+          "empty_legacy_function_required_removed": 72,
+          "legacy_function_required_lifted": 11,
+          "source_call_index_fields_removed": 12293,
+          "source_linkage_fields_removed": 473829,
+          "structured_tool_results_serialized": 655165
+        }
+      }
+    },
+    "source": {
+      "config": "default",
+      "files": [
+        "data/interactive_agent.jsonl",
+        "data/tool_calling.jsonl"
+      ],
+      "revision": "650d590978ca35c8f1ecea2faf136e5fac421b62",
+      "subsets": {
+        "interactive_agent": {
+          "converted": 19028,
+          "parseable": 19028,
+          "physical": 19028,
+          "validated": 16925
+        },
+        "tool_calling": {
+          "converted": 316094,
+          "parseable": 316094,
+          "physical": 316094,
+          "validated": 230275
+        }
+      }
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_source_tool_linkage": 48093,
+    "conflicting_duplicate_tool_names": 15104,
+    "empty_final_assistant": 1,
+    "incomplete_async_job": 16,
+    "invalid_arguments": 9050,
+    "invalid_tool_schema": 292,
+    "non_object_arguments": 7,
+    "reused_started_job_identifier": 1,
+    "unbalanced_cardinality": 3451,
+    "ungrounded_credential": 4005,
+    "ungrounded_job_identifier": 23,
+    "ungrounded_temporal_reference": 196,
+    "unsupported_schema_format:binary": 38,
+    "unsupported_schema_format:currency": 23,
+    "unsupported_schema_format:date-range": 44,
+    "unsupported_schema_format:date-time": 3318,
+    "unsupported_schema_format:email": 377,
+    "unsupported_schema_format:int32": 1517,
+    "unsupported_schema_format:string": 40,
+    "unsupported_schema_format:time": 800,
+    "unsupported_schema_format:uri": 10,
+    "unsupported_schema_format:url": 4,
+    "unsupported_schema_keyword:dependencies": 4,
+    "unsupported_schema_keyword:documentation": 77,
+    "unsupported_schema_keyword:example": 1164,
+    "unsupported_schema_keyword:min_length": 61,
+    "unsupported_schema_keyword:note": 184,
+    "unsupported_schema_keyword:optional": 22
+  },
+  "filtered_count": 247200,
+  "final_count": 186053,
+  "raw_count": 335122,
+  "stage1_count": 335122,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": false
+}

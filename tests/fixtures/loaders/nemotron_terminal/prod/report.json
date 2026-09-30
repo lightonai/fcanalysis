@@ -1,0 +1,409 @@
+{
+  "dataset": "nvidia/Nemotron-Terminal-Corpus",
+  "dataset_config_count": 364963,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 77907,
+            "extra_samples": 511,
+            "repeated_groups": 299,
+            "samples_in_repeated_groups": 810,
+            "unique_groups": 77396
+          },
+          "level_4": {
+            "eligible_samples": 77908,
+            "extra_samples": 48114,
+            "repeated_groups": 3067,
+            "samples_in_repeated_groups": 51181,
+            "unique_groups": 29794
+          },
+          "level_5": {
+            "eligible_samples": 77908,
+            "extra_samples": 77907,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 77908,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 77908,
+        "output_samples": 77908,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "nvidia/Nemotron-Terminal-Corpus/dataset_adapters",
+          "split": "train",
+          "subset": "dataset_adapters"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 77908,
+            "output_samples": 77908,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 77908,
+            "output_samples": 77908,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 77908,
+            "output_samples": 77908,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 17676,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 17676
+          },
+          "level_4": {
+            "eligible_samples": 17676,
+            "extra_samples": 5056,
+            "repeated_groups": 1587,
+            "samples_in_repeated_groups": 6643,
+            "unique_groups": 12620
+          },
+          "level_5": {
+            "eligible_samples": 17676,
+            "extra_samples": 17675,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 17676,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 17676,
+        "output_samples": 17676,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "nvidia/Nemotron-Terminal-Corpus/skill_based_easy",
+          "split": "train",
+          "subset": "skill_based_easy"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 17676,
+            "output_samples": 17676,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 17676,
+            "output_samples": 17676,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 17676,
+            "output_samples": 17676,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 12801,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 12801
+          },
+          "level_4": {
+            "eligible_samples": 12801,
+            "extra_samples": 495,
+            "repeated_groups": 414,
+            "samples_in_repeated_groups": 909,
+            "unique_groups": 12306
+          },
+          "level_5": {
+            "eligible_samples": 12801,
+            "extra_samples": 12800,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 12801,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 12801,
+        "output_samples": 12801,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "nvidia/Nemotron-Terminal-Corpus/skill_based_medium",
+          "split": "train",
+          "subset": "skill_based_medium"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 12801,
+            "output_samples": 12801,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 12801,
+            "output_samples": 12801,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 12801,
+            "output_samples": 12801,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 451,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 451
+          },
+          "level_4": {
+            "eligible_samples": 451,
+            "extra_samples": 1,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 2,
+            "unique_groups": 450
+          },
+          "level_5": {
+            "eligible_samples": 451,
+            "extra_samples": 450,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 451,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 451,
+        "output_samples": 451,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "nvidia/Nemotron-Terminal-Corpus/skill_based_mixed",
+          "split": "train",
+          "subset": "skill_based_mixed"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 451,
+            "output_samples": 451,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 451,
+            "output_samples": 451,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 451,
+            "output_samples": 451,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_by_config": {
+      "dataset_adapters": {
+        "drops": {
+          "ambiguous_protocol_json": 545,
+          "empty_assistant_after_transform": 104782,
+          "final_commands_without_observation": 32692,
+          "final_parser_rejection": 9220,
+          "unconfirmed_terminal_ending": 413
+        },
+        "passed": {
+          "final_structure": 182690,
+          "final_view": 77908,
+          "interface": 225560,
+          "reasoning": 182690,
+          "structure": 225560,
+          "terminal_protocol": 182690
+        },
+        "stage_drops": {
+          "final_view": 104782,
+          "terminal_protocol": 42870
+        }
+      },
+      "skill_based_easy": {
+        "drops": {
+          "ambiguous_protocol_json": 375,
+          "empty_assistant_after_transform": 16282,
+          "final_commands_without_observation": 8565,
+          "final_parser_rejection": 1437,
+          "unconfirmed_terminal_ending": 406
+        },
+        "passed": {
+          "final_structure": 33958,
+          "final_view": 17676,
+          "interface": 44741,
+          "reasoning": 33958,
+          "structure": 44741,
+          "terminal_protocol": 33958
+        },
+        "stage_drops": {
+          "final_view": 16282,
+          "terminal_protocol": 10783
+        }
+      },
+      "skill_based_medium": {
+        "drops": {
+          "ambiguous_protocol_json": 565,
+          "empty_assistant_after_transform": 6335,
+          "final_commands_without_observation": 60985,
+          "final_parser_rejection": 6572,
+          "unconfirmed_terminal_ending": 1761
+        },
+        "passed": {
+          "final_structure": 19136,
+          "final_view": 12801,
+          "interface": 89019,
+          "reasoning": 19136,
+          "structure": 89019,
+          "terminal_protocol": 19136
+        },
+        "stage_drops": {
+          "final_view": 6335,
+          "terminal_protocol": 69883
+        }
+      },
+      "skill_based_mixed": {
+        "drops": {
+          "ambiguous_protocol_json": 11,
+          "empty_assistant_after_transform": 190,
+          "final_commands_without_observation": 4406,
+          "final_parser_rejection": 525,
+          "unconfirmed_terminal_ending": 60
+        },
+        "passed": {
+          "final_structure": 641,
+          "final_view": 451,
+          "interface": 5643,
+          "reasoning": 641,
+          "structure": 5643,
+          "terminal_protocol": 641
+        },
+        "stage_drops": {
+          "final_view": 190,
+          "terminal_protocol": 5002
+        }
+      }
+    },
+    "source": {
+      "files": {
+        "dataset_adapters/code.parquet": 31960,
+        "dataset_adapters/math.parquet": 162692,
+        "dataset_adapters/swe.parquet": 31661,
+        "synthetic_tasks/skill_based/easy/data_processing/data_filtered.parquet": 4987,
+        "synthetic_tasks/skill_based/easy/data_querying/data_filtered.parquet": 5000,
+        "synthetic_tasks/skill_based/easy/data_science/data_filtered.parquet": 4976,
+        "synthetic_tasks/skill_based/easy/debugging/data_filtered.parquet": 4965,
+        "synthetic_tasks/skill_based/easy/dependency_management/data_filtered.parquet": 4994,
+        "synthetic_tasks/skill_based/easy/file_operations/data_filtered.parquet": 4954,
+        "synthetic_tasks/skill_based/easy/scientific_computing/data_filtered.parquet": 4999,
+        "synthetic_tasks/skill_based/easy/security/data_filtered.parquet": 4977,
+        "synthetic_tasks/skill_based/easy/software_engineering/data_filtered.parquet": 4957,
+        "synthetic_tasks/skill_based/medium/data_processing/data_filtered.parquet": 3343,
+        "synthetic_tasks/skill_based/medium/data_querying/data_filtered.parquet": 4535,
+        "synthetic_tasks/skill_based/medium/data_science/data_filtered.parquet": 11645,
+        "synthetic_tasks/skill_based/medium/debugging/data_filtered.parquet": 11467,
+        "synthetic_tasks/skill_based/medium/dependency_management/data_filtered.parquet": 4941,
+        "synthetic_tasks/skill_based/medium/file_operations/data_filtered.parquet": 10291,
+        "synthetic_tasks/skill_based/medium/model_training/data_filtered.parquet": 214,
+        "synthetic_tasks/skill_based/medium/scientific_computing/data_filtered.parquet": 13483,
+        "synthetic_tasks/skill_based/medium/security/data_filtered.parquet": 11046,
+        "synthetic_tasks/skill_based/medium/software_engineering/data_filtered.parquet": 10602,
+        "synthetic_tasks/skill_based/medium/system_administration/data_filtered.parquet": 7776,
+        "synthetic_tasks/skill_based/mixed/data_processing/data_filtered.parquet": 957,
+        "synthetic_tasks/skill_based/mixed/data_science/data_filtered.parquet": 944,
+        "synthetic_tasks/skill_based/mixed/debugging/data_filtered.parquet": 950,
+        "synthetic_tasks/skill_based/mixed/file_operations/data_filtered.parquet": 851,
+        "synthetic_tasks/skill_based/mixed/scientific_computing/data_filtered.parquet": 1000,
+        "synthetic_tasks/skill_based/mixed/security/data_filtered.parquet": 987
+      },
+      "revision": "a1667c4ffdadea02a89bffe4f1bb7ca2ff19f8d9",
+      "subsets": {
+        "dataset_adapters": {
+          "conversion_dropped": 753,
+          "converted": 225560,
+          "raw": 226313,
+          "retained": 77908,
+          "validated": 77908
+        },
+        "skill_based_easy": {
+          "conversion_dropped": 68,
+          "converted": 44741,
+          "raw": 44809,
+          "retained": 17676,
+          "validated": 17676
+        },
+        "skill_based_medium": {
+          "conversion_dropped": 324,
+          "converted": 89019,
+          "raw": 89343,
+          "retained": 12801,
+          "validated": 12801
+        },
+        "skill_based_mixed": {
+          "conversion_dropped": 46,
+          "converted": 5643,
+          "raw": 5689,
+          "retained": 451,
+          "validated": 451
+        }
+      }
+    },
+    "transformations": {
+      "native_fields_decoded": 3095916,
+      "reasoning_fields_removed": 2034453
+    },
+    "validated_protocol_issues": {
+      "completion_requests": 121240,
+      "duplicate_prose_fields": 128,
+      "interpreted_commands": 2090143,
+      "parser_autocorrected_assistants": 8,
+      "parser_rejected_assistants": 2532,
+      "parser_warning_assistants": 11705
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_protocol_json": 1496,
+    "empty_assistant_after_transform": 127589,
+    "final_commands_without_observation": 106648,
+    "final_parser_rejection": 17754,
+    "unconfirmed_terminal_ending": 2640
+  },
+  "filtered_count": 108836,
+  "final_count": 108836,
+  "raw_count": 366154,
+  "stage1_count": 364963,
+  "stage1_drop_reasons": {
+    "ambiguous_source_reasoning_boundary": 1,
+    "unsupported_source_conversation": 1190
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

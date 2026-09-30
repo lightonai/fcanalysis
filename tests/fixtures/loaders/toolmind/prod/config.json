@@ -1,0 +1,27 @@
+{
+  "dataset_config": {
+    "drop_consecutive_text_assistant": false,
+    "drop_non_object_arguments": false,
+    "merge_split_assistant": false,
+    "seed_group_filter": "none",
+    "sources": null,
+    "strip_think_tool": false
+  },
+  "extra_kwargs": {
+    "batch_size": 256,
+    "curation_config": {
+      "audit": true,
+      "max_level": "level_2",
+      "temporary_directory": null
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  }
+}

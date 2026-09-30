@@ -1,0 +1,880 @@
+{
+  "dataset": "Agent-Ark/Toucan-1.5M [Kimi-K2+OSS+Qwen3]",
+  "dataset_config_count": 931410,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 78544,
+            "extra_samples": 8674,
+            "repeated_groups": 2608,
+            "samples_in_repeated_groups": 11282,
+            "unique_groups": 69870
+          },
+          "level_4": {
+            "eligible_samples": 78544,
+            "extra_samples": 50090,
+            "repeated_groups": 5369,
+            "samples_in_repeated_groups": 55459,
+            "unique_groups": 28454
+          },
+          "level_5": {
+            "eligible_samples": 78544,
+            "extra_samples": 72909,
+            "repeated_groups": 4652,
+            "samples_in_repeated_groups": 77561,
+            "unique_groups": 5635
+          }
+        },
+        "input_samples": 78545,
+        "output_samples": 78544,
+        "removed_samples": 1,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Kimi-K2",
+          "split": "train",
+          "subset": "single-turn-original"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 78545,
+            "output_samples": 78545,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 78545,
+            "output_samples": 78545,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 1,
+            "input_samples": 78545,
+            "output_samples": 78544,
+            "removed_samples": 1
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 49265,
+            "extra_samples": 3564,
+            "repeated_groups": 1122,
+            "samples_in_repeated_groups": 4686,
+            "unique_groups": 45701
+          },
+          "level_4": {
+            "eligible_samples": 49265,
+            "extra_samples": 30572,
+            "repeated_groups": 3513,
+            "samples_in_repeated_groups": 34085,
+            "unique_groups": 18693
+          },
+          "level_5": {
+            "eligible_samples": 49265,
+            "extra_samples": 44931,
+            "repeated_groups": 3112,
+            "samples_in_repeated_groups": 48043,
+            "unique_groups": 4334
+          }
+        },
+        "input_samples": 49265,
+        "output_samples": 49265,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Kimi-K2",
+          "split": "train",
+          "subset": "single-turn-diversify"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 49265,
+            "output_samples": 49265,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 49265,
+            "output_samples": 49265,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 49265,
+            "output_samples": 49265,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 33041,
+            "extra_samples": 33040,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 33041,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 33041,
+            "extra_samples": 32806,
+            "repeated_groups": 233,
+            "samples_in_repeated_groups": 33039,
+            "unique_groups": 235
+          }
+        },
+        "input_samples": 33041,
+        "output_samples": 33041,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Kimi-K2",
+          "split": "train",
+          "subset": "irrelevant"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 33041,
+            "output_samples": 33041,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 33041,
+            "output_samples": 33041,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 33041,
+            "output_samples": 33041,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 109389,
+            "extra_samples": 9878,
+            "repeated_groups": 4951,
+            "samples_in_repeated_groups": 14829,
+            "unique_groups": 99511
+          },
+          "level_4": {
+            "eligible_samples": 109389,
+            "extra_samples": 85417,
+            "repeated_groups": 9065,
+            "samples_in_repeated_groups": 94482,
+            "unique_groups": 23972
+          },
+          "level_5": {
+            "eligible_samples": 109389,
+            "extra_samples": 104762,
+            "repeated_groups": 3300,
+            "samples_in_repeated_groups": 108062,
+            "unique_groups": 4627
+          }
+        },
+        "input_samples": 109389,
+        "output_samples": 109389,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Kimi-K2",
+          "split": "train",
+          "subset": "multi-turn"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 109389,
+            "output_samples": 109389,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 109389,
+            "output_samples": 109389,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 109389,
+            "output_samples": 109389,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 97350,
+            "extra_samples": 11928,
+            "repeated_groups": 3382,
+            "samples_in_repeated_groups": 15310,
+            "unique_groups": 85422
+          },
+          "level_4": {
+            "eligible_samples": 97350,
+            "extra_samples": 68601,
+            "repeated_groups": 6686,
+            "samples_in_repeated_groups": 75287,
+            "unique_groups": 28749
+          },
+          "level_5": {
+            "eligible_samples": 97350,
+            "extra_samples": 88704,
+            "repeated_groups": 6098,
+            "samples_in_repeated_groups": 94802,
+            "unique_groups": 8646
+          }
+        },
+        "input_samples": 97351,
+        "output_samples": 97350,
+        "removed_samples": 1,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:OSS",
+          "split": "train",
+          "subset": "single-turn-original"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 97351,
+            "output_samples": 97351,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 97351,
+            "output_samples": 97351,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 1,
+            "input_samples": 97351,
+            "output_samples": 97350,
+            "removed_samples": 1
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 98333,
+            "extra_samples": 9990,
+            "repeated_groups": 2965,
+            "samples_in_repeated_groups": 12955,
+            "unique_groups": 88343
+          },
+          "level_4": {
+            "eligible_samples": 98333,
+            "extra_samples": 74108,
+            "repeated_groups": 6535,
+            "samples_in_repeated_groups": 80643,
+            "unique_groups": 24225
+          },
+          "level_5": {
+            "eligible_samples": 98333,
+            "extra_samples": 91332,
+            "repeated_groups": 5051,
+            "samples_in_repeated_groups": 96383,
+            "unique_groups": 7001
+          }
+        },
+        "input_samples": 98333,
+        "output_samples": 98333,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:OSS",
+          "split": "train",
+          "subset": "single-turn-diversify"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 98333,
+            "output_samples": 98333,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 98333,
+            "output_samples": 98333,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 98333,
+            "output_samples": 98333,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 42543,
+            "extra_samples": 42542,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 42543,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 42543,
+            "extra_samples": 42240,
+            "repeated_groups": 300,
+            "samples_in_repeated_groups": 42540,
+            "unique_groups": 303
+          }
+        },
+        "input_samples": 42543,
+        "output_samples": 42543,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:OSS",
+          "split": "train",
+          "subset": "irrelevant"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 42543,
+            "output_samples": 42543,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 42543,
+            "output_samples": 42543,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 42543,
+            "output_samples": 42543,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 133351,
+            "extra_samples": 9921,
+            "repeated_groups": 5594,
+            "samples_in_repeated_groups": 15515,
+            "unique_groups": 123430
+          },
+          "level_4": {
+            "eligible_samples": 133351,
+            "extra_samples": 103870,
+            "repeated_groups": 12089,
+            "samples_in_repeated_groups": 115959,
+            "unique_groups": 29481
+          },
+          "level_5": {
+            "eligible_samples": 133351,
+            "extra_samples": 126887,
+            "repeated_groups": 4877,
+            "samples_in_repeated_groups": 131764,
+            "unique_groups": 6464
+          }
+        },
+        "input_samples": 133351,
+        "output_samples": 133351,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:OSS",
+          "split": "train",
+          "subset": "multi-turn"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 133351,
+            "output_samples": 133351,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 133351,
+            "output_samples": 133351,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 133351,
+            "output_samples": 133351,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 83245,
+            "extra_samples": 12100,
+            "repeated_groups": 3560,
+            "samples_in_repeated_groups": 15660,
+            "unique_groups": 71145
+          },
+          "level_4": {
+            "eligible_samples": 83245,
+            "extra_samples": 65368,
+            "repeated_groups": 5066,
+            "samples_in_repeated_groups": 70434,
+            "unique_groups": 17877
+          },
+          "level_5": {
+            "eligible_samples": 83245,
+            "extra_samples": 77183,
+            "repeated_groups": 5146,
+            "samples_in_repeated_groups": 82329,
+            "unique_groups": 6062
+          }
+        },
+        "input_samples": 83245,
+        "output_samples": 83245,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Qwen3",
+          "split": "train",
+          "subset": "single-turn-original"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 83245,
+            "output_samples": 83245,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 83245,
+            "output_samples": 83245,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 83245,
+            "output_samples": 83245,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 57743,
+            "extra_samples": 4902,
+            "repeated_groups": 1508,
+            "samples_in_repeated_groups": 6410,
+            "unique_groups": 52841
+          },
+          "level_4": {
+            "eligible_samples": 57743,
+            "extra_samples": 41620,
+            "repeated_groups": 3788,
+            "samples_in_repeated_groups": 45408,
+            "unique_groups": 16123
+          },
+          "level_5": {
+            "eligible_samples": 57743,
+            "extra_samples": 53165,
+            "repeated_groups": 3512,
+            "samples_in_repeated_groups": 56677,
+            "unique_groups": 4578
+          }
+        },
+        "input_samples": 57743,
+        "output_samples": 57743,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Qwen3",
+          "split": "train",
+          "subset": "single-turn-diversify"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 57743,
+            "output_samples": 57743,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 57743,
+            "output_samples": 57743,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 57743,
+            "output_samples": 57743,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 34178,
+            "extra_samples": 34177,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 34178,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 34178,
+            "extra_samples": 33939,
+            "repeated_groups": 239,
+            "samples_in_repeated_groups": 34178,
+            "unique_groups": 239
+          }
+        },
+        "input_samples": 34178,
+        "output_samples": 34178,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Qwen3",
+          "split": "train",
+          "subset": "irrelevant"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 34178,
+            "output_samples": 34178,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 34178,
+            "output_samples": 34178,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 34178,
+            "output_samples": 34178,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 107978,
+            "extra_samples": 8151,
+            "repeated_groups": 4121,
+            "samples_in_repeated_groups": 12272,
+            "unique_groups": 99827
+          },
+          "level_4": {
+            "eligible_samples": 107978,
+            "extra_samples": 81931,
+            "repeated_groups": 9559,
+            "samples_in_repeated_groups": 91490,
+            "unique_groups": 26047
+          },
+          "level_5": {
+            "eligible_samples": 107978,
+            "extra_samples": 102836,
+            "repeated_groups": 3569,
+            "samples_in_repeated_groups": 106405,
+            "unique_groups": 5142
+          }
+        },
+        "input_samples": 107978,
+        "output_samples": 107978,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Agent-Ark/Toucan-1.5M:Qwen3",
+          "split": "train",
+          "subset": "multi-turn"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 107978,
+            "output_samples": 107978,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 107978,
+            "output_samples": 107978,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 107978,
+            "output_samples": 107978,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "definitions": 478965,
+      "reasoning": 10,
+      "source_capabilities": 43519,
+      "source_policy": 15547,
+      "source_structure": 5274,
+      "termination": 6438
+    },
+    "pipeline_passed": {
+      "definitions": 995750,
+      "final_artifacts": 931400,
+      "final_capabilities": 931400,
+      "final_context": 931400,
+      "final_linkage": 931400,
+      "final_structure": 931400,
+      "reasoning": 931400,
+      "source_capabilities": 946957,
+      "source_linkage": 990476,
+      "source_policy": 931410,
+      "source_structure": 990476,
+      "system_override": 931400,
+      "termination": 924962
+    },
+    "source": {
+      "configs": [
+        "Kimi-K2",
+        "OSS",
+        "Qwen3"
+      ],
+      "files": [
+        "Kimi-K2/train-00000-of-00040.parquet",
+        "Kimi-K2/train-00001-of-00040.parquet",
+        "Kimi-K2/train-00002-of-00040.parquet",
+        "Kimi-K2/train-00003-of-00040.parquet",
+        "Kimi-K2/train-00004-of-00040.parquet",
+        "Kimi-K2/train-00005-of-00040.parquet",
+        "Kimi-K2/train-00006-of-00040.parquet",
+        "Kimi-K2/train-00007-of-00040.parquet",
+        "Kimi-K2/train-00008-of-00040.parquet",
+        "Kimi-K2/train-00009-of-00040.parquet",
+        "Kimi-K2/train-00010-of-00040.parquet",
+        "Kimi-K2/train-00011-of-00040.parquet",
+        "Kimi-K2/train-00012-of-00040.parquet",
+        "Kimi-K2/train-00013-of-00040.parquet",
+        "Kimi-K2/train-00014-of-00040.parquet",
+        "Kimi-K2/train-00015-of-00040.parquet",
+        "Kimi-K2/train-00016-of-00040.parquet",
+        "Kimi-K2/train-00017-of-00040.parquet",
+        "Kimi-K2/train-00018-of-00040.parquet",
+        "Kimi-K2/train-00019-of-00040.parquet",
+        "Kimi-K2/train-00020-of-00040.parquet",
+        "Kimi-K2/train-00021-of-00040.parquet",
+        "Kimi-K2/train-00022-of-00040.parquet",
+        "Kimi-K2/train-00023-of-00040.parquet",
+        "Kimi-K2/train-00024-of-00040.parquet",
+        "Kimi-K2/train-00025-of-00040.parquet",
+        "Kimi-K2/train-00026-of-00040.parquet",
+        "Kimi-K2/train-00027-of-00040.parquet",
+        "Kimi-K2/train-00028-of-00040.parquet",
+        "Kimi-K2/train-00029-of-00040.parquet",
+        "Kimi-K2/train-00030-of-00040.parquet",
+        "Kimi-K2/train-00031-of-00040.parquet",
+        "Kimi-K2/train-00032-of-00040.parquet",
+        "Kimi-K2/train-00033-of-00040.parquet",
+        "Kimi-K2/train-00034-of-00040.parquet",
+        "Kimi-K2/train-00035-of-00040.parquet",
+        "Kimi-K2/train-00036-of-00040.parquet",
+        "Kimi-K2/train-00037-of-00040.parquet",
+        "Kimi-K2/train-00038-of-00040.parquet",
+        "Kimi-K2/train-00039-of-00040.parquet",
+        "OSS/train-00000-of-00047.parquet",
+        "OSS/train-00001-of-00047.parquet",
+        "OSS/train-00002-of-00047.parquet",
+        "OSS/train-00003-of-00047.parquet",
+        "OSS/train-00004-of-00047.parquet",
+        "OSS/train-00005-of-00047.parquet",
+        "OSS/train-00006-of-00047.parquet",
+        "OSS/train-00007-of-00047.parquet",
+        "OSS/train-00008-of-00047.parquet",
+        "OSS/train-00009-of-00047.parquet",
+        "OSS/train-00010-of-00047.parquet",
+        "OSS/train-00011-of-00047.parquet",
+        "OSS/train-00012-of-00047.parquet",
+        "OSS/train-00013-of-00047.parquet",
+        "OSS/train-00014-of-00047.parquet",
+        "OSS/train-00015-of-00047.parquet",
+        "OSS/train-00016-of-00047.parquet",
+        "OSS/train-00017-of-00047.parquet",
+        "OSS/train-00018-of-00047.parquet",
+        "OSS/train-00019-of-00047.parquet",
+        "OSS/train-00020-of-00047.parquet",
+        "OSS/train-00021-of-00047.parquet",
+        "OSS/train-00022-of-00047.parquet",
+        "OSS/train-00023-of-00047.parquet",
+        "OSS/train-00024-of-00047.parquet",
+        "OSS/train-00025-of-00047.parquet",
+        "OSS/train-00026-of-00047.parquet",
+        "OSS/train-00027-of-00047.parquet",
+        "OSS/train-00028-of-00047.parquet",
+        "OSS/train-00029-of-00047.parquet",
+        "OSS/train-00030-of-00047.parquet",
+        "OSS/train-00031-of-00047.parquet",
+        "OSS/train-00032-of-00047.parquet",
+        "OSS/train-00033-of-00047.parquet",
+        "OSS/train-00034-of-00047.parquet",
+        "OSS/train-00035-of-00047.parquet",
+        "OSS/train-00036-of-00047.parquet",
+        "OSS/train-00037-of-00047.parquet",
+        "OSS/train-00038-of-00047.parquet",
+        "OSS/train-00039-of-00047.parquet",
+        "OSS/train-00040-of-00047.parquet",
+        "OSS/train-00041-of-00047.parquet",
+        "OSS/train-00042-of-00047.parquet",
+        "OSS/train-00043-of-00047.parquet",
+        "OSS/train-00044-of-00047.parquet",
+        "OSS/train-00045-of-00047.parquet",
+        "OSS/train-00046-of-00047.parquet",
+        "Qwen3/train-00000-of-00044.parquet",
+        "Qwen3/train-00001-of-00044.parquet",
+        "Qwen3/train-00002-of-00044.parquet",
+        "Qwen3/train-00003-of-00044.parquet",
+        "Qwen3/train-00004-of-00044.parquet",
+        "Qwen3/train-00005-of-00044.parquet",
+        "Qwen3/train-00006-of-00044.parquet",
+        "Qwen3/train-00007-of-00044.parquet",
+        "Qwen3/train-00008-of-00044.parquet",
+        "Qwen3/train-00009-of-00044.parquet",
+        "Qwen3/train-00010-of-00044.parquet",
+        "Qwen3/train-00011-of-00044.parquet",
+        "Qwen3/train-00012-of-00044.parquet",
+        "Qwen3/train-00013-of-00044.parquet",
+        "Qwen3/train-00014-of-00044.parquet",
+        "Qwen3/train-00015-of-00044.parquet",
+        "Qwen3/train-00016-of-00044.parquet",
+        "Qwen3/train-00017-of-00044.parquet",
+        "Qwen3/train-00018-of-00044.parquet",
+        "Qwen3/train-00019-of-00044.parquet",
+        "Qwen3/train-00020-of-00044.parquet",
+        "Qwen3/train-00021-of-00044.parquet",
+        "Qwen3/train-00022-of-00044.parquet",
+        "Qwen3/train-00023-of-00044.parquet",
+        "Qwen3/train-00024-of-00044.parquet",
+        "Qwen3/train-00025-of-00044.parquet",
+        "Qwen3/train-00026-of-00044.parquet",
+        "Qwen3/train-00027-of-00044.parquet",
+        "Qwen3/train-00028-of-00044.parquet",
+        "Qwen3/train-00029-of-00044.parquet",
+        "Qwen3/train-00030-of-00044.parquet",
+        "Qwen3/train-00031-of-00044.parquet",
+        "Qwen3/train-00032-of-00044.parquet",
+        "Qwen3/train-00033-of-00044.parquet",
+        "Qwen3/train-00034-of-00044.parquet",
+        "Qwen3/train-00035-of-00044.parquet",
+        "Qwen3/train-00036-of-00044.parquet",
+        "Qwen3/train-00037-of-00044.parquet",
+        "Qwen3/train-00038-of-00044.parquet",
+        "Qwen3/train-00039-of-00044.parquet",
+        "Qwen3/train-00040-of-00044.parquet",
+        "Qwen3/train-00041-of-00044.parquet",
+        "Qwen3/train-00042-of-00044.parquet",
+        "Qwen3/train-00043-of-00044.parquet"
+      ],
+      "revision": "0df3cf37f2abefb380370cfb02eabea2a35ae782",
+      "split": "train",
+      "subsets": {
+        "Kimi-K2:irrelevant": 54283,
+        "Kimi-K2:multi-turn": 196991,
+        "Kimi-K2:single-turn-diversify": 103269,
+        "Kimi-K2:single-turn-original": 163973,
+        "OSS:irrelevant": 45954,
+        "OSS:multi-turn": 175663,
+        "OSS:single-turn-diversify": 118161,
+        "OSS:single-turn-original": 117352,
+        "Qwen3:irrelevant": 59039,
+        "Qwen3:multi-turn": 194209,
+        "Qwen3:single-turn-diversify": 122624,
+        "Qwen3:single-turn-original": 175741
+      }
+    },
+    "transformations": {
+      "cross_source_schema_encodings_reconciled": 2434483,
+      "duplicate_tool_definitions_removed": 3410785,
+      "embedded_tool_templates_extracted": 1506306,
+      "producer_call_ids_removed": 1121109,
+      "reasoning_fields_removed": 1518645,
+      "reasoning_spans_removed": 8761,
+      "source_assistant_fragments_merged": 3512170,
+      "source_linkage_fields_removed": 2749565
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_reasoning": 10,
+    "assistant_protocol_residue": 3760,
+    "conflicting_duplicate_tool_names": 478956,
+    "duplicate_json_key": 449,
+    "empty_assistant_target": 2077,
+    "empty_final_assistant": 2642,
+    "incomplete_termination": 1719,
+    "invalid_arguments": 33061,
+    "invalid_tool_description": 9,
+    "malformed_json": 4746,
+    "malformed_tool_call": 41,
+    "non_object_arguments": 37,
+    "nonfinite_json_number": 1,
+    "producer_error_target": 9939,
+    "undefined_function_calls": 3902,
+    "ungrounded_credential": 1658,
+    "ungrounded_relative_date": 190,
+    "unsupported_schema_format:binary": 1700,
+    "unsupported_schema_format:date-time": 1446,
+    "unsupported_schema_format:uri": 3392,
+    "unsupported_schema_keyword:_def": 13,
+    "unsupported_schema_keyword:optional": 5
+  },
+  "filtered_count": 924962,
+  "final_count": 924960,
+  "raw_count": 1527259,
+  "stage1_count": 1474715,
+  "stage1_drop_reasons": {
+    "ambiguous_source_assistant_run": 2,
+    "unexposed_available_tool_definition": 52542
+  },
+  "stage1_issue_counts": {
+    "no_system_message": 20953,
+    "system_available_tool_context_mismatch": 965332
+  },
+  "strip_thinking_applied": true
+}

@@ -1,0 +1,122 @@
+{
+  "dataset": "LLM360/TxT360-3efforts/medium",
+  "dataset_config_count": 608,
+  "dataset_config_drop_reasons": {
+    "malformed_json": 86
+  },
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 303,
+            "extra_samples": 302,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 303,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 303,
+            "extra_samples": 113,
+            "repeated_groups": 41,
+            "samples_in_repeated_groups": 154,
+            "unique_groups": 190
+          }
+        },
+        "input_samples": 608,
+        "output_samples": 303,
+        "removed_samples": 305,
+        "scope": {
+          "dataset": "LLM360/TxT360-3efforts/medium",
+          "split": "medium",
+          "subset": "agent"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 304,
+            "input_samples": 608,
+            "output_samples": 304,
+            "removed_samples": 304
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 304,
+            "output_samples": 304,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 1,
+            "input_samples": 304,
+            "output_samples": 303,
+            "removed_samples": 1
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "definitions": 374,
+      "linkage": 131162
+    },
+    "pipeline_passed": {
+      "capabilities": 732,
+      "definitions": 131894,
+      "final_capabilities": 732,
+      "final_linkage": 732,
+      "final_structure": 732,
+      "final_visible_context": 732,
+      "linkage": 732,
+      "structure": 131894,
+      "termination": 732,
+      "visible_context": 732
+    },
+    "reconstruction": {
+      "ambiguous_donor_rows": 272,
+      "input_rows": 132626,
+      "missing_donor_rows": 0,
+      "output_rows": 608,
+      "removed_prefix_rows": 124,
+      "restored_messages": 164,
+      "restored_rows": 124,
+      "validated_rows": 732,
+      "validation_dropped_rows": 131622
+    },
+    "source": {
+      "config": "agent",
+      "files": [
+        "agent/medium-00000-of-00001.parquet"
+      ],
+      "revision": "bfc4a082d11967cd7810fe0b773be87bf54fb32e",
+      "split": "medium"
+    },
+    "transformations": {}
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "conflicting_duplicate_tool_names": 374,
+    "unbalanced_cardinality": 131162
+  },
+  "filtered_count": 732,
+  "final_count": 303,
+  "raw_count": 133670,
+  "stage1_count": 132626,
+  "stage1_drop_reasons": {
+    "nonassistant_source_tool_calls": 1044
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": false
+}

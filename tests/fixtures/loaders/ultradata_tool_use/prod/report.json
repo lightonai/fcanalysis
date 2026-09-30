@@ -1,0 +1,627 @@
+{
+  "dataset": "openbmb/UltraData-SFT-Agent-2609",
+  "dataset_config_count": 82760,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 1291,
+            "extra_samples": 475,
+            "repeated_groups": 118,
+            "samples_in_repeated_groups": 593,
+            "unique_groups": 816
+          },
+          "level_4": {
+            "eligible_samples": 2417,
+            "extra_samples": 2344,
+            "repeated_groups": 50,
+            "samples_in_repeated_groups": 2394,
+            "unique_groups": 73
+          },
+          "level_5": {
+            "eligible_samples": 2417,
+            "extra_samples": 2414,
+            "repeated_groups": 3,
+            "samples_in_repeated_groups": 2417,
+            "unique_groups": 3
+          }
+        },
+        "input_samples": 2417,
+        "output_samples": 2417,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "areal_tau2"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 2417,
+            "output_samples": 2417,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 2417,
+            "output_samples": 2417,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 2417,
+            "output_samples": 2417,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 6791,
+            "extra_samples": 3,
+            "repeated_groups": 3,
+            "samples_in_repeated_groups": 6,
+            "unique_groups": 6788
+          },
+          "level_4": {
+            "eligible_samples": 6882,
+            "extra_samples": 6257,
+            "repeated_groups": 254,
+            "samples_in_repeated_groups": 6511,
+            "unique_groups": 625
+          },
+          "level_5": {
+            "eligible_samples": 6882,
+            "extra_samples": 6880,
+            "repeated_groups": 2,
+            "samples_in_repeated_groups": 6882,
+            "unique_groups": 2
+          }
+        },
+        "input_samples": 6882,
+        "output_samples": 6882,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "simia_airline"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 6882,
+            "output_samples": 6882,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 6882,
+            "output_samples": 6882,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 6882,
+            "output_samples": 6882,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 12487,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 12487
+          },
+          "level_4": {
+            "eligible_samples": 12487,
+            "extra_samples": 11443,
+            "repeated_groups": 460,
+            "samples_in_repeated_groups": 11903,
+            "unique_groups": 1044
+          },
+          "level_5": {
+            "eligible_samples": 12487,
+            "extra_samples": 12486,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 12487,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 12487,
+        "output_samples": 12487,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "simia_retail"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 12487,
+            "output_samples": 12487,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 12487,
+            "output_samples": 12487,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 12487,
+            "output_samples": 12487,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 310,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 310
+          },
+          "level_4": {
+            "eligible_samples": 2591,
+            "extra_samples": 2338,
+            "repeated_groups": 41,
+            "samples_in_repeated_groups": 2379,
+            "unique_groups": 253
+          },
+          "level_5": {
+            "eligible_samples": 2591,
+            "extra_samples": 1000,
+            "repeated_groups": 381,
+            "samples_in_repeated_groups": 1381,
+            "unique_groups": 1591
+          }
+        },
+        "input_samples": 2591,
+        "output_samples": 2591,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "toolmind_graphsyn"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 2591,
+            "output_samples": 2591,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 2591,
+            "output_samples": 2591,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 2591,
+            "output_samples": 2591,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 1604,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 1604
+          },
+          "level_4": {
+            "eligible_samples": 2269,
+            "extra_samples": 2214,
+            "repeated_groups": 25,
+            "samples_in_repeated_groups": 2239,
+            "unique_groups": 55
+          },
+          "level_5": {
+            "eligible_samples": 2269,
+            "extra_samples": 2266,
+            "repeated_groups": 3,
+            "samples_in_repeated_groups": 2269,
+            "unique_groups": 3
+          }
+        },
+        "input_samples": 2269,
+        "output_samples": 2269,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "synth_memory_20260608"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 2269,
+            "output_samples": 2269,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 2269,
+            "output_samples": 2269,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 2269,
+            "output_samples": 2269,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 3114,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 3114
+          },
+          "level_4": {
+            "eligible_samples": 3114,
+            "extra_samples": 2340,
+            "repeated_groups": 288,
+            "samples_in_repeated_groups": 2628,
+            "unique_groups": 774
+          },
+          "level_5": {
+            "eligible_samples": 3114,
+            "extra_samples": 3113,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 3114,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 3114,
+        "output_samples": 3114,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "openbmb/UltraData-SFT-Agent-2609",
+          "split": "train",
+          "subset": "synth_search_20260609"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 3114,
+            "output_samples": 3114,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 3114,
+            "output_samples": 3114,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 3114,
+            "output_samples": 3114,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_by_source": {
+      "areal_tau2": {
+        "drops": {
+          "ambiguous_source_tool_linkage": 9780,
+          "unbalanced_cardinality": 3031,
+          "ungrounded_authentication_input": 18
+        },
+        "passed": {
+          "capabilities": 2435,
+          "definitions": 15246,
+          "final_capabilities": 2417,
+          "final_linkage": 2417,
+          "final_structure": 2417,
+          "final_visible_context": 2417,
+          "linkage": 2435,
+          "native_boundaries": 2417,
+          "reasoning": 2417,
+          "structure": 15246,
+          "termination": 2417,
+          "visible_context": 2417
+        },
+        "stage_drops": {
+          "linkage": 12811,
+          "visible_context": 18
+        }
+      },
+      "simia_airline": {
+        "drops": {
+          "ambiguous_reasoning": 3,
+          "unbalanced_cardinality": 288,
+          "ungrounded_identifier": 26
+        },
+        "passed": {
+          "capabilities": 6911,
+          "definitions": 7199,
+          "final_capabilities": 6882,
+          "final_linkage": 6882,
+          "final_structure": 6882,
+          "final_visible_context": 6882,
+          "linkage": 6911,
+          "native_boundaries": 6882,
+          "reasoning": 6882,
+          "structure": 7199,
+          "termination": 6882,
+          "visible_context": 6885
+        },
+        "stage_drops": {
+          "linkage": 288,
+          "native_boundaries": 3,
+          "visible_context": 26
+        }
+      },
+      "simia_retail": {
+        "drops": {
+          "incomplete_termination": 37,
+          "missing_visible_authentication": 18,
+          "unbalanced_cardinality": 1,
+          "ungrounded_authentication_input": 95,
+          "ungrounded_identifier": 162
+        },
+        "passed": {
+          "capabilities": 12799,
+          "definitions": 12800,
+          "final_capabilities": 12524,
+          "final_linkage": 12524,
+          "final_structure": 12524,
+          "final_visible_context": 12524,
+          "linkage": 12799,
+          "native_boundaries": 12524,
+          "reasoning": 12524,
+          "structure": 12800,
+          "termination": 12487,
+          "visible_context": 12524
+        },
+        "stage_drops": {
+          "linkage": 1,
+          "termination": 37,
+          "visible_context": 275
+        }
+      },
+      "spider_bird_merged_traj": {
+        "drops": {
+          "ambiguous_reasoning": 19,
+          "incomplete_termination": 20426
+        },
+        "passed": {
+          "capabilities": 20445,
+          "definitions": 20445,
+          "final_capabilities": 20426,
+          "final_linkage": 20426,
+          "final_structure": 20426,
+          "final_visible_context": 20426,
+          "linkage": 20445,
+          "native_boundaries": 20426,
+          "reasoning": 20426,
+          "structure": 20445,
+          "visible_context": 20445
+        },
+        "stage_drops": {
+          "native_boundaries": 19,
+          "termination": 20426
+        }
+      },
+      "synth_memory_20260608": {
+        "drops": {
+          "ambiguous_reasoning": 1,
+          "ambiguous_source_tool_linkage": 2730
+        },
+        "passed": {
+          "capabilities": 2270,
+          "definitions": 5000,
+          "final_capabilities": 2269,
+          "final_linkage": 2269,
+          "final_structure": 2269,
+          "final_visible_context": 2269,
+          "linkage": 2270,
+          "native_boundaries": 2269,
+          "reasoning": 2269,
+          "structure": 5000,
+          "termination": 2269,
+          "visible_context": 2270
+        },
+        "stage_drops": {
+          "linkage": 2730,
+          "native_boundaries": 1
+        }
+      },
+      "synth_search_20260609": {
+        "drops": {
+          "ambiguous_source_tool_linkage": 1880,
+          "invalid_arguments": 6
+        },
+        "passed": {
+          "capabilities": 3114,
+          "definitions": 5000,
+          "final_capabilities": 3114,
+          "final_linkage": 3114,
+          "final_structure": 3114,
+          "final_visible_context": 3114,
+          "linkage": 3120,
+          "native_boundaries": 3114,
+          "reasoning": 3114,
+          "structure": 5000,
+          "termination": 3114,
+          "visible_context": 3114
+        },
+        "stage_drops": {
+          "capabilities": 6,
+          "linkage": 1880
+        }
+      },
+      "tau3_banking_sft_glm-5.2_20260625": {
+        "drops": {
+          "ambiguous_source_tool_linkage": 1674,
+          "unverified_source_discovery_protocol": 113
+        },
+        "passed": {
+          "capabilities": 113,
+          "definitions": 1787,
+          "linkage": 113,
+          "structure": 1787
+        },
+        "stage_drops": {
+          "linkage": 1674,
+          "visible_context": 113
+        }
+      },
+      "toolmind_graphsyn": {
+        "drops": {
+          "ambiguous_reasoning": 2,
+          "ambiguous_source_tool_linkage": 56,
+          "conflicting_duplicate_tool_names": 42,
+          "empty_final_assistant": 1,
+          "invalid_arguments": 15,
+          "invalid_tool_schema": 1804,
+          "unbalanced_cardinality": 10602,
+          "unresolved_source_tool_epoch": 109,
+          "unsupported_schema_format:YYYY-MM-DD": 3,
+          "unsupported_schema_format:date-time": 15,
+          "unsupported_schema_format:email": 5,
+          "unsupported_schema_format:float": 6,
+          "unsupported_schema_format:string": 6,
+          "unsupported_schema_format:time": 4,
+          "unsupported_schema_format:uri": 2,
+          "unsupported_schema_keyword:contentEncoding": 1,
+          "unsupported_schema_keyword:example": 14,
+          "unsupported_schema_keyword:location": 1,
+          "unsupported_schema_keyword:optional": 4
+        },
+        "passed": {
+          "capabilities": 2703,
+          "definitions": 15241,
+          "final_capabilities": 2592,
+          "final_linkage": 2592,
+          "final_structure": 2592,
+          "final_visible_context": 2592,
+          "linkage": 4583,
+          "native_boundaries": 2592,
+          "reasoning": 2592,
+          "structure": 15241,
+          "termination": 2591,
+          "visible_context": 2594
+        },
+        "stage_drops": {
+          "capabilities": 1880,
+          "definitions": 42,
+          "linkage": 10658,
+          "native_boundaries": 2,
+          "termination": 1,
+          "visible_context": 109
+        }
+      }
+    },
+    "source": {
+      "files": [
+        "data/Tool_Use/Tool_Use_part-1-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-2-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-3-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-4-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-5-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-6-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-7-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-8-of-9.jsonl",
+        "data/Tool_Use/Tool_Use_part-9-of-9.jsonl"
+      ],
+      "revision": "f684cc1a9f3e19f6f4929102cd9b06cc0b895b8a",
+      "subsets": {
+        "areal_tau2": 15246,
+        "simia_airline": 7199,
+        "simia_retail": 12800,
+        "spider_bird_merged_traj": 20445,
+        "synth_memory_20260608": 5000,
+        "synth_search_20260609": 5000,
+        "tau3_banking_sft_glm-5.2_20260625": 1787,
+        "toolmind_graphsyn": 15283
+      }
+    },
+    "source_retained": {
+      "areal_tau2": 2417,
+      "simia_airline": 6882,
+      "simia_retail": 12487,
+      "synth_memory_20260608": 2269,
+      "synth_search_20260609": 3114,
+      "toolmind_graphsyn": 2591
+    },
+    "transformations": {
+      "arguments_canonicalized": 702927,
+      "double_function_envelopes_unwrapped": 631,
+      "duplicate_tool_definitions_removed": 21,
+      "legacy_function_required_lifted": 760,
+      "null_function_required_placeholders_removed": 9703,
+      "reasoning_fields_removed": 385196,
+      "source_argument_maps_wrapped": 24065,
+      "source_linkage_fields_removed": 844846,
+      "source_loss_metadata_removed": 17033,
+      "source_parameter_maps_wrapped": 6415,
+      "source_schema_type_aliases": 111913
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_reasoning": 25,
+    "ambiguous_source_tool_linkage": 16120,
+    "conflicting_duplicate_tool_names": 42,
+    "empty_final_assistant": 1,
+    "incomplete_termination": 20463,
+    "invalid_arguments": 21,
+    "invalid_tool_schema": 1804,
+    "missing_visible_authentication": 18,
+    "unbalanced_cardinality": 13922,
+    "ungrounded_authentication_input": 113,
+    "ungrounded_identifier": 188,
+    "unresolved_source_tool_epoch": 109,
+    "unsupported_schema_format:YYYY-MM-DD": 3,
+    "unsupported_schema_format:date-time": 15,
+    "unsupported_schema_format:email": 5,
+    "unsupported_schema_format:float": 6,
+    "unsupported_schema_format:string": 6,
+    "unsupported_schema_format:time": 4,
+    "unsupported_schema_format:uri": 2,
+    "unsupported_schema_keyword:contentEncoding": 1,
+    "unsupported_schema_keyword:example": 14,
+    "unsupported_schema_keyword:location": 1,
+    "unsupported_schema_keyword:optional": 4,
+    "unverified_source_discovery_protocol": 113
+  },
+  "filtered_count": 29760,
+  "final_count": 29760,
+  "raw_count": 82760,
+  "stage1_count": 82760,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

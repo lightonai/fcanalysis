@@ -1,0 +1,168 @@
+{
+  "dataset": "LLM360/TxT360-3efforts/low",
+  "dataset_config_count": 111804,
+  "dataset_config_drop_reasons": {
+    "corrupted_source_call_serialization": 4,
+    "duplicate_json_key": 6,
+    "malformed_json": 114,
+    "malformed_tool_definitions": 16504,
+    "non_object_arguments": 397812
+  },
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 846,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 846
+          },
+          "level_4": {
+            "eligible_samples": 93303,
+            "extra_samples": 92466,
+            "repeated_groups": 11,
+            "samples_in_repeated_groups": 92477,
+            "unique_groups": 837
+          },
+          "level_5": {
+            "eligible_samples": 93303,
+            "extra_samples": 72999,
+            "repeated_groups": 3624,
+            "samples_in_repeated_groups": 76623,
+            "unique_groups": 20304
+          }
+        },
+        "input_samples": 111804,
+        "output_samples": 93303,
+        "removed_samples": 18501,
+        "scope": {
+          "dataset": "LLM360/TxT360-3efforts/low",
+          "split": "low",
+          "subset": "agent"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 1735,
+            "input_samples": 111804,
+            "output_samples": 106917,
+            "removed_samples": 4887
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 106917,
+            "output_samples": 106917,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 5887,
+            "input_samples": 106917,
+            "output_samples": 93303,
+            "removed_samples": 13614
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "capabilities": 1014,
+      "definitions": 621,
+      "linkage": 131225,
+      "reasoning": 991,
+      "visible_context": 17
+    },
+    "pipeline_passed": {
+      "capabilities": 198815,
+      "definitions": 331054,
+      "final_capabilities": 197807,
+      "final_linkage": 197807,
+      "final_structure": 197807,
+      "final_visible_context": 197807,
+      "linkage": 199829,
+      "reasoning": 197807,
+      "structure": 331054,
+      "termination": 197807,
+      "visible_context": 198798
+    },
+    "reconstruction": {
+      "ambiguous_donor_rows": 56696,
+      "input_rows": 802891,
+      "missing_donor_rows": 80,
+      "output_rows": 111804,
+      "removed_prefix_rows": 86003,
+      "restored_messages": 190492,
+      "restored_rows": 86756,
+      "validated_rows": 197807,
+      "validation_dropped_rows": 548308
+    },
+    "source": {
+      "config": "agent",
+      "files": [
+        "agent/low-00000-of-00007.parquet",
+        "agent/low-00001-of-00007.parquet",
+        "agent/low-00002-of-00007.parquet",
+        "agent/low-00003-of-00007.parquet",
+        "agent/low-00004-of-00007.parquet",
+        "agent/low-00005-of-00007.parquet",
+        "agent/low-00006-of-00007.parquet"
+      ],
+      "revision": "bfc4a082d11967cd7810fe0b773be87bf54fb32e",
+      "split": "low"
+    },
+    "transformations": {
+      "duplicate_tool_definitions_removed": 3,
+      "flattened_function_envelopes_normalized": 1841838,
+      "reasoning_fields_removed": 388299,
+      "reasoning_spans_removed": 1,
+      "source_result_bundles_expanded": 2893,
+      "source_result_entries_emitted": 2939,
+      "source_schema_type_aliases": 29163
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_reasoning": 991,
+    "conflicting_duplicate_tool_names": 463,
+    "invalid_arguments": 174,
+    "invalid_tool_description": 158,
+    "invalid_tool_schema": 53,
+    "orphan_tool_result": 2771,
+    "unbalanced_cardinality": 128454,
+    "undefined_function_calls": 27,
+    "ungrounded_temporal_reference": 17,
+    "unsupported_schema_format:YYYY-MM-DD": 3,
+    "unsupported_schema_format:binary": 45,
+    "unsupported_schema_format:comma-separated": 3,
+    "unsupported_schema_format:date-time": 307,
+    "unsupported_schema_format:email": 122,
+    "unsupported_schema_format:float": 3,
+    "unsupported_schema_format:string": 21,
+    "unsupported_schema_format:time": 96,
+    "unsupported_schema_format:uri": 123,
+    "unsupported_schema_format:url": 12,
+    "unsupported_schema_format:yyyy-MM-dd": 3,
+    "unsupported_schema_keyword:choices": 1,
+    "unsupported_schema_keyword:contentEncoding": 1,
+    "unsupported_schema_keyword:dependencies": 6,
+    "unsupported_schema_keyword:example": 10,
+    "unsupported_schema_keyword:optional": 3,
+    "unsupported_schema_keyword:require": 1
+  },
+  "filtered_count": 197807,
+  "final_count": 93303,
+  "raw_count": 804047,
+  "stage1_count": 802891,
+  "stage1_drop_reasons": {
+    "nonassistant_source_tool_calls": 1156
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

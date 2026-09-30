@@ -1,0 +1,370 @@
+{
+  "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+  "dataset_config_count": 220469,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 152324,
+            "extra_samples": 70,
+            "repeated_groups": 59,
+            "samples_in_repeated_groups": 129,
+            "unique_groups": 152254
+          },
+          "level_4": {
+            "eligible_samples": 171811,
+            "extra_samples": 46101,
+            "repeated_groups": 12540,
+            "samples_in_repeated_groups": 58641,
+            "unique_groups": 125710
+          },
+          "level_5": {
+            "eligible_samples": 171811,
+            "extra_samples": 142303,
+            "repeated_groups": 24464,
+            "samples_in_repeated_groups": 166767,
+            "unique_groups": 29508
+          }
+        },
+        "input_samples": 171848,
+        "output_samples": 171811,
+        "removed_samples": 37,
+        "scope": {
+          "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+          "split": "train",
+          "subset": "allenai/olmo-toolu-sft-mix-T2-S2-f2-bfclv3-decontaminated"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 171848,
+            "output_samples": 171848,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 171848,
+            "output_samples": 171848,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 36,
+            "input_samples": 171848,
+            "output_samples": 171811,
+            "removed_samples": 37
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 7968,
+            "extra_samples": 1066,
+            "repeated_groups": 479,
+            "samples_in_repeated_groups": 1545,
+            "unique_groups": 6902
+          },
+          "level_4": {
+            "eligible_samples": 7974,
+            "extra_samples": 7817,
+            "repeated_groups": 75,
+            "samples_in_repeated_groups": 7892,
+            "unique_groups": 157
+          },
+          "level_5": {
+            "eligible_samples": 7974,
+            "extra_samples": 7973,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 7974,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 8057,
+        "output_samples": 7974,
+        "removed_samples": 83,
+        "scope": {
+          "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+          "split": "train",
+          "subset": "allenai/olmo-toolu-s2-sft-m3"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 1,
+            "input_samples": 8057,
+            "output_samples": 8056,
+            "removed_samples": 1
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 8056,
+            "output_samples": 8056,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 74,
+            "input_samples": 8056,
+            "output_samples": 7974,
+            "removed_samples": 82
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 9084,
+            "extra_samples": 242,
+            "repeated_groups": 175,
+            "samples_in_repeated_groups": 417,
+            "unique_groups": 8842
+          },
+          "level_4": {
+            "eligible_samples": 9084,
+            "extra_samples": 8738,
+            "repeated_groups": 125,
+            "samples_in_repeated_groups": 8863,
+            "unique_groups": 346
+          },
+          "level_5": {
+            "eligible_samples": 9084,
+            "extra_samples": 9083,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 9084,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 9084,
+        "output_samples": 9084,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+          "split": "train",
+          "subset": "allenai/olmo-toolu-s2-sft-m4v2"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 9084,
+            "output_samples": 9084,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 9084,
+            "output_samples": 9084,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 9084,
+            "output_samples": 9084,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 5411,
+            "extra_samples": 29,
+            "repeated_groups": 26,
+            "samples_in_repeated_groups": 55,
+            "unique_groups": 5382
+          },
+          "level_4": {
+            "eligible_samples": 5412,
+            "extra_samples": 5123,
+            "repeated_groups": 106,
+            "samples_in_repeated_groups": 5229,
+            "unique_groups": 289
+          },
+          "level_5": {
+            "eligible_samples": 5412,
+            "extra_samples": 5411,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 5412,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 5417,
+        "output_samples": 5412,
+        "removed_samples": 5,
+        "scope": {
+          "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+          "split": "train",
+          "subset": "allenai/olmo-toolu-s2-sft-m5v2"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 5417,
+            "output_samples": 5417,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 5417,
+            "output_samples": 5417,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 4,
+            "input_samples": 5417,
+            "output_samples": 5412,
+            "removed_samples": 5
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 4662,
+            "extra_samples": 1,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 2,
+            "unique_groups": 4661
+          },
+          "level_4": {
+            "eligible_samples": 4689,
+            "extra_samples": 4582,
+            "repeated_groups": 70,
+            "samples_in_repeated_groups": 4652,
+            "unique_groups": 107
+          },
+          "level_5": {
+            "eligible_samples": 4689,
+            "extra_samples": 4688,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 4689,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 4689,
+        "output_samples": 4689,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "allenai/Dolci-Instruct-SFT-Tool-Use",
+          "split": "train",
+          "subset": "allenai/olmo-toolu_deepresearch_no_thinking_DRv4"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 4689,
+            "output_samples": 4689,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 4689,
+            "output_samples": 4689,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 4689,
+            "output_samples": 4689,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "definitions": 890,
+      "reasoning": 1,
+      "source_capabilities": 5900,
+      "source_context": 236,
+      "source_linkage": 13210,
+      "source_structure": 3,
+      "termination": 1134
+    },
+    "pipeline_passed": {
+      "definitions": 219579,
+      "final_capabilities": 200229,
+      "final_context": 200229,
+      "final_linkage": 200229,
+      "final_structure": 200229,
+      "reasoning": 200229,
+      "source_capabilities": 200466,
+      "source_context": 200230,
+      "source_linkage": 206366,
+      "source_structure": 219576,
+      "system_override": 200229,
+      "termination": 199095
+    },
+    "source": {
+      "files": [
+        "data/train-00000-of-00006.parquet",
+        "data/train-00001-of-00006.parquet",
+        "data/train-00002-of-00006.parquet",
+        "data/train-00003-of-00006.parquet",
+        "data/train-00004-of-00006.parquet",
+        "data/train-00005-of-00006.parquet"
+      ],
+      "revision": "dc042846f0f2de0f15eedae3d6ced04223ed47eb",
+      "split": "train",
+      "subsets": {
+        "allenai/olmo-toolu-s2-sft-m3": 8074,
+        "allenai/olmo-toolu-s2-sft-m4v2": 9085,
+        "allenai/olmo-toolu-s2-sft-m5v2": 5417,
+        "allenai/olmo-toolu-sft-mix-T2-S2-f2-bfclv3-decontaminated": 200000,
+        "allenai/olmo-toolu_deepresearch_no_thinking_DRv4": 5003
+      }
+    },
+    "transformations": {
+      "bundled_result_batches_split": 215764,
+      "duplicate_tool_definitions_removed": 3,
+      "reasoning_spans_removed": 40,
+      "system_message_override": 200229
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": ""
+  },
+  "filter_drop_reasons": {
+    "ambiguous_reasoning": 1,
+    "conflicting_duplicate_tool_names": 890,
+    "dolci_unresolved_credential_context": 185,
+    "dolci_unresolved_date_context": 30,
+    "dolci_unresolved_identifier_context": 21,
+    "empty_assistant_target": 973,
+    "empty_final_assistant": 6,
+    "incomplete_termination": 155,
+    "invalid_arguments": 5691,
+    "invalid_tool_schema": 3,
+    "no_user_message": 3,
+    "orphan_tool_result": 26,
+    "unbalanced_cardinality": 13184,
+    "undefined_function_calls": 175,
+    "unresolved_tool_schema": 1,
+    "unsupported_schema_format:binary": 1,
+    "unsupported_schema_format:date-time": 4,
+    "unsupported_schema_format:email": 5,
+    "unsupported_schema_format:path": 1,
+    "unsupported_schema_format:uri": 12,
+    "unsupported_schema_keyword:database_name": 1,
+    "unsupported_schema_keyword:example": 1,
+    "unsupported_schema_keyword:insert_after": 2,
+    "unsupported_schema_keyword:nullable": 1,
+    "unsupported_schema_keyword:optional": 2
+  },
+  "filtered_count": 199095,
+  "final_count": 198970,
+  "raw_count": 227579,
+  "stage1_count": 220469,
+  "stage1_drop_reasons": {
+    "ambiguous_bundled_results": 3375,
+    "function_calls_on_environment": 5,
+    "function_calls_on_user": 168,
+    "malformed_function_calls": 3562
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

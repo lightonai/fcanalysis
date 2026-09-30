@@ -1,0 +1,123 @@
+{
+  "dataset": "Nanbeige/ToolMind-Web-QA",
+  "dataset_config_count": 4850,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 4458,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 4458
+          },
+          "level_4": {
+            "eligible_samples": 4459,
+            "extra_samples": 4196,
+            "repeated_groups": 243,
+            "samples_in_repeated_groups": 4439,
+            "unique_groups": 263
+          },
+          "level_5": {
+            "eligible_samples": 4459,
+            "extra_samples": 4458,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 4459,
+            "unique_groups": 1
+          }
+        },
+        "input_samples": 4459,
+        "output_samples": 4459,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind-Web-QA",
+          "split": "released",
+          "subset": "open-wiki-traj.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 4459,
+            "output_samples": 4459,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 4459,
+            "output_samples": 4459,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 4459,
+            "output_samples": 4459,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "termination": 2,
+      "visible_context": 389
+    },
+    "pipeline_passed": {
+      "capabilities": 4850,
+      "definitions": 4850,
+      "final_capabilities": 4461,
+      "final_linkage": 4461,
+      "final_mcp_contracts": 4461,
+      "final_structure": 4461,
+      "final_visible_context": 4461,
+      "linkage": 4850,
+      "mcp_contracts": 4850,
+      "structure": 4850,
+      "termination": 4459,
+      "visible_context": 4461
+    },
+    "source": {
+      "files": [
+        "open-wiki-traj.jsonl"
+      ],
+      "revision": "2690dcdfdd82ab147aad4a65ab231d4e344f5cd0",
+      "subsets": {
+        "open-wiki-traj.jsonl": 5624
+      }
+    },
+    "transformations": {
+      "embedded_mcp_catalogs_extracted": 5624,
+      "source_user_results_normalized": 336891,
+      "source_xml_calls_normalized": 336896,
+      "xml_wire_templates_removed": 5624
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "empty_final_assistant": 2,
+    "ungrounded_sandbox_id": 389
+  },
+  "filtered_count": 4459,
+  "final_count": 4459,
+  "raw_count": 5624,
+  "stage1_count": 4850,
+  "stage1_drop_reasons": {
+    "ambiguous_reasoning": 59,
+    "duplicate_json_key": 4,
+    "invalid_arguments": 43,
+    "malformed_json": 65,
+    "malformed_source_tool_markup": 516,
+    "missing_source_tool_result": 5,
+    "undefined_mcp_tool": 82
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": false
+}

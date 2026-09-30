@@ -1,0 +1,31 @@
+{
+  "dataset_config": {
+    "sources": [
+      "areal_tau2",
+      "simia_airline",
+      "simia_retail",
+      "toolmind_graphsyn",
+      "spider_bird_merged_traj",
+      "synth_memory_20260608",
+      "synth_search_20260609",
+      "tau3_banking_sft_glm-5.2_20260625"
+    ]
+  },
+  "extra_kwargs": {
+    "batch_size": 256,
+    "curation_config": {
+      "audit": true,
+      "max_level": "level_2",
+      "temporary_directory": null
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "dataset": "Salesforce/APIGen-MT-5k",
+  "dataset_config_count": 5000,
+  "dataset_config_drop_reasons": {},
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 4283,
+            "extra_samples": 67,
+            "repeated_groups": 61,
+            "samples_in_repeated_groups": 128,
+            "unique_groups": 4216
+          },
+          "level_4": {
+            "eligible_samples": 4306,
+            "extra_samples": 3684,
+            "repeated_groups": 211,
+            "samples_in_repeated_groups": 3895,
+            "unique_groups": 622
+          },
+          "level_5": {
+            "eligible_samples": 4306,
+            "extra_samples": 4303,
+            "repeated_groups": 3,
+            "samples_in_repeated_groups": 4306,
+            "unique_groups": 3
+          }
+        },
+        "input_samples": 4306,
+        "output_samples": 4306,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Salesforce/APIGen-MT-5k",
+          "split": "train",
+          "subset": "dataset"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 4306,
+            "output_samples": 4306,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 4306,
+            "output_samples": 4306,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 4306,
+            "output_samples": 4306,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "capabilities": 245,
+      "termination": 91,
+      "visible_inputs": 358
+    },
+    "pipeline_passed": {
+      "capabilities": 4755,
+      "definitions": 5000,
+      "final_capabilities": 4397,
+      "final_linkage": 4397,
+      "final_structure": 4397,
+      "final_visible_inputs": 4397,
+      "linkage": 5000,
+      "reasoning": 4397,
+      "structure": 5000,
+      "termination": 4306,
+      "visible_inputs": 4397
+    },
+    "source": {
+      "config": "dataset",
+      "files": [
+        "apigen-mt_5k.json"
+      ],
+      "revision": "abc4a517d67c541f85f6470cbd8fd3186b36830e",
+      "split": "train",
+      "subsets": {
+        "dataset": 5000
+      }
+    },
+    "transformations": {}
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "incomplete_termination": 91,
+    "invalid_arguments": 49,
+    "missing_visible_authentication": 2,
+    "undefined_function_calls": 196,
+    "ungrounded_authentication_input": 155,
+    "ungrounded_identifier": 201
+  },
+  "filtered_count": 4306,
+  "final_count": 4306,
+  "raw_count": 5000,
+  "stage1_count": 5000,
+  "stage1_drop_reasons": {},
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}

@@ -1,0 +1,172 @@
+{
+  "dataset": "LLM360/TxT360-3efforts/high",
+  "dataset_config_count": 213345,
+  "dataset_config_drop_reasons": {
+    "malformed_json": 24
+  },
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 193950,
+            "extra_samples": 202,
+            "repeated_groups": 77,
+            "samples_in_repeated_groups": 279,
+            "unique_groups": 193748
+          },
+          "level_4": {
+            "eligible_samples": 202881,
+            "extra_samples": 145787,
+            "repeated_groups": 16736,
+            "samples_in_repeated_groups": 162523,
+            "unique_groups": 57094
+          },
+          "level_5": {
+            "eligible_samples": 202881,
+            "extra_samples": 168275,
+            "repeated_groups": 3723,
+            "samples_in_repeated_groups": 171998,
+            "unique_groups": 34606
+          }
+        },
+        "input_samples": 213345,
+        "output_samples": 202881,
+        "removed_samples": 10464,
+        "scope": {
+          "dataset": "LLM360/TxT360-3efforts/high",
+          "split": "high",
+          "subset": "agent"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 10464,
+            "input_samples": 213345,
+            "output_samples": 202881,
+            "removed_samples": 10464
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 202881,
+            "output_samples": 202881,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 202881,
+            "output_samples": 202881,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "capabilities": 30787,
+      "definitions": 89530,
+      "linkage": 804207,
+      "structure": 14,
+      "termination": 19,
+      "visible_context": 15930
+    },
+    "pipeline_passed": {
+      "capabilities": 476515,
+      "definitions": 1311523,
+      "final_capabilities": 460585,
+      "final_linkage": 460585,
+      "final_structure": 460585,
+      "final_visible_context": 460585,
+      "linkage": 507302,
+      "structure": 1311509,
+      "termination": 460566,
+      "visible_context": 460585
+    },
+    "reconstruction": {
+      "ambiguous_donor_rows": 292,
+      "input_rows": 1401369,
+      "missing_donor_rows": 0,
+      "output_rows": 213345,
+      "removed_prefix_rows": 247221,
+      "restored_messages": 1139394,
+      "restored_rows": 420251,
+      "validated_rows": 460566,
+      "validation_dropped_rows": 940511
+    },
+    "source": {
+      "config": "agent",
+      "files": [
+        "agent/high-00000-of-00026.parquet",
+        "agent/high-00001-of-00026.parquet",
+        "agent/high-00002-of-00026.parquet",
+        "agent/high-00003-of-00026.parquet",
+        "agent/high-00004-of-00026.parquet",
+        "agent/high-00005-of-00026.parquet",
+        "agent/high-00006-of-00026.parquet",
+        "agent/high-00007-of-00026.parquet",
+        "agent/high-00008-of-00026.parquet",
+        "agent/high-00009-of-00026.parquet",
+        "agent/high-00010-of-00026.parquet",
+        "agent/high-00011-of-00026.parquet",
+        "agent/high-00012-of-00026.parquet",
+        "agent/high-00013-of-00026.parquet",
+        "agent/high-00014-of-00026.parquet",
+        "agent/high-00015-of-00026.parquet",
+        "agent/high-00016-of-00026.parquet",
+        "agent/high-00017-of-00026.parquet",
+        "agent/high-00018-of-00026.parquet",
+        "agent/high-00019-of-00026.parquet",
+        "agent/high-00020-of-00026.parquet",
+        "agent/high-00021-of-00026.parquet",
+        "agent/high-00022-of-00026.parquet",
+        "agent/high-00023-of-00026.parquet",
+        "agent/high-00024-of-00026.parquet",
+        "agent/high-00025-of-00026.parquet"
+      ],
+      "revision": "bfc4a082d11967cd7810fe0b773be87bf54fb32e",
+      "split": "high"
+    },
+    "transformations": {
+      "legacy_function_required_lifted": 465
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_source_tool_linkage": 115546,
+    "conflicting_duplicate_tool_names": 89530,
+    "empty_final_assistant": 19,
+    "invalid_arguments": 17173,
+    "invalid_tool_schema": 853,
+    "malformed_tool_call": 14,
+    "unbalanced_cardinality": 688661,
+    "ungrounded_credential_argument": 15006,
+    "ungrounded_temporal_reference": 924,
+    "unsupported_schema_format:binary": 204,
+    "unsupported_schema_format:currency": 78,
+    "unsupported_schema_format:date-range": 142,
+    "unsupported_schema_format:date-time": 5905,
+    "unsupported_schema_format:email": 383,
+    "unsupported_schema_format:string": 171,
+    "unsupported_schema_format:time": 476,
+    "unsupported_schema_keyword:documentation": 260,
+    "unsupported_schema_keyword:example": 4353,
+    "unsupported_schema_keyword:min_length": 100,
+    "unsupported_schema_keyword:note": 586,
+    "unsupported_schema_keyword:optional": 103
+  },
+  "filtered_count": 460566,
+  "final_count": 202881,
+  "raw_count": 1401471,
+  "stage1_count": 1401369,
+  "stage1_drop_reasons": {
+    "nonassistant_source_tool_calls": 102
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": false
+}

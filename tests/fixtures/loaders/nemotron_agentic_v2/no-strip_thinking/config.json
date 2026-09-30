@@ -1,0 +1,31 @@
+{
+  "dataset_config": {
+    "deduplicate_within_subset": true,
+    "drop_conflicting_duplicate_tools": false,
+    "drop_invalid_source_tool_linkage": false,
+    "interactive_agent_domain_cap": null,
+    "publish_equivalence_metadata": true,
+    "splits": [
+      "interactive_agent",
+      "search",
+      "tool_calling"
+    ]
+  },
+  "extra_kwargs": {
+    "batch_size": 256,
+    "curation_config": {
+      "audit": true,
+      "max_level": "level_2",
+      "temporary_directory": null
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": false,
+    "system_message_override": null
+  }
+}

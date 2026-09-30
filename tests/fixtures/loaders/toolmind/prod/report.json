@@ -1,0 +1,574 @@
+{
+  "dataset": "Nanbeige/ToolMind",
+  "dataset_config_count": 28134,
+  "dataset_config_drop_reasons": {
+    "non_object_arguments": 59
+  },
+  "dataset_config_transform_counts": {
+    "curation": [
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 6084,
+            "extra_samples": 118,
+            "repeated_groups": 102,
+            "samples_in_repeated_groups": 220,
+            "unique_groups": 5966
+          },
+          "level_4": {
+            "eligible_samples": 10791,
+            "extra_samples": 7945,
+            "repeated_groups": 1716,
+            "samples_in_repeated_groups": 9661,
+            "unique_groups": 2846
+          },
+          "level_5": {
+            "eligible_samples": 10791,
+            "extra_samples": 4443,
+            "repeated_groups": 2731,
+            "samples_in_repeated_groups": 7174,
+            "unique_groups": 6348
+          }
+        },
+        "input_samples": 10791,
+        "output_samples": 10791,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "graph_syn_datasets",
+          "subset": "graph_syn_datasets/graphsyn.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 10791,
+            "output_samples": 10791,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 10791,
+            "output_samples": 10791,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 10791,
+            "output_samples": 10791,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 565,
+            "extra_samples": 564,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 565,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 565,
+            "extra_samples": 562,
+            "repeated_groups": 3,
+            "samples_in_repeated_groups": 565,
+            "unique_groups": 3
+          }
+        },
+        "input_samples": 565,
+        "output_samples": 565,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/APIGen-MT-5k-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 565,
+            "output_samples": 565,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 565,
+            "output_samples": 565,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 565,
+            "output_samples": 565,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 857,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 857
+          },
+          "level_4": {
+            "eligible_samples": 962,
+            "extra_samples": 129,
+            "repeated_groups": 12,
+            "samples_in_repeated_groups": 141,
+            "unique_groups": 833
+          },
+          "level_5": {
+            "eligible_samples": 962,
+            "extra_samples": 1,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 2,
+            "unique_groups": 961
+          }
+        },
+        "input_samples": 962,
+        "output_samples": 962,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/BUTTONInstruct-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 962,
+            "output_samples": 962,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 962,
+            "output_samples": 962,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 962,
+            "output_samples": 962,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 688,
+            "extra_samples": 687,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 688,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 688,
+            "extra_samples": 5,
+            "repeated_groups": 5,
+            "samples_in_repeated_groups": 10,
+            "unique_groups": 683
+          }
+        },
+        "input_samples": 688,
+        "output_samples": 688,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/ToolACE-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 688,
+            "output_samples": 688,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 688,
+            "output_samples": 688,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 688,
+            "output_samples": 688,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 2687,
+            "extra_samples": 2686,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 2687,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 2687,
+            "extra_samples": 1351,
+            "repeated_groups": 407,
+            "samples_in_repeated_groups": 1758,
+            "unique_groups": 1336
+          }
+        },
+        "input_samples": 2687,
+        "output_samples": 2687,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/When2Call-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 2687,
+            "output_samples": 2687,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 2687,
+            "output_samples": 2687,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 2687,
+            "output_samples": 2687,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 2,
+            "extra_samples": 1,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 2,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 2,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 2
+          }
+        },
+        "input_samples": 2,
+        "output_samples": 2,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/glaive-function-calling-v2-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 2,
+            "output_samples": 2,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 2,
+            "output_samples": 2,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 2,
+            "output_samples": 2,
+            "removed_samples": 0
+          }
+        }
+      },
+      {
+        "audit": {
+          "level_3": {
+            "eligible_samples": 0,
+            "extra_samples": 0,
+            "repeated_groups": 0,
+            "samples_in_repeated_groups": 0,
+            "unique_groups": 0
+          },
+          "level_4": {
+            "eligible_samples": 12439,
+            "extra_samples": 12438,
+            "repeated_groups": 1,
+            "samples_in_repeated_groups": 12439,
+            "unique_groups": 1
+          },
+          "level_5": {
+            "eligible_samples": 12439,
+            "extra_samples": 10414,
+            "repeated_groups": 856,
+            "samples_in_repeated_groups": 11270,
+            "unique_groups": 2025
+          }
+        },
+        "input_samples": 12439,
+        "output_samples": 12439,
+        "removed_samples": 0,
+        "scope": {
+          "dataset": "Nanbeige/ToolMind",
+          "split": "open_datasets",
+          "subset": "open_datasets/xlam-function-calling-60k-query.jsonl"
+        },
+        "stages": {
+          "level_1": {
+            "duplicate_groups": 0,
+            "input_samples": 12439,
+            "output_samples": 12439,
+            "removed_samples": 0
+          },
+          "level_1_5": {
+            "duplicate_groups": 0,
+            "input_samples": 12439,
+            "output_samples": 12439,
+            "removed_samples": 0
+          },
+          "level_2": {
+            "duplicate_groups": 0,
+            "input_samples": 12439,
+            "output_samples": 12439,
+            "removed_samples": 0
+          }
+        }
+      }
+    ],
+    "pipeline_drops": {
+      "capabilities": 19912,
+      "definitions": 362,
+      "linkage": 104822,
+      "source_templates": 1,
+      "visible_context": 24
+    },
+    "pipeline_passed": {
+      "capabilities": 28159,
+      "definitions": 152893,
+      "final_capabilities": 28134,
+      "final_linkage": 28134,
+      "final_source_templates": 28134,
+      "final_structure": 28134,
+      "final_visible_context": 28134,
+      "linkage": 48071,
+      "reasoning": 28134,
+      "source_templates": 28158,
+      "structure": 152893,
+      "termination": 28134,
+      "visible_context": 28134
+    },
+    "reconstruction": {
+      "graph_syn_datasets/graphsyn.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 163097,
+        "missing_donor_rows": 120044,
+        "output_rows": 10791,
+        "removed_prefix_rows": 0,
+        "restored_messages": 6147,
+        "restored_rows": 6084,
+        "validated_rows": 10791,
+        "validation_dropped_rows": 32262
+      },
+      "open_datasets/APIGen-MT-5k-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 25109,
+        "missing_donor_rows": 24531,
+        "output_rows": 565,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 565,
+        "validation_dropped_rows": 13
+      },
+      "open_datasets/BUTTONInstruct-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 21188,
+        "missing_donor_rows": 14966,
+        "output_rows": 962,
+        "removed_prefix_rows": 0,
+        "restored_messages": 1353,
+        "restored_rows": 857,
+        "validated_rows": 962,
+        "validation_dropped_rows": 5260
+      },
+      "open_datasets/ToolACE-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 7327,
+        "missing_donor_rows": 2585,
+        "output_rows": 688,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 688,
+        "validation_dropped_rows": 4054
+      },
+      "open_datasets/When2Call-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 17531,
+        "missing_donor_rows": 3047,
+        "output_rows": 2687,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 2687,
+        "validation_dropped_rows": 11797
+      },
+      "open_datasets/glaive-function-calling-v2-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 20016,
+        "missing_donor_rows": 14401,
+        "output_rows": 2,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 2,
+        "validation_dropped_rows": 5613
+      },
+      "open_datasets/tau-train-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 12882,
+        "missing_donor_rows": 12882,
+        "output_rows": 0,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 0,
+        "validation_dropped_rows": 0
+      },
+      "open_datasets/xlam-function-calling-60k-query.jsonl": {
+        "ambiguous_donor_rows": 0,
+        "input_rows": 101338,
+        "missing_donor_rows": 22718,
+        "output_rows": 12439,
+        "removed_prefix_rows": 0,
+        "restored_messages": 0,
+        "restored_rows": 0,
+        "validated_rows": 12439,
+        "validation_dropped_rows": 66181
+      }
+    },
+    "source": {
+      "files": [
+        "graph_syn_datasets/graphsyn.jsonl",
+        "open_datasets/APIGen-MT-5k-query.jsonl",
+        "open_datasets/BUTTONInstruct-query.jsonl",
+        "open_datasets/ToolACE-query.jsonl",
+        "open_datasets/When2Call-query.jsonl",
+        "open_datasets/glaive-function-calling-v2-query.jsonl",
+        "open_datasets/tau-train-query.jsonl",
+        "open_datasets/xlam-function-calling-60k-query.jsonl"
+      ],
+      "revision": "8020ed1c03c367e4eb720ac3828ab4b0b95d8baf",
+      "subsets": {
+        "graph_syn_datasets/graphsyn.jsonl": 163180,
+        "open_datasets/APIGen-MT-5k-query.jsonl": 25109,
+        "open_datasets/BUTTONInstruct-query.jsonl": 21202,
+        "open_datasets/ToolACE-query.jsonl": 7327,
+        "open_datasets/When2Call-query.jsonl": 17531,
+        "open_datasets/glaive-function-calling-v2-query.jsonl": 20017,
+        "open_datasets/tau-train-query.jsonl": 12882,
+        "open_datasets/xlam-function-calling-60k-query.jsonl": 101363
+      }
+    },
+    "transformations": {
+      "double_function_envelopes_unwrapped": 13126,
+      "duplicate_tool_definitions_removed": 358,
+      "legacy_function_required_lifted": 29917,
+      "null_function_required_placeholders_removed": 211356,
+      "reasoning_spans_removed": 35634,
+      "source_argument_maps_wrapped": 169101,
+      "source_parameter_maps_wrapped": 158759,
+      "source_result_bundles_expanded": 2569,
+      "source_result_entries_emitted": 3106,
+      "source_schema_type_aliases": 790545
+    }
+  },
+  "filter_config": {
+    "align_results": true,
+    "require_balanced_cardinality": true,
+    "require_defined_functions": true,
+    "require_parseable_arguments": true,
+    "require_valid_arguments": true,
+    "strip_thinking": true,
+    "system_message_override": null
+  },
+  "filter_drop_reasons": {
+    "ambiguous_source_tool_linkage": 689,
+    "conflicting_duplicate_tool_names": 362,
+    "invalid_arguments": 6,
+    "invalid_tool_schema": 19386,
+    "unbalanced_cardinality": 104133,
+    "ungrounded_credential_argument": 6,
+    "ungrounded_temporal_reference": 18,
+    "unresolved_source_api_key_placeholder": 1,
+    "unsupported_schema_format:YYYY-MM-DD": 15,
+    "unsupported_schema_format:binary": 10,
+    "unsupported_schema_format:comma-separated": 11,
+    "unsupported_schema_format:date-time": 97,
+    "unsupported_schema_format:email": 31,
+    "unsupported_schema_format:float": 37,
+    "unsupported_schema_format:string": 91,
+    "unsupported_schema_format:time": 38,
+    "unsupported_schema_format:uri": 18,
+    "unsupported_schema_format:yyyy-MM-dd": 5,
+    "unsupported_schema_format:yyyy-mm-dd": 5,
+    "unsupported_schema_keyword:choices": 2,
+    "unsupported_schema_keyword:contentEncoding": 10,
+    "unsupported_schema_keyword:example": 95,
+    "unsupported_schema_keyword:example_values": 6,
+    "unsupported_schema_keyword:location": 8,
+    "unsupported_schema_keyword:optional": 41
+  },
+  "filtered_count": 28134,
+  "final_count": 28134,
+  "raw_count": 368611,
+  "stage1_count": 368488,
+  "stage1_drop_reasons": {
+    "inseparable_source_reasoning": 123
+  },
+  "stage1_issue_counts": {},
+  "strip_thinking_applied": true
+}
